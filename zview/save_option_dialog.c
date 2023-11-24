@@ -117,16 +117,24 @@ static void __CDECL option_ok_event(WINDOW *win, int obj_index, int mode, void *
 
 	if (curr_output_plugin)
 	{
-		plugin_set_option(&curr_output_plugin->c.slb, OPTION_QUALITY, quality);
-		plugin_set_option(&curr_output_plugin->c.slb, OPTION_COMPRESSION, compression);
-		plugin_set_option(&curr_output_plugin->c.slb, OPTION_COLOR_SPACE, color_space);
-		plugin_set_option(&curr_output_plugin->c.slb, OPTION_PROGRESSIVE, progressive);
-	} else if (ldg_funcs.set_tiff_option)
-	{
-		ldg_funcs.set_tiff_option(quality, compression);
-	} else if (ldg_funcs.set_jpg_option)
-	{
-		ldg_funcs.set_jpg_option(quality, color_space, progressive);
+		switch (curr_output_plugin->type)
+		{
+		case CODEC_SLB:
+			plugin_set_option(&curr_output_plugin->c.slb, OPTION_QUALITY, quality);
+			plugin_set_option(&curr_output_plugin->c.slb, OPTION_COMPRESSION, compression);
+			plugin_set_option(&curr_output_plugin->c.slb, OPTION_COLOR_SPACE, color_space);
+			plugin_set_option(&curr_output_plugin->c.slb, OPTION_PROGRESSIVE, progressive);
+			break;
+		case CODEC_LDG:
+			if (ldg_funcs.set_tiff_option)
+			{
+				ldg_funcs.set_tiff_option(quality, compression);
+			} else if (ldg_funcs.set_jpg_option)
+			{
+				ldg_funcs.set_jpg_option(quality, color_space, progressive);
+			}
+			break;
+		}
 	}
 
 	ObjcChange(OC_FORM, win, obj_index, NORMAL, TRUE);
@@ -170,16 +178,23 @@ void save_option_dialog(const char *source_file, CODEC *codec)
 
 	if (curr_output_plugin)
 	{
-		long value;
-		
-		if ((value = plugin_get_option(&curr_output_plugin->c.slb, OPTION_QUALITY)) >= 0)
-			quality = value;
-		if ((value = plugin_get_option(&curr_output_plugin->c.slb, OPTION_COLOR_SPACE)) >= 0)
-			color_space = value;
-		if ((value = plugin_get_option(&curr_output_plugin->c.slb, OPTION_PROGRESSIVE)) >= 0)
-			progressive = value;
-		if ((value = plugin_get_option(&curr_output_plugin->c.slb, OPTION_COMPRESSION)) >= 0)
-			compression = value;
+		switch (curr_output_plugin->type)
+		{
+		case CODEC_SLB:
+			{
+				long value;
+
+				if ((value = plugin_get_option(&curr_output_plugin->c.slb, OPTION_QUALITY)) >= 0)
+					quality = value;
+				if ((value = plugin_get_option(&curr_output_plugin->c.slb, OPTION_COLOR_SPACE)) >= 0)
+					color_space = value;
+				if ((value = plugin_get_option(&curr_output_plugin->c.slb, OPTION_PROGRESSIVE)) >= 0)
+					progressive = value;
+				if ((value = plugin_get_option(&curr_output_plugin->c.slb, OPTION_COMPRESSION)) >= 0)
+					compression = value;
+			}
+			break;
+		}
 	}
 
 	sprintf(ObjcString(option_content, PREF_PERCENT, NULL), "%d", quality);

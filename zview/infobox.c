@@ -305,69 +305,77 @@ void infobox( void)
 	else
 		infotext[FILE_INFO_EXIF].ob_flags |= HIDETREE;
 
-	if( img->codec && (img->codec->capabilities & HAS_INFO))
+	if( img->codec)
 	{
 		long ret;
-		SLB *slb;
 		char extensions[50 + 2];
 		char *p;
 		const char *src;
-		slb = &img->codec->c.slb;
 
-		ret = plugin_get_option(slb, INFO_NAME);
-		objc_multiline(infotext, ret, FILE_CODEC_NAME_FIRST, FILE_CODEC_NAME_LAST);
+		switch (img->codec->type)
+		{
+		case CODEC_SLB:
+			{
+				SLB *slb;
+
+				slb = &img->codec->c.slb;
+				ret = plugin_get_option(slb, INFO_NAME);
+				objc_multiline(infotext, ret, FILE_CODEC_NAME_FIRST, FILE_CODEC_NAME_LAST);
+
+				ret = plugin_get_option(slb, INFO_VERSION);
+				if (ret > 0)
+					sprintf(temp, "%ld.%02lx", ret >> 8, ret & 0xff);
+				else
+					*temp = '\0';
+				ObjcStrnCpy(infotext, FILE_CODEC_VERSION, temp);
+
+				ret = plugin_get_option(slb, INFO_DATETIME);
+				ObjcStrnCpy(infotext, FILE_CODEC_DATE, ret > 0 ? (const char *)ret : "");
+
+				ret = plugin_get_option(slb, INFO_AUTHOR);
+				ObjcStrnCpy(infotext, FILE_CODEC_AUTHOR, ret > 0 ? (const char *)ret : "");
+
+				ret = plugin_get_option(slb, INFO_MISC);
+				objc_multiline(infotext, ret, FILE_CODEC_INFO_FIRST, FILE_CODEC_INFO_LAST);
+			}
+			break;
+		case CODEC_LDG:
+			{
+				LDG *ldg;
+
+				ldg = img->codec->c.ldg;
+				objc_multiline(infotext, (long)(ldg->list[0].info != NULL && strncmp(ldg->list[0].info, "Codec: ", 7) == 0 ? ldg->list[0].info + 7 : 0), FILE_CODEC_NAME_FIRST, FILE_CODEC_NAME_LAST);
+				sprintf(temp, "%d.%02x", (unsigned short)ldg->vers >> 8, ldg->vers & 0xff);
+				ObjcStrnCpy(infotext, FILE_CODEC_VERSION, temp);
+				ObjcStrnCpy(infotext, FILE_CODEC_DATE, ldg->list[2].info != NULL && strncmp(ldg->list[2].info, "Date: ", 6) == 0 ? ldg->list[2].info + 6 : "");
+				ObjcStrnCpy(infotext, FILE_CODEC_AUTHOR, ldg->list[1].info != NULL && strncmp(ldg->list[1].info, "Author: ", 8) == 0 ? ldg->list[1].info + 8 : "");
+				objc_multiline(infotext, 0, FILE_CODEC_INFO_FIRST, FILE_CODEC_INFO_LAST);
+			}
+			break;
+		}
+
 		ObjcStrnCpy(infotext, FILE_CODEC_FILENAME, img->codec->name);
-
-		ret = plugin_get_option(slb, INFO_VERSION);
-		if (ret > 0)
-			sprintf(temp, "%ld.%02lx", ret >> 8, ret & 0xff);
-		else
-			*temp = '\0';
-		ObjcStrnCpy(infotext, FILE_CODEC_VERSION, temp);
-
-		ret = plugin_get_option(slb, INFO_DATETIME);
-		ObjcStrnCpy(infotext, FILE_CODEC_DATE, ret > 0 ? (const char *)ret : "");
-
-		ret = plugin_get_option(slb, INFO_AUTHOR);
-		ObjcStrnCpy(infotext, FILE_CODEC_AUTHOR, ret > 0 ? (const char *)ret : "");
-
-		ret = plugin_get_option(slb, INFO_MISC);
-		objc_multiline(infotext, ret, FILE_CODEC_INFO_FIRST, FILE_CODEC_INFO_LAST);
-		
 		p = extensions;
 		src = img->codec->extensions;
-		if (img->codec->type == CODEC_SLB || img->codec->num_extensions == 0)
+		/*
+		 * extensions is a double '\0' terminated list
+		 */
+		while (*src)
 		{
-			while (*src)
-			{
-				size_t len = strlen(src) + 1;
-				strcpy(p, src);
-				p += len;
-				p[-1] = ' ';
-				src += len;
-			}
-		} else
-		{
-			int j, num_extensions = (int)img->codec->num_extensions;
-			for (j = 0; j < num_extensions; j++)
-			{
-				*p = *src++;
-				if (*p) p++;
-				*p = *src++;
-				if (*p) p++;
-				*p = *src++;
-				if (*p) p++;
-				*p++ = ' ';
-			}
+			size_t len = strlen(src) + 1;
+			strcpy(p, src);
+			p += len;
+			p[-1] = ' ';
+			src += len;
 		}
 		*p = '\0';
 		ObjcStrnCpy(infotext, FILE_CODEC_EXTENSIONS, extensions);
-		
+
 		if (infotext[FILE_INFO_EXIF].ob_flags & HIDETREE)
 			infotext[FILE_INFO_CODEC].ob_x = infotext[FILE_INFO_IMAGE].ob_x + infotext[FILE_INFO_IMAGE].ob_width + 2;
 		else
 			infotext[FILE_INFO_CODEC].ob_x = infotext[FILE_INFO_EXIF].ob_x + infotext[FILE_INFO_EXIF].ob_width + 2;
-			
+
 		infotext[FILE_INFO_CODEC].ob_flags &= ~HIDETREE;
 	} else
 	{

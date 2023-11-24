@@ -75,6 +75,7 @@ static boolean encoder_plugin_setup( WINDOW *win, int encoder_selected, const ch
 				errshow(codec->extensions, LDG_ERR_BASE + ldg_error());
 				return FALSE;
 			}
+			curr_output_plugin = codec;
 		}
 		break;
 	case CODEC_SLB:
@@ -115,15 +116,8 @@ static void format_type(CODEC *codec, char *str)
 {
 	int len;
 
-	if (codec->num_extensions == 0)
-	{
-		/* limited by array, and button width in resource file */
-		len = strlen(codec->extensions);
-	} else
-	{
-		/* limited by 3-chars per extension in list */
-		len = 3; /* strnlen(codec->extensions, 3); */
-	}
+	/* limited by array, and button width in resource file */
+	len = strlen(codec->extensions);
 	memset(str, ' ', MAX_TYPENAME_LEN - 1);
 	if (len >= MAX_TYPENAME_LEN)
 		len = MAX_TYPENAME_LEN - 1;

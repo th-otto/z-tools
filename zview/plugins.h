@@ -23,18 +23,16 @@ struct _ldg_funcs {
 
 typedef struct {
 	int type;
-#define CODEC_NONE 0
-#define CODEC_LDG  1
-#define CODEC_SLB  2
+#define CODEC_NONE     0  /* empty slot */
+#define CODEC_LDG      1  /* old LDG style codec */
+#define CODEC_SLB      2  /* new SLB style codec */
 	union {
 		LDG *ldg;
 		SLB slb;
 	} c;
 	long capabilities;
-#define HAS_INFO 0x80000000L
+	const char *name;
 	const char *extensions;
-	long num_extensions;
-	char *name;
 } CODEC;
 #define MAX_CODECS 200
 

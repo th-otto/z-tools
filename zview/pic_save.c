@@ -95,17 +95,26 @@ static boolean write_img( IMGINFO in_info, IMGINFO out_info, DECDATA data)
 	{	
 		for( y = 0; y < img_h; y++)
 		{
-			if (curr_input_plugin)
+			switch (curr_input_plugin->type)
+			{
+			case CODEC_SLB:
 				plugin_reader_read(&curr_input_plugin->c.slb, in_info, data->RowBuf);
-			else
+				break;
+			case CODEC_LDG:
 				ldg_funcs.decoder_read(in_info, data->RowBuf);
-				
+				break;
+			}
 			( *raster)( data, dst);
 	
-			if (curr_output_plugin)
+			switch (curr_output_plugin->type)
+			{
+			case CODEC_SLB:
 				ret &= plugin_encoder_write(&curr_output_plugin->c.slb, out_info, dst);
-			else
+				break;
+			case CODEC_LDG:
 				ret &= ldg_funcs.encoder_write(out_info, dst);
+				break;
+			}
 			if (!ret)
 				break;
 
@@ -121,11 +130,15 @@ static boolean write_img( IMGINFO in_info, IMGINFO out_info, DECDATA data)
 		/* First pass, we decode the entire image */
 		for( y = 0; y < img_h; y++)
 		{
-			if (curr_input_plugin)
+			switch (curr_input_plugin->type)
+			{
+			case CODEC_SLB:
 				plugin_reader_read(&curr_input_plugin->c.slb, in_info, data->RowBuf);
-			else
+				break;
+			case CODEC_LDG:
 				ldg_funcs.decoder_read(in_info, data->RowBuf);
-
+				break;
+			}
 			( *raster)( data, dst);
 	
 			dst -= data->LnSize;
@@ -139,10 +152,15 @@ static boolean write_img( IMGINFO in_info, IMGINFO out_info, DECDATA data)
 		/* second pass, we encode it */
 		for( ; y < h; y++)
 		{
-			if (curr_output_plugin)
+			switch (curr_output_plugin->type)
+			{
+			case CODEC_SLB:
 				ret &= plugin_encoder_write(&curr_output_plugin->c.slb, out_info, dst);
-			else
+				break;
+			case CODEC_LDG:
 				ret &= ldg_funcs.encoder_write(out_info, dst);
+				break;
+			}
 			if (!ret)
 				break;
 
@@ -171,18 +189,28 @@ static void exit_pic_save( IMGINFO in_info, IMGINFO out_info, DECDATA data)
 
 	if (encoder_init_done)
 	{
-		if (curr_output_plugin)
+		switch (curr_output_plugin->type)
+		{
+		case CODEC_SLB:
 			plugin_encoder_quit(&curr_output_plugin->c.slb, out_info);
-		else
+			break;
+		case CODEC_LDG:
 			ldg_funcs.encoder_quit(out_info);
+			break;
+		}
 	}
 	
 	if (decoder_init_done)
 	{
-		if (curr_input_plugin)
+		switch (curr_input_plugin->type)
+		{
+		case CODEC_SLB:
 			plugin_reader_quit(&curr_input_plugin->c.slb, in_info);
-		else
+			break;
+		case CODEC_LDG:
 			ldg_funcs.decoder_quit( in_info);
+			break;
+		}
 	}
 	
 	free( data);
@@ -250,10 +278,15 @@ int16 pic_save( const char *in_file, const char *out_file)
 	/* copy information from input's information to output's information struct */
 	*out_info = *in_info;
 
-	if (curr_output_plugin)
+	switch (curr_output_plugin->type)
+	{
+	case CODEC_SLB:
 		encoder_init_done = plugin_encoder_init(&curr_output_plugin->c.slb, out_file, out_info);
-	else
+		break;
+	case CODEC_LDG:
 		encoder_init_done = ldg_funcs.encoder_init(out_file, out_info);
+		break;
+	}
 	if (encoder_init_done == FALSE)
 	{
 		errshow(out_file, CANT_SAVE_IMG);
@@ -261,7 +294,6 @@ int16 pic_save( const char *in_file, const char *out_file)
 		win_progress_end();
 		return FALSE;
 	}
-
 
 	if (!setup_encoder(in_info, out_info, data))
 	{

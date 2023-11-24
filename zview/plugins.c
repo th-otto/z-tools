@@ -34,7 +34,6 @@ static void plugin_free(CODEC *codec, boolean waitpid)
 		plugin_close(&codec->c.slb, waitpid);
 		break;
 	}
-	free(codec->name);
 	free(codec);
 }
 
@@ -81,79 +80,17 @@ static boolean check_duplicates(void)
 	CODEC *this_codec;
 	const char *p1;
 	const char *p2;
-	char ext1[4];
-	char ext2[4];
-	int16_t j, k;
 	
-	ext1[3] = '\0';
-	ext2[3] = '\0';
 	for (i = 0; i < last; i++)
 	{
 		this_codec = codecs[i];
-		if (this_codec->num_extensions == 0)
+		for (p1 = last_codec->extensions; *p1; p1 += strlen(p1) + 1)
 		{
-			if (last_codec->num_extensions == 0)
+			for (p2 = this_codec->extensions; *p2; p2 += strlen(p2) + 1)
 			{
-				for (p1 = last_codec->extensions; *p1; p1 += strlen(p1) + 1)
+				if (strcmp(p1, p2) == 0)
 				{
-					for (p2 = this_codec->extensions; *p2; p2 += strlen(p2) + 1)
-					{
-						if (strcmp(p1, p2) == 0)
-						{
-							return warn_duplicates(i, last_codec, p1, this_codec);
-						}
-					}
-				}
-			} else
-			{
-				for (p1 = last_codec->extensions, j = 0; j < (int16_t)last_codec->num_extensions; p1 += 3, j++)
-				{
-					ext1[0] = p1[0];
-					ext1[1] = p1[1];
-					ext1[2] = p1[2];
-					for (p2 = this_codec->extensions; *p2; p2 += strlen(p2) + 1)
-					{
-						if (strcmp(ext1, p2) == 0)
-						{
-							return warn_duplicates(i,last_codec, ext1, this_codec);
-						}
-					}
-				}
-			}
-		} else
-		{
-			if (last_codec->num_extensions == 0)
-			{
-				for (p1 = last_codec->extensions; *p1; p1 += strlen(p1) + 1)
-				{
-					for (p2 = this_codec->extensions, j = 0; j < (int16_t)this_codec->num_extensions; p2 += 3, j++)
-					{
-						ext2[0] = p2[0];
-						ext2[1] = p2[1];
-						ext2[2] = p2[2];
-						if (strcmp(p1, ext2) == 0)
-						{
-							return warn_duplicates(i, last_codec, p1, this_codec);
-						}
-					}
-				}
-			} else
-			{
-				for (p1 = last_codec->extensions, k = 0; k < (int16_t)last_codec->num_extensions; p1 += 3, k++)
-				{
-					ext1[0] = p1[0];
-					ext1[1] = p1[1];
-					ext1[2] = p1[2];
-					for (p2 = this_codec->extensions, j = 0; j < (int16_t)this_codec->num_extensions; p2 += 3, j++)
-					{
-						ext2[0] = p2[0];
-						ext2[1] = p2[1];
-						ext2[2] = p2[2];
-						if (strcmp(ext1, ext2) == 0)
-						{
-							return warn_duplicates(i, last_codec, ext1, this_codec);
-						}
-					}
+					return warn_duplicates(i, last_codec, p1, this_codec);
 				}
 			}
 		}
@@ -161,6 +98,69 @@ static boolean check_duplicates(void)
 
 	plugins_nbr++;
 	return TRUE;
+}
+
+
+static void copy_extensions(char *dst, const char *src, int num_extensions, int ext_size)
+{
+	if (num_extensions == 0)
+	{
+		/*
+		 * newer plugin, with 0-terminated list
+		 */
+		size_t elen;
+
+		while (*src != '\0')
+		{
+			elen = strlen(src) + 1;
+			strcpy(dst, src);
+			src += elen;
+			dst += elen;
+		}
+		*dst = '\0';
+	} else
+	{
+		int i, j;
+		
+		for (i = 0; i < num_extensions; i++)
+		{
+			for (j = 0; j < ext_size; j++)
+			{
+				if (*src != '\0')
+				{
+					if (*src != ' ')
+						*dst++ = *src;
+				}
+				src++;
+			}
+			*dst++ = '\0';
+		}
+		*dst = '\0';
+	}
+}
+
+
+static size_t calc_extension_len(const char *extensions, int num_extensions, int ext_size)
+{
+	if (num_extensions == 0)
+	{
+		/*
+		 * newer plugin, with 0-terminated list
+		 */
+		size_t len = 1;
+		size_t elen;
+		const char *p = extensions;
+
+		while (*p != '\0')
+		{
+			elen = strlen(p) + 1;
+			len += elen;
+			p += elen;
+		}
+		return len;
+	}
+	/* old version, with exactly 3 chars per extension */
+	return num_extensions * (ext_size + 1) + 1;
 }
 
 
@@ -180,7 +180,7 @@ int16 plugins_init( void)
 	DIR	 			*dir;
 	LDG_INFOS 		*cook = 0;
 	struct dirent	*de;
-	int16			len;
+	size_t			namelen;
 	char  			extension[4];
 	char *name;
 	CODEC *codec;
@@ -207,9 +207,9 @@ int16 plugins_init( void)
 		else 
 			strcpy( plugin_dir, "C:\\gemsys\\ldg\\");
 
-		len = ( int16)strlen( plugin_dir);
+		namelen = strlen(plugin_dir);
 		
-		if( len > 0 && plugin_dir[len-1] != '\\' && plugin_dir[len-1] != '/')
+		if( namelen > 0 && plugin_dir[namelen-1] != '\\' && plugin_dir[namelen-1] != '/')
 			strcat( plugin_dir, "\\"); 
 
 		strcat( plugin_dir, "codecs\\");
@@ -222,43 +222,56 @@ int16 plugins_init( void)
 		name = plugin_dir + strlen(plugin_dir);
 		while ((de = readdir(dir)) != NULL && plugins_nbr < MAX_CODECS)
 		{
-			len = (int16)strlen(de->d_name);
-			if (len < 3)
+			namelen = strlen(de->d_name);
+			if (namelen < 3)
 				continue;
 			strcpy(name, de->d_name);
-			strcpy(extension, de->d_name + len - 3);
+			strcpy(extension, de->d_name + namelen - 3);
 			str2lower(extension);
 
 			if (strcmp(extension, "ldg") == 0)
 			{
-				codec = codecs[plugins_nbr] = (CODEC *)calloc(1, sizeof(CODEC));
-				if (codec == NULL)
-				{
-					errshow(NULL, -ENOMEM);
-					break;
-				}
-				if ((codec->c.ldg = ldg_open(plugin_dir, ldg_global)) != NULL)
+				LDG *ldg;
+				
+				if ((ldg = ldg_open(plugin_dir, ldg_global)) != NULL)
 				{
 					void CDECL(*codec_init)(void);
-
-					if ((codec_init = ldg_find("plugin_init", codec->c.ldg)) != NULL)
+					size_t extension_len;
+					const char *extensions;
+					char *dst;
+					int num_extensions;
+					
+					if ((codec_init = ldg_find("plugin_init", ldg)) != NULL)
 					{
+						extensions = ldg->infos;
+						num_extensions = ldg->user_ext;
+						extension_len = calc_extension_len(extensions, num_extensions, 3);
+						codec = codecs[plugins_nbr] = (CODEC *)calloc(1, sizeof(CODEC) + extension_len + namelen + 1);
+						if (codec == NULL)
+						{
+							errshow(NULL, -ENOMEM);
+							break;
+						}
 						codec->type = CODEC_LDG;
-						codec->extensions = codec->c.ldg->infos;
-						codec->num_extensions = codec->c.ldg->user_ext;
+						codec->c.ldg = ldg;
+						dst = (char *)(codec + 1);
+						codec->extensions = dst;
+						copy_extensions(dst, extensions, num_extensions, 3);
+						dst += extension_len;
+						codec->name = dst;
+						strcpy(dst, de->d_name);
 						codec->capabilities = 0;
-						if (ldg_find("reader_init", codec->c.ldg) != 0)
+						if (ldg_find("reader_init", ldg) != 0)
 							codec->capabilities |= CAN_DECODE;
-						if (ldg_find("encoder_init", codec->c.ldg) != 0)
+						if (ldg_find("encoder_init", ldg) != 0)
 							codec->capabilities |= CAN_ENCODE;
-						codec->name = strdup(de->d_name);
 						if (!check_duplicates())
 							break;
 						codec_init();
 					} else
 					{
 						errshow(de->d_name, LDG_ERR_BASE + ldg_error());
-						plugin_free(codec, TRUE);
+						ldg_close(ldg, ldg_global);
 					}
 				} else
 				{
@@ -266,32 +279,35 @@ int16 plugins_init( void)
 				}
 			} else if (strcmp(extension, "slb") == 0)
 			{
-				SLB *slb;
+				SLB slb;
 				long err;
+				size_t extension_len;
+				const char *extensions;
+				char *dst;
 				
-				codec = codecs[plugins_nbr] = (CODEC *)calloc(1, sizeof(CODEC));
-				if (codec == NULL)
-				{
-					errshow(NULL, -ENOMEM);
-					break;
-				}
-				slb = &codec->c.slb;
 				*name = '\0';
-				if ((err = plugin_open(de->d_name, plugin_dir, slb)) >= 0)
+				slb.handle = 0;
+				if ((err = plugin_open(de->d_name, plugin_dir, &slb)) >= 0)
 				{
+					extensions = (const char *)plugin_get_option(&slb, OPTION_EXTENSIONS);
+					extension_len = calc_extension_len(extensions, 0, 0);
+					codec = codecs[plugins_nbr] = (CODEC *)calloc(1, sizeof(CODEC) + extension_len + namelen + 1);
+					if (codec == NULL)
+					{
+						errshow(NULL, -ENOMEM);
+						break;
+					}
 					codec->type = CODEC_SLB;
-					codec->extensions = (const char *)plugin_get_option(slb, OPTION_EXTENSIONS);
-					codec->num_extensions = 0;
-					codec->capabilities = plugin_get_option(slb, OPTION_CAPABILITIES);
+					codec->c.slb = slb;
+					dst = (char *)(codec + 1);
+					codec->extensions = dst;
+					copy_extensions(dst, extensions, 0, 0);
+					dst += extension_len;
+					codec->name = dst;
+					strcpy(dst, de->d_name);
+					codec->capabilities = plugin_get_option(&slb, OPTION_CAPABILITIES);
 					if (codec->capabilities < 0)
 						codec->capabilities = 0;
-					codec->name = strdup(de->d_name);
-					if (plugin_get_option(slb, INFO_NAME) > 0 ||
-						plugin_get_option(slb, INFO_VERSION) > 0 ||
-						plugin_get_option(slb, INFO_AUTHOR) > 0 ||
-						plugin_get_option(slb, INFO_DATETIME) > 0 ||
-						plugin_get_option(slb, INFO_MISC) > 0)
-						codec->capabilities |= HAS_INFO;
 					if (!check_duplicates())
 						break;
 				} else
@@ -299,7 +315,6 @@ int16 plugins_init( void)
 					if (err == -EINVAL)
 						err = PLUGIN_MISMATCH;
 					errshow(de->d_name, err);
-					free(codec);
 				}
 			}
 		}

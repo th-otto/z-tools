@@ -77,19 +77,27 @@ static int16 setup ( IMAGE *img, IMGINFO info, DECDATA data)
 		
 	if (curr_input_plugin)
 	{
-		/*
-		 * SLB plugins can allocate the strings through callbacks,
-		 * and may not have set up the num_comments member until now
-		 */
-		plugin_reader_get_txt(&curr_input_plugin->c.slb, info, img->comments);
-		info->num_comments = img->comments->lines;
-	} else if (info->num_comments > 0)
-	{
-		/*
-		 * LDG plugins need the strings preallocated, so we must only
-		 * call decoder_get_txt if there are actually infos
-		 */
-		ldg_funcs.decoder_get_txt(info, img->comments);
+		switch (curr_input_plugin->type)
+		{
+		case CODEC_SLB:
+			/*
+			 * SLB plugins can allocate the strings through callbacks,
+			 * and may not have set up the num_comments member until now
+			 */
+			plugin_reader_get_txt(&curr_input_plugin->c.slb, info, img->comments);
+			info->num_comments = img->comments->lines;
+			break;
+		case CODEC_LDG:
+			if (info->num_comments > 0)
+			{
+				/*
+				 * LDG plugins need the strings preallocated, so we must only
+				 * call decoder_get_txt if there are actually infos
+				 */
+				ldg_funcs.decoder_get_txt(info, img->comments);
+			}
+			break;
+		}
 	}
 	if (img->comments && img->comments->lines == 0)
 		delete_txt_data(img);
@@ -182,14 +190,16 @@ static inline void read_img ( IMAGE *img, IMGINFO info, DECDATA data)
 
 		for( y = 1; y <= img_h && y_dst; y++)
 		{
-			if (curr_input_plugin)
+			switch (curr_input_plugin->type)
 			{
+			case CODEC_SLB:
 				if (!plugin_reader_read(&curr_input_plugin->c.slb, info, buf))
-					return;		
-			} else
-			{
+					return;
+				break;
+			case CODEC_LDG:
 				if( !ldg_funcs.decoder_read( info, buf))
-					return;		
+					return;
+				break;
 			}
 
 			while(( scale >> 16) < y) 
@@ -226,10 +236,15 @@ void quit_img( IMGINFO info, DECDATA data)
 {
 	if (decoder_init_done)
 	{
-		if (curr_input_plugin)
+		switch (curr_input_plugin->type)
+		{
+		case CODEC_SLB:
 			plugin_reader_quit(&curr_input_plugin->c.slb, info);
-		else
+			break;
+		case CODEC_LDG:
 			ldg_funcs.decoder_quit(info);
+			break;
+		}
 	}
 	
 	if( data->DthBuf != NULL) 
@@ -245,13 +260,27 @@ void quit_img( IMGINFO info, DECDATA data)
 }
 
 
+static boolean codec_handles_extension(const char *extensions, const char *extension)
+{
+	const char *p;
+
+	p = extensions;
+	while (*p)
+	{
+		if (strcmp(extension, p) == 0)
+		{
+			return TRUE;
+		}
+		p += strlen(p) + 1;
+	}
+	return FALSE;
+}
+
+
 CODEC *get_codec( const char *file)
 {
-	int16 	i, j, c;
-	char 	plugin[4];
+	int16 i;
 	LDG *ldg;
-	const char *p;
-	int match;
 	const char *dot;
 	char extension[MAXNAMLEN];
 
@@ -261,7 +290,6 @@ CODEC *get_codec( const char *file)
 		return FALSE;
 	strcpy(extension, dot + 1);
 	str2upper(extension);
-	plugin[3] = '\0';
 
 	/* We check if a plug-ins can do the job */
 	for( i = 0; i < plugins_nbr; i++)
@@ -272,40 +300,7 @@ CODEC *get_codec( const char *file)
 		{
 		case CODEC_LDG:
 			ldg = codec->c.ldg;
-			match = FALSE;
-			if (codec->num_extensions == 0)
-			{
-				/*
-				 * newer plugin, with 0-terminated list
-				 */
-				p = codec->extensions;
-				while (*p)
-				{
-					if (strcmp(extension, p) == 0)
-					{
-						match = TRUE;
-						break;
-					}
-					p += strlen(p) + 1;
-				}
-			} else
-			{
-				c = 0;
-				/* old version, with exactly 3 chars per extension */
-				for( j = 0; j < codec->num_extensions; j++)
-				{
-					plugin[0] = codec->extensions[c++];
-					plugin[1] = codec->extensions[c++];
-					plugin[2] = codec->extensions[c++];
-		
-					if (strcmp(extension, plugin) == 0)
-					{
-						match = TRUE;
-						break;
-					}
-				}
-			}
-			if (match)
+			if (codec_handles_extension(codec->extensions, extension))
 			{
 				if ( !( ldg_funcs.decoder_init 	= ldg_find( "reader_init", ldg))
 				  || !( ldg_funcs.decoder_read 	= ldg_find( "reader_read", ldg)) 
@@ -318,20 +313,15 @@ CODEC *get_codec( const char *file)
 
 				/* decoder_get_page_size = ldg_find( "reader_get_page_size", ldg); */
 
+				curr_input_plugin = codec;
 				return codec;
 			}
 			break;
 		case CODEC_SLB:
-			match = FALSE;
-			p = codec->extensions;
-			while (*p)
+			if (codec_handles_extension(codec->extensions, extension))
 			{
-				if (strcmp(extension, p) == 0)
-				{
-					curr_input_plugin = codec;
-					return codec;
-				}
-				p += strlen(p) + 1;
+				curr_input_plugin = codec;
+				return codec;
 			}
 			break;
 		}
@@ -346,13 +336,15 @@ boolean get_pic_info( const char *file, IMGINFO info)
 {
 	if (get_codec(file))
 	{
-		if (curr_input_plugin)
+		if (curr_input_plugin->capabilities & CAN_DECODE)
 		{
-			if (curr_input_plugin->capabilities & CAN_DECODE)
+			switch (curr_input_plugin->type)
+			{
+			case CODEC_SLB:
 				return plugin_reader_init(&curr_input_plugin->c.slb, file, info);
-		} else
-		{
-			return ldg_funcs.decoder_init(file, info);
+			case CODEC_LDG:
+				return ldg_funcs.decoder_init(file, info);
+			}
 		}
 	}
 	return FALSE;
