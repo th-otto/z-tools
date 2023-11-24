@@ -794,13 +794,14 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			if (bc < fc)
 			{
 				uint32_t s;
-				uint8_t *p;
+				uint32_t *p;
 				
-				p = bmap;
-				s = datasize;
+				p = (uint32_t *)bmap;
+				s = datasize >> 2;
 				do
 				{
 					*p = ~*p;
+					p++;
 				} while (--s > 0);
 			}
 		}
