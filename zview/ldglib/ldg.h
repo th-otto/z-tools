@@ -76,14 +76,14 @@ typedef struct ldg {
 	long magic;				/* magic number ('LDGM')   */
 	short vers;				/* library version 	*/
 	short id;				/* AES-id of launcher */
-	short num;				/* count of avalaible functions */
+	short num;				/* count of available functions */
 	const PROC *list;		/* pointer to the functions list */
 	const char *infos;		/* describe the library */
 	void *baspag;			/* basepage of library */
 /* from version 0.99 */
 	unsigned short flags;	/* library flags ( shared, resident, locked) */
 /* from version 0.99c */
-	void (*close)(void);	/* fonction launched by ldg_term() */
+	void (*close)(void);	/* function launched by ldg_term() */
 /* from version 1.00 */
 	short vers_ldg;			/* LDG-protocol version */
 	char path[PATHLEN];		/* real path of the lib */
@@ -126,7 +126,7 @@ typedef struct {
 
 typedef struct ldglib {
 	short vers;   			/* library version */
-	short num;    			/* count of avalaible functions */
+	short num;    			/* count of available functions */
 	const PROC *list;		/* pointer to the functions list */
 	const char *infos; 		/* description of the lib */
 	unsigned short flags;	/* library flags (shared, locked, resident) */
