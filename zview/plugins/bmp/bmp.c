@@ -756,7 +756,11 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	/* try to get masks from file */
 	if (compressed == BMP_BITFIELDS)
 	{
-		if ((info->planes == 16 || info->planes == 32) && hdrsize >= 52)
+		/*
+		 * Some files seems to have a header size of 40,
+		 * but still contain the bitfield masks
+		 */
+		if ((info->planes == 16 || info->planes == 32) && (hdrsize >= 52 || (hdrsize >= 40 && offbits >= 66)))
 		{
 			rmask = ToL(header.bmp_info_header.bitmapinfoheader.RedMask);
 			gmask = ToL(header.bmp_info_header.bitmapinfoheader.GreenMask);
@@ -767,7 +771,6 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 
 	if (offbits != 0)
 		Fseek(offbits, handle, SEEK_SET);
-	offbits = Fseek(0, handle, SEEK_CUR);
 
 #if 0
 	db("rmask=%lu",rmask);
