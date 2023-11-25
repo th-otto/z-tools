@@ -22,6 +22,8 @@
  * BMP files can now be saved (uncompressed only)
  * For most codecs, a info box is now available
  * HyperText documentation has been updated.
+ * New plugin for signum image format
+ * Update PDF library to 4.04
 
  Bug Fixes:
  ----------
