@@ -12,6 +12,7 @@ PLUGINS = \
 	jpg \
 	neochrome \
 	png \
+	pnm \
 	signum \
 	tga \
 	tiff \

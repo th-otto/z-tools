@@ -23,7 +23,9 @@
  * For most codecs, a info box is now available
  * HyperText documentation has been updated.
  * New plugin for signum image format
+ * New plugin for WebP image format
  * Update PDF library to 4.04
+ * New plugin for NetPbm image format(s)
 
  Bug Fixes:
  ----------
