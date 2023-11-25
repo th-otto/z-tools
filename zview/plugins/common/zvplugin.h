@@ -44,6 +44,7 @@ void __CDECL plugin_encoder_quit(SLB *slb, IMGINFO info);
 #define INFO_AUTHOR         8	/* a single string */
 #define INFO_DATETIME       9	/* a single string, in the format produced by the __DATE__ macro, optionally also with time */
 #define INFO_MISC          10	/* other information, can be multiple lines separated by '\n' */
+#define INFO_COMPILER      12   /* compiler used */
 
 
 /*
@@ -96,6 +97,37 @@ void __CDECL encoder_quit(IMGINFO info);
 long __CDECL get_option(zv_int_t which);
 long __CDECL set_option(zv_int_t which, zv_int_t value);
 
+#define stringify1(x) #x
+#define stringify(x) stringify1(x)
+
+#if (defined(__INTEL_CLANG_COMPILER) || defined(__INTEL_LLVM_COMPILER) || defined(_ICC)) && defined(__VERSION__)
+#define COMPILER_VERSION_STRING __VERSION__ bitvers
+#elif defined(__clang_version__)
+#define COMPILER_VERSION_STRING "Clang version %s (%s) " __clang_version__ bitvers
+#elif defined(__GNUC__)
+#define COMPILER_VERSION_STRING "GNU-C version " stringify(__GNUC__) "." stringify(__GNUC_MINOR__) "." stringify(__GNUC_PATCHLEVEL__) bitvers
+#elif defined(__AHCC__)
+#define bitvers " (16-bit)"
+#define COMPILER_VERSION_STRING "AHCC version " stringify(__AHCC__) bitvers
+#elif defined(__PUREC__)
+#define bitvers " (16-bit)"
+#define COMPILER_VERSION_STRING "Pure-C version " stringify(__PUREC__) bitvers
+#else
+#define COMPILER_VERSION_STRING "Unknown" bitvers
+#endif
+#ifndef bitvers
+# if defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__) >= 16
+#   define bitvers " (128-bit)"
+# elif defined(__SIZEOF_POINTER__) && (__SIZEOF_POINTER__) >= 8
+#   define bitvers " (64-bit)"
+# elif defined(__SIZEOF_INT__) && (__SIZEOF_INT__) >= 4
+#   define bitvers " (32-bit)"
+# elif defined(__SIZEOF_INT__) && (__SIZEOF_INT__) >= 2
+#   define bitvers " (16-bit)"
+# else
+#   define bitvers ""
+# endif
+#endif
 
 /*
  * helper function to get the actual basepage start,

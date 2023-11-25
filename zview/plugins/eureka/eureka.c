@@ -25,6 +25,8 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+	case INFO_COMPILER:
+		return (long)(COMPILER_VERSION_STRING);
 	}
 	return -ENOSYS;
 }

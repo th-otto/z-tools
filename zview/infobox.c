@@ -337,6 +337,9 @@ void infobox( void)
 
 				ret = plugin_get_option(slb, INFO_MISC);
 				objc_multiline(infotext, ret, FILE_CODEC_INFO_FIRST, FILE_CODEC_INFO_LAST);
+
+				ret = plugin_get_option(slb, INFO_COMPILER);
+				ObjcStrnCpy(infotext, FILE_CODEC_COMPILER, ret > 0 ? (const char *)ret : "");
 			}
 			break;
 		case CODEC_LDG:
@@ -350,6 +353,7 @@ void infobox( void)
 				ObjcStrnCpy(infotext, FILE_CODEC_DATE, ldg->list[2].info != NULL && strncmp(ldg->list[2].info, "Date: ", 6) == 0 ? ldg->list[2].info + 6 : "");
 				ObjcStrnCpy(infotext, FILE_CODEC_AUTHOR, ldg->list[1].info != NULL && strncmp(ldg->list[1].info, "Author: ", 8) == 0 ? ldg->list[1].info + 8 : "");
 				objc_multiline(infotext, 0, FILE_CODEC_INFO_FIRST, FILE_CODEC_INFO_LAST);
+				ObjcStrnCpy(infotext, FILE_CODEC_COMPILER, ldg->flags & LDG_STDCALL ? "Pure-C" : "GNU-C");
 			}
 			break;
 		}
