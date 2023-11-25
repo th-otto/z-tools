@@ -36,7 +36,7 @@ static LDGLIB plugin =
 	0x103, 	/* Plugin version */
 	sizeof(Func) / sizeof(Func[0]),					/* Number of plugin's functions */
 	Func,				/* List of functions */
-	"PPM\0PGM\0PBM\0",	/* File's type Handled */
+	"PPM\0PGM\0PBM\0PAM\0",	/* File's type Handled */
 	LDG_NOT_SHARED, 	/* The flags NOT_SHARED is used here.. even if zview plugins are reentrant 
 					   	   and are shareable, we must use this flags because we don't know if the 
 					   	   user has ldg.prg deamon installed on his computer */

@@ -1,8 +1,8 @@
 !begin_node Supported File Formats
 !html_name file_formats
 
-zView can load ten picture formats, one picture/animation format 
-(GIF) and one document format (PDF). The following table shows the 
+zView can load several picture formats, one picture/animation format
+(GIF) and one document format (PDF). The following table shows the
 supported features of the formats.
 
 !begin_table [llllll]
@@ -34,10 +34,15 @@ supported features of the formats.
                !!                   !! 640x200         !! 2              !!                 !! 
                !!                   !! 640x400         !! 1              !!                 !! 
 !hline
+ STAD          !! .pac              !! 640x400         !! 1              !! RLE             !!
+!hline
  PDF           !! .pdf              !! Any             !! Any            !! Many            !! Bookmarks
 !hline
  PNG           !! .png              !! Any             !! 1/2/4/8/       !! Deflate         !! Alpha Channel
-                                    !! 16/24/32        !!                !!                 !! Textual data
+               !!                   !!                 !! 16/24/32       !!                 !! Textual data
+!hline
+ PNM           !! .pbm/.pgm         !! Any             !! 1/2/4/8/       !! None            !!
+               !! .ppm/.pam         !!                 !! 16/24/32       !!                 !!
 !hline
  TGA           !! .tga              !! Any             !! 16/24/32       !! None/RLE        !! Alpha Channel
 !hline
@@ -49,6 +54,8 @@ supported features of the formats.
                !!                   !!                 !!                !! and 4 (!link [[4!]] [[4!]]) !!
 !hline
  Signum        !! .imc              !! 640x400         !! 1              !! None
+!hline
+ WebP          !! .web/.webp        !! Any             !! 24/32          !! None
 !hline
 
 !end_table

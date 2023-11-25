@@ -1,7 +1,7 @@
 /*
- * bmpslb.c - initialization code for the shared library
+ * pnmslb.c - initialization code for the shared library
  *
- * Copyright (C) 2019 Thorsten Otto
+ * Copyright (C) 2023 Thorsten Otto
  *
  * For conditions of distribution and use, see copyright file.
  */

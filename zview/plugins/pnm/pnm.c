@@ -5,6 +5,8 @@
 
 #include "plugin.h"
 #include "zvplugin.h"
+#define NF_DEBUG 0
+#include "nfdebug.h"
 
 static uint16_t filetype;
 static uint16_t maxval;
@@ -18,6 +20,7 @@ static size_t file_pos;
 #define PNM_P4 0x5034
 #define PNM_P5 0x5035
 #define PNM_P6 0x5036
+#define PNM_P7 0x5037
 
 #define ISSPACE(c) ((c) == ' ' || (c) == '\t' || (c) == '\r' || (c) == '\n')
 #define ISDIGIT(c) (((c) - '0') <= '9')
@@ -33,7 +36,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE | CAN_ENCODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("PPM\0PGM\0PBM\0");
+		return (long) ("PPM\0PGM\0PBM\0PAM\0");
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -77,11 +80,118 @@ static uint16_t read_int(IMGINFO info)
 				break;
 		} else if (ISDIGIT(ch))
 		{
+			if (val >= (65540U / 10) || (val >= (65530U / 10) && ch >= '6'))
+				return -1;
 			val = val * 10 + (ch - '0');
 			i = 1;
 		}
 	}
 	return val;
+}
+
+
+static int read_pam_header(IMGINFO info)
+{
+	int i;
+	char namebuf[20];
+	unsigned char ch;
+	
+	info->width = 0;
+	info->height = 0;
+	info->components = 0;
+	maxval = 0;
+	for (;;)
+	{
+		i = 0;
+		for (;;)
+		{
+			ch = file_buffer[file_pos++];
+			if (ch == 0)
+				return FALSE;
+			if (ch == '#')
+			{
+				do
+				{
+					ch = file_buffer[file_pos++];
+				} while (ch > 0x0a);
+			} else if (ISSPACE(ch))
+			{
+				break;
+			}
+			if (i < (int)sizeof(namebuf) - 1)
+				namebuf[i++] = ch;
+		}
+		namebuf[i] = 0;
+		if (strcmp(namebuf, "ENDHDR") == 0)
+			break;
+		if (strcmp(namebuf, "WIDTH") == 0)
+		{
+			if ((info->width = read_int(info)) == (uint16_t)-1)
+				return FALSE;
+			nf_debugprintf("width: %u\n", info->width);
+		} else if (strcmp(namebuf, "HEIGHT") == 0)
+		{
+			if ((info->height = read_int(info)) == (uint16_t)-1)
+				return FALSE;
+			nf_debugprintf("heigth: %u\n", info->width);
+		} else if (strcmp(namebuf, "DEPTH") == 0)
+		{
+			if ((info->components = read_int(info)) == (uint16_t)-1)
+				return FALSE;
+			nf_debugprintf("depth: %u\n", info->components);
+		} else if (strcmp(namebuf, "MAXVAL") == 0)
+		{
+			if ((maxval = read_int(info)) == (uint16_t)-1)
+				return FALSE;
+			nf_debugprintf("maxval: %u\n", maxval);
+		} else if (strcmp(namebuf, "TUPLTYPE") == 0)
+		{
+			/* ignored for now */
+			do
+			{
+				ch = file_buffer[file_pos++];
+			} while (ch > 0x0a);
+		} else
+		{
+			nf_debugprintf("unknown hdr type: %s\n", namebuf);
+			return FALSE;
+		}
+	}
+	if (info->width == 0 || info->height == 0 || info->components == 0 || maxval == 0)
+	{
+		return FALSE;
+	}
+	return TRUE;
+}
+
+
+static void cleanup(IMGINFO info)
+{
+	int16_t handle = info->_priv_var;
+
+	Mfree(file_buffer);
+	file_buffer = NULL;
+	if (handle > 0)
+	{
+		Fclose(handle);
+		info->_priv_var = 0;
+	}
+}
+
+
+static int read_pnm_header(IMGINFO info)
+{
+	if ((info->width = read_int(info)) == (uint16_t)-1)
+	{
+		cleanup(info);
+		return FALSE;
+	}
+	if ((info->height = read_int(info)) == (uint16_t)-1)
+	{
+		cleanup(info);
+		return FALSE;
+	}
+	return TRUE;
 }
 
 
@@ -99,20 +209,6 @@ static void myitoa(unsigned int value, char *buffer)
 	while (--i >= 0)	/* reverse it back  */
 		*p++ = tmpbuf[i];
 	*p = '\0';
-}
-
-
-static void cleanup(IMGINFO info)
-{
-	int16_t handle = info->_priv_var;
-
-	Mfree(file_buffer);
-	file_buffer = NULL;
-	if (handle > 0)
-	{
-		Fclose(handle);
-		info->_priv_var = 0;
-	}
 }
 
 
@@ -162,19 +258,12 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	file_buffer[filesize] = '\0';
 	filetype = (file_buffer[0] << 8) | file_buffer[1];
 	file_pos = 3;
-	if ((info->width = read_int(info)) == (uint16_t)-1)
-	{
-		cleanup(info);
-		return FALSE;
-	}
-	if ((info->height = read_int(info)) == (uint16_t)-1)
-	{
-		cleanup(info);
-		return FALSE;
-	}
 	switch (filetype)
 	{
 	case PNM_P1:
+		strcpy(info->info, "PBM BitMap (Ascii)");
+		if (read_pnm_header(info) == FALSE)
+			return FALSE;
 		maxval = 1;
 		datasize = 0;
 		info->planes = 1;
@@ -182,9 +271,11 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		info->indexed_color = TRUE;
 		info->palette[0].red = info->palette[0].green = info->palette[0].blue = 255;
 		info->palette[1].red = info->palette[1].green = info->palette[1].blue = 0;
-		strcpy(info->info, "PBM BitMap (Ascii)");
 		break;
 	case PNM_P2:
+		strcpy(info->info, "PGM GrayMap (Ascii)");
+		if (read_pnm_header(info) == FALSE)
+			return FALSE;
 		if ((maxval = read_int(info)) == (uint16_t)-1)
 		{
 			cleanup(info);
@@ -196,9 +287,11 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		info->indexed_color = TRUE;
 		for (i = 0; i < 256; i++)
 			info->palette[i].red = info->palette[i].green = info->palette[i].blue = i;
-		strcpy(info->info, "PGM GrayMap (Ascii)");
 		break;
 	case PNM_P3:
+		strcpy(info->info, "PPM PixMap (Ascii)");
+		if (read_pnm_header(info) == FALSE)
+			return FALSE;
 		if ((maxval = read_int(info)) == (uint16_t)-1)
 		{
 			cleanup(info);
@@ -208,55 +301,112 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		info->planes = 24;
 		info->components = 3;
 		info->indexed_color = FALSE;
-		strcpy(info->info, "PPM PixMap (Ascii)");
 		break;
 	case PNM_P4:
+		strcpy(info->info, "PBM BitMap (Binary)");
+		if (read_pnm_header(info) == FALSE)
+			return FALSE;
 		linesize = (info->width + 7) >> 3;
 		datasize = linesize * info->height;
-		
 		maxval = 1;
 		info->planes = 1;
 		info->components = 1;
 		info->indexed_color = TRUE;
 		info->palette[0].red = info->palette[0].green = info->palette[0].blue = 255;
 		info->palette[1].red = info->palette[1].green = info->palette[1].blue = 0;
-		strcpy(info->info, "PBM BitMap (Binary)");
 		break;
 	case PNM_P5:
+		strcpy(info->info, "PGM GrayMap (Binary)");
+		if (read_pnm_header(info) == FALSE)
+			return FALSE;
 		if ((maxval = read_int(info)) == (uint16_t)-1)
 		{
 			cleanup(info);
 			return FALSE;
 		}
 		datasize = ((uint32_t) info->width * (uint32_t) info->height);
-		if (maxval >= 256)
-			datasize *= 2;
 		info->planes = 8;
 		info->components = 1;
 		info->indexed_color = TRUE;
 		for (i = 0; i < 256; i++)
 			info->palette[i].red = info->palette[i].green = info->palette[i].blue = i;
-		strcpy(info->info, "PGM GrayMap (Binary)");
 		break;
 	case PNM_P6:
+		strcpy(info->info, "PPM PixMap (Binary)");
+		if (read_pnm_header(info) == FALSE)
+			return FALSE;
 		if ((maxval = read_int(info)) == (uint16_t)-1)
 		{
 			cleanup(info);
 			return FALSE;
 		}
 		datasize = ((uint32_t) info->width * (uint32_t) info->height) * 3;
-		if (maxval >= 256)
-			datasize *= 2;
 		info->planes = 24;
 		info->components = 3;
 		info->indexed_color = FALSE;
-		strcpy(info->info, "PPM PixMap (Binary)");
+		break;
+	case PNM_P7:
+		if (read_pam_header(info) == FALSE)
+		{
+			cleanup(info);
+			return FALSE;
+		}
+		switch (info->components)
+		{
+		case 1:
+			if (maxval == 1)
+			{
+				strcpy(info->info, "PAM BitMap");
+				filetype = PNM_P4;
+				linesize = (info->width + 7) >> 3;
+				datasize = linesize * info->height;
+				info->planes = 1;
+				info->components = 1;
+				info->indexed_color = TRUE;
+				info->palette[0].red = info->palette[0].green = info->palette[0].blue = 255;
+				info->palette[1].red = info->palette[1].green = info->palette[1].blue = 0;
+			} else
+			{
+				strcpy(info->info, "PAM GrayMap");
+				filetype = PNM_P5;
+				datasize = ((uint32_t) info->width * (uint32_t) info->height);
+				info->planes = 8;
+				info->components = 1;
+				info->indexed_color = TRUE;
+				for (i = 0; i < 256; i++)
+					info->palette[i].red = info->palette[i].green = info->palette[i].blue = i;
+			}
+			break;
+		case 3:
+			strcpy(info->info, "PAM PixMap");
+			filetype = PNM_P6;
+			datasize = ((uint32_t) info->width * (uint32_t) info->height) * 3;
+			info->planes = 24;
+			info->components = 3;
+			info->indexed_color = FALSE;
+			break;
+		case 4:
+			strcpy(info->info, "PAM PixMap (alpha)");
+			filetype = PNM_P6;
+			datasize = ((uint32_t) info->width * (uint32_t) info->height) * 4;
+			info->planes = 32;
+			info->components = 3;
+			info->indexed_color = FALSE;
+			break;
+		case 2:
+			/* graymap with alpha not supported */
+		default:
+			cleanup(info);
+			return FALSE;
+		}
 		break;
 	default:
 		cleanup(info);
 		return FALSE;
 	}
 	
+	if (maxval >= 256)
+		datasize *= 2;
 	if (filetype == PNM_P4 || filetype == PNM_P5 || filetype == PNM_P6)
 	{
 		if (file_pos + datasize > filesize)
@@ -273,7 +423,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 
 	info->real_width = info->width;
 	info->real_height = info->height;
-	info->colors = 1L << info->planes;
+	info->colors = 1L << MIN(info->planes, 24);
 	info->memory_alloc = TT_RAM;
 	info->page = 1;
 	info->orientation = UP_TO_DOWN;
@@ -388,34 +538,73 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 		}
 		break;
 	case PNM_P6:
-		if (maxval == 255)
+		if (info->planes == 32)
 		{
-			uint32_t rowsize;
-
-			rowsize = (uint32_t)info->width * 3;
-			memcpy(buffer, &file_buffer[file_pos], rowsize);
-			file_pos += rowsize;
-		} else if (maxval < 255)
-		{
-			for (x = 0; x < info->width; x++)
+			if (maxval == 255)
 			{
-				buffer[i++] = file_buffer[file_pos++] * maxvalmult;
-				buffer[i++] = file_buffer[file_pos++] * maxvalmult;
-				buffer[i++] = file_buffer[file_pos++] * maxvalmult;
+				for (x = 0; x < info->width; x++)
+				{
+					buffer[i++] = file_buffer[file_pos++];
+					buffer[i++] = file_buffer[file_pos++];
+					buffer[i++] = file_buffer[file_pos++];
+					file_pos++;
+				}
+			} else if (maxval < 255)
+			{
+				for (x = 0; x < info->width; x++)
+				{
+					buffer[i++] = file_buffer[file_pos++] * maxvalmult;
+					buffer[i++] = file_buffer[file_pos++] * maxvalmult;
+					buffer[i++] = file_buffer[file_pos++] * maxvalmult;
+					file_pos++;
+				}
+			} else
+			{
+				for (x = 0; x < info->width; x++)
+				{
+					g = file_buffer[file_pos++] << 8;
+					g |= file_buffer[file_pos++];
+					buffer[i++] = g * maxvalmult;
+					g = file_buffer[file_pos++] << 8;
+					g |= file_buffer[file_pos++];
+					buffer[i++] = g * maxvalmult;
+					g = file_buffer[file_pos++] << 8;
+					g |= file_buffer[file_pos++];
+					buffer[i++] = g * maxvalmult;
+					file_pos++;
+				}
 			}
 		} else
 		{
-			for (x = 0; x < info->width; x++)
+			if (maxval == 255)
 			{
-				g = file_buffer[file_pos++] << 8;
-				g |= file_buffer[file_pos++];
-				buffer[i++] = g * maxvalmult;
-				g = file_buffer[file_pos++] << 8;
-				g |= file_buffer[file_pos++];
-				buffer[i++] = g * maxvalmult;
-				g = file_buffer[file_pos++] << 8;
-				g |= file_buffer[file_pos++];
-				buffer[i++] = g * maxvalmult;
+				uint32_t rowsize;
+	
+				rowsize = (uint32_t)info->width * 3;
+				memcpy(buffer, &file_buffer[file_pos], rowsize);
+				file_pos += rowsize;
+			} else if (maxval < 255)
+			{
+				for (x = 0; x < info->width; x++)
+				{
+					buffer[i++] = file_buffer[file_pos++] * maxvalmult;
+					buffer[i++] = file_buffer[file_pos++] * maxvalmult;
+					buffer[i++] = file_buffer[file_pos++] * maxvalmult;
+				}
+			} else
+			{
+				for (x = 0; x < info->width; x++)
+				{
+					g = file_buffer[file_pos++] << 8;
+					g |= file_buffer[file_pos++];
+					buffer[i++] = g * maxvalmult;
+					g = file_buffer[file_pos++] << 8;
+					g |= file_buffer[file_pos++];
+					buffer[i++] = g * maxvalmult;
+					g = file_buffer[file_pos++] << 8;
+					g |= file_buffer[file_pos++];
+					buffer[i++] = g * maxvalmult;
+				}
 			}
 		}
 		break;
