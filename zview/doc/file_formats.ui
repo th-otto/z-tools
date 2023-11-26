@@ -55,6 +55,8 @@ supported features of the formats.
 !hline
  Signum        !! .imc              !! 640x400         !! 1              !! None
 !hline
+ Spectrum      !! .spu/.spc/.sps    !! 320x200         !! 12/15          !! RLE
+!hline
  WebP          !! .web/.webp        !! Any             !! 24/32          !! None
 !hline
 

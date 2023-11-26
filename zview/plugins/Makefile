@@ -14,6 +14,7 @@ PLUGINS = \
 	png \
 	pnm \
 	signum \
+	spectrum \
 	stad \
 	tga \
 	tiff \

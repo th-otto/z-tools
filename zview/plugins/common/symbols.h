@@ -37,3 +37,11 @@
 #   define C_SYMBOL_NAME(name) __SYMBOL_PREFIX #name
 # endif
 #endif
+
+#ifndef __ASSEMBLER__
+# ifdef __GNUC__
+#   define ASM_NAME(x) __asm__(x)
+# else
+#   define ASM_NAME(x)
+# endif
+#endif
