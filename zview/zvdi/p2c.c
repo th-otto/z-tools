@@ -4,7 +4,7 @@
 void ( *planar_to_chunky)( uint8 *in, uint8 *out, int16 width);
 
 
-inline void planar8_to_chunky8( uint8 *in, uint8 *out, int16 width)
+void planar8_to_chunky8( uint8 *in, uint8 *out, int16 width)
 {
 	uint8		*l;
 	uint16		x, c, p0, p1, p2, p3, p4, p5, p6, p7;
@@ -37,7 +37,7 @@ inline void planar8_to_chunky8( uint8 *in, uint8 *out, int16 width)
 }
 
 
-inline void planar4_to_chunky8( uint8 *in, uint8 *out, int16 width)
+void planar4_to_chunky8( uint8 *in, uint8 *out, int16 width)
 {
 	uint8		*l;
 	uint16		x, c, p0, p1, p2, p3;
@@ -62,7 +62,7 @@ inline void planar4_to_chunky8( uint8 *in, uint8 *out, int16 width)
 }
 
 
-inline void planar2_to_chunky8( uint8 *in, uint8 *out, int16 width)
+void planar2_to_chunky8( uint8 *in, uint8 *out, int16 width)
 {
 	uint8		*l;
 	uint16		x, c, p0, p1;

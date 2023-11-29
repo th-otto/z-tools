@@ -3,7 +3,7 @@
 #include "raster.h"
 #include "raster_resize.h"
 
-inline void resize_mono ( DECDATA info, void * _dst)
+void resize_mono ( DECDATA info, void * _dst)
 {
 	uint8	*dst   	= _dst;
 	int16   width 	= info->DthWidth;
@@ -28,7 +28,7 @@ inline void resize_mono ( DECDATA info, void * _dst)
 }
 
 
-inline void resize_I4 ( DECDATA info, void * _dst)
+void resize_I4 ( DECDATA info, void * _dst)
 {
 	uint16 	*dst   	= _dst;
 	int16   width 	= info->DthWidth;
@@ -54,7 +54,7 @@ inline void resize_I4 ( DECDATA info, void * _dst)
 }
 
 
-inline void resize_I8 ( DECDATA info, void * _dst)
+void resize_I8 ( DECDATA info, void * _dst)
 {
 	uint16 	*dst   		= _dst;
 	int16   width 		= info->DthWidth;
@@ -80,7 +80,7 @@ inline void resize_I8 ( DECDATA info, void * _dst)
 }
 
 
-inline void resize_P8(DECDATA info, void * _dst)
+void resize_P8(DECDATA info, void * _dst)
 {
 	uint8 	*dst  		= _dst;
 	int16   width 		= info->DthWidth;
@@ -95,7 +95,7 @@ inline void resize_P8(DECDATA info, void * _dst)
 }
 
 
-inline void resize_16(DECDATA info, void * _dst)
+void resize_16(DECDATA info, void * _dst)
 {
 	uint8 	*dst  		= _dst;
 	int16   width 		= info->DthWidth;
@@ -111,7 +111,7 @@ inline void resize_16(DECDATA info, void * _dst)
 }
 
 
-inline void resize_24(DECDATA info, void * _dst)
+void resize_24(DECDATA info, void * _dst)
 {
 	uint8 	*dst  = _dst;
 	int16   width = info->DthWidth;
@@ -128,7 +128,7 @@ inline void resize_24(DECDATA info, void * _dst)
 }
 
 
-inline void resize_32( DECDATA info, void * _dst)
+void resize_32( DECDATA info, void * _dst)
 {
 	uint8  *dst   = _dst;
 	int16   width = info->DthWidth;

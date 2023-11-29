@@ -4,7 +4,7 @@
 #include "dither.h"
 #include "raster.h"
 
-inline void raster_mono ( DECDATA info, void * _dst)
+void raster_mono ( DECDATA info, void * _dst)
 {
 #ifdef USE_ASM
 	__asm__ volatile (
@@ -60,7 +60,7 @@ inline void raster_mono ( DECDATA info, void * _dst)
 #endif		 
 }
 
-inline void raster_D1 ( DECDATA info, void * _dst)
+void raster_D1 ( DECDATA info, void * _dst)
 {
 	uint16	*dst	= _dst;
 	int16   width 	= info->DthWidth;
@@ -94,7 +94,7 @@ inline void raster_D1 ( DECDATA info, void * _dst)
 	} while ( width);
 }
 
-inline void gscale_D1( DECDATA info, void * _dst)
+void gscale_D1( DECDATA info, void * _dst)
 {
 	uint16 	*dst  	= _dst;
 	int16   width 	= info->DthWidth;
@@ -126,7 +126,7 @@ inline void gscale_D1( DECDATA info, void * _dst)
 	} while (width);
 }
 
-inline void dither_D1 ( DECDATA info, void * _dst)
+void dither_D1 ( DECDATA info, void * _dst)
 {
 	uint16 	*dst  	= _dst;
 	int16   width 	= info->DthWidth;
@@ -160,7 +160,7 @@ inline void dither_D1 ( DECDATA info, void * _dst)
 }
 
 
-inline void raster_D2 ( DECDATA info, void * _dst)
+void raster_D2 ( DECDATA info, void * _dst)
 {
 	uint16 	*dst  	= _dst;
 	int16   width 	= info->DthWidth;
@@ -195,7 +195,7 @@ inline void raster_D2 ( DECDATA info, void * _dst)
 	} while ( width);
 }
 
-inline void gscale_D2( DECDATA info, void * _dst)
+void gscale_D2( DECDATA info, void * _dst)
 {
 	uint16 	*dst  	= _dst;
 	int16   width 	= info->DthWidth;
@@ -228,7 +228,7 @@ inline void gscale_D2( DECDATA info, void * _dst)
 	} while (width);
 }
 
-inline void dither_D2 ( DECDATA info, void * _dst)
+void dither_D2 ( DECDATA info, void * _dst)
 {
 	uint16 	*dst  	= _dst;
 	int16   width 	= info->DthWidth;
@@ -405,7 +405,7 @@ inline void raster_chunks ( uint8 *src, uint16 *dst, uint16 num, uint16 depth)
 
 #endif
 
-inline void raster_I4 ( DECDATA info, void * _dst)
+void raster_I4 ( DECDATA info, void * _dst)
 {
 	uint16 	*dst   	= _dst;
 	int16   width 	= info->DthWidth;
@@ -431,7 +431,7 @@ inline void raster_I4 ( DECDATA info, void * _dst)
 	} while ( width);
 }
 
-inline void gscale_I4( DECDATA info, void * _dst)
+void gscale_I4( DECDATA info, void * _dst)
 {
 	uint16 	*dst   	= _dst;
 	int16   width 	= info->DthWidth;
@@ -458,7 +458,7 @@ inline void gscale_I4( DECDATA info, void * _dst)
 	} while (width);
 }
 
-inline void dither_I4 ( DECDATA info, void * _dst)
+void dither_I4 ( DECDATA info, void * _dst)
 {
 	uint16 	*dst   	= _dst;
 	int16   width 	= info->DthWidth;
@@ -486,7 +486,7 @@ inline void dither_I4 ( DECDATA info, void * _dst)
 }
 
 
-inline void raster_I8 ( DECDATA info, void * _dst)
+void raster_I8 ( DECDATA info, void * _dst)
 {
 #ifdef USE_ASM
 	size_t  x     = (info->IncXfx + 1) >> 1;
@@ -579,7 +579,7 @@ inline void raster_I8 ( DECDATA info, void * _dst)
 #endif
 }
 
-inline void gscale_I8( DECDATA info, void * _dst)
+void gscale_I8( DECDATA info, void * _dst)
 {
 	uint16 	*dst   	= _dst;
 	int16   width 	= info->DthWidth;
@@ -605,7 +605,7 @@ inline void gscale_I8( DECDATA info, void * _dst)
 	} while (width);
 }
 
-inline void dither_I8 (DECDATA info, void * _dst)
+void dither_I8 (DECDATA info, void * _dst)
 {
 	uint16 	*dst   	= _dst;
 	int16   width 	= info->DthWidth;
@@ -633,7 +633,7 @@ inline void dither_I8 (DECDATA info, void * _dst)
 }
 
 
-inline void raster_P8 (DECDATA info, void * _dst)
+void raster_P8 (DECDATA info, void * _dst)
 {
 	uint8  	*dst  = _dst;
 	int16   width = info->DthWidth;
@@ -648,7 +648,7 @@ inline void raster_P8 (DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void gscale_P8( DECDATA info, void * _dst)
+void gscale_P8( DECDATA info, void * _dst)
 {
 	uint8  	*dst  = _dst;
 	int16   width = info->DthWidth;
@@ -663,7 +663,7 @@ inline void gscale_P8( DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void dither_P8 (DECDATA info, void * _dst)
+void dither_P8 (DECDATA info, void * _dst)
 {
 	uint8 	*dst  	= _dst;
 	int16  	width 	= info->DthWidth;
@@ -694,7 +694,7 @@ static inline void dither32_P8 (DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void raster_15 (DECDATA info, void * _dst)
+void raster_15 (DECDATA info, void * _dst)
 {
 	uint16 	*dst  = _dst;
 	int16   width = info->DthWidth;
@@ -709,7 +709,7 @@ inline void raster_15 (DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void gscale_15( DECDATA info, void * _dst)
+void gscale_15( DECDATA info, void * _dst)
 {
 	uint16 * dst   = _dst;
 	int16   width  = info->DthWidth;
@@ -724,7 +724,7 @@ inline void gscale_15( DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void dither_15 (DECDATA info, void * _dst)
+void dither_15 (DECDATA info, void * _dst)
 {
 	uint16 	*dst  = _dst;
 	int16   width = info->DthWidth;
@@ -737,7 +737,7 @@ inline void dither_15 (DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void raster_15r (DECDATA info, void * _dst)
+void raster_15r (DECDATA info, void * _dst)
 {
 	uint16 	*dst  = _dst;
 	int16   width = info->DthWidth;
@@ -753,7 +753,7 @@ inline void raster_15r (DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void gscale_15r( DECDATA info, void * _dst)
+void gscale_15r( DECDATA info, void * _dst)
 {
 	uint16 * dst   = _dst;
 	int16   width  = info->DthWidth;
@@ -768,7 +768,7 @@ inline void gscale_15r( DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void dither_15r (DECDATA info, void * _dst)
+void dither_15r (DECDATA info, void * _dst)
 {
 	uint16 	*dst  = _dst;
 	int16   width = info->DthWidth;
@@ -784,7 +784,7 @@ inline void dither_15r (DECDATA info, void * _dst)
 }
 
 
-inline void raster_16 (DECDATA info, void * _dst)
+void raster_16 (DECDATA info, void * _dst)
 {
 	uint16 	*dst  = _dst;
 	int16   width = info->DthWidth;
@@ -799,7 +799,7 @@ inline void raster_16 (DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void gscale_16( DECDATA info, void * _dst)
+void gscale_16( DECDATA info, void * _dst)
 {
 #ifdef USE_ASM
 	if (info->IncXfx == 0x00010000uL) {
@@ -860,7 +860,7 @@ inline void gscale_16( DECDATA info, void * _dst)
 	} while (--width);
 }}
 	
-inline void dither_16 (DECDATA info, void * _dst)
+void dither_16 (DECDATA info, void * _dst)
 {
 #ifdef USE_ASM
 	if (info->IncXfx == 0x00010000uL) {
@@ -913,7 +913,7 @@ inline void dither_16 (DECDATA info, void * _dst)
 			: "d0"
 		);
 #else
-		register uint8 *rgb = &info->RowBuf[(x >> 16) * 3];
+		uint8 *rgb = &info->RowBuf[(x >> 16) * 3];
 
 		*(dst++) = (((uint16)rgb[0] & 0xF8) << 8) | (((uint16)rgb[1] & 0xFC) << 3) | ( rgb[2] >> 3);
 #endif
@@ -922,7 +922,7 @@ inline void dither_16 (DECDATA info, void * _dst)
 }}
 
 
-inline void raster_16r (DECDATA info, void * _dst)
+void raster_16r (DECDATA info, void * _dst)
 {
 	uint16 	*dst  = _dst;
 	int16   width = info->DthWidth;
@@ -938,7 +938,7 @@ inline void raster_16r (DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void gscale_16r( DECDATA info, void * _dst)
+void gscale_16r( DECDATA info, void * _dst)
 {
 	uint16  *dst   = _dst;
 	int16   width = info->DthWidth;
@@ -953,7 +953,7 @@ inline void gscale_16r( DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void dither_16r (DECDATA info, void * _dst)
+void dither_16r (DECDATA info, void * _dst)
 {
 	uint16 	*dst  = _dst;
 	int16   width = info->DthWidth;
@@ -969,7 +969,7 @@ inline void dither_16r (DECDATA info, void * _dst)
 }
 
 
-inline void raster_24 (DECDATA info, void * _dst)
+void raster_24 (DECDATA info, void * _dst)
 {
 	uint8 	*dst  = _dst;
 	int16   width = info->DthWidth;
@@ -987,7 +987,7 @@ inline void raster_24 (DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void gscale_24( DECDATA info, void * _dst)
+void gscale_24( DECDATA info, void * _dst)
 {
 	uint8  *dst  = _dst;
 	int16  width = info->DthWidth;
@@ -1003,7 +1003,7 @@ inline void gscale_24( DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void dither_24 (DECDATA info, void * _dst)
+void dither_24 (DECDATA info, void * _dst)
 {
 	uint8 	*dst  = _dst;
 	int16   width = info->DthWidth;
@@ -1019,7 +1019,7 @@ inline void dither_24 (DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void raster_24r (DECDATA info, void * _dst)
+void raster_24r (DECDATA info, void * _dst)
 {
 	uint8 	*dst  = _dst;
 	int16   width = info->DthWidth;
@@ -1037,7 +1037,7 @@ inline void raster_24r (DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void gscale_24r( DECDATA info, void * _dst)
+void gscale_24r( DECDATA info, void * _dst)
 {
 	uint8  *dst  = _dst;
 	int16  width = info->DthWidth;
@@ -1053,7 +1053,7 @@ inline void gscale_24r( DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void dither_24r( DECDATA info, void * _dst)
+void dither_24r( DECDATA info, void * _dst)
 {
 	uint8 	*dst  = _dst;
 	int16   width = info->DthWidth;
@@ -1070,7 +1070,7 @@ inline void dither_24r( DECDATA info, void * _dst)
 }
 
 
-inline void raster_32 (DECDATA info, void * _dst)
+void raster_32 (DECDATA info, void * _dst)
 {
 	uint32 * dst   = _dst;
 	int16   width = info->DthWidth;
@@ -1085,7 +1085,7 @@ inline void raster_32 (DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void gscale_32( DECDATA info, void * _dst)
+void gscale_32( DECDATA info, void * _dst)
 {
 	uint32 *dst   = _dst;
 	int16   width = info->DthWidth;
@@ -1099,7 +1099,7 @@ inline void gscale_32( DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void dither_32 (DECDATA info, void * _dst)
+void dither_32 (DECDATA info, void * _dst)
 {
 	uint32 * dst   = _dst;
 	int16   width = info->DthWidth;
@@ -1113,7 +1113,7 @@ inline void dither_32 (DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void raster_32r( DECDATA info, void * _dst)
+void raster_32r( DECDATA info, void * _dst)
 {
 	uint32 * dst   = _dst;
 	int16   width = info->DthWidth;
@@ -1129,7 +1129,7 @@ inline void raster_32r( DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void gscale_32r( DECDATA info, void * _dst)
+void gscale_32r( DECDATA info, void * _dst)
 {
 	uint32 *dst   = _dst;
 	int16   width = info->DthWidth;
@@ -1143,7 +1143,7 @@ inline void gscale_32r( DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void dither_32r (DECDATA info, void * _dst)
+void dither_32r (DECDATA info, void * _dst)
 {
 	uint32 * dst   = _dst;
 	int16   width = info->DthWidth;
@@ -1158,7 +1158,7 @@ inline void dither_32r (DECDATA info, void * _dst)
 }
 
 
-inline void raster_32z ( DECDATA info, void * _dst)
+void raster_32z ( DECDATA info, void * _dst)
 {
 	uint32 * dst   = _dst;
 	int16   width = info->DthWidth;
@@ -1171,7 +1171,7 @@ inline void raster_32z ( DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void gscale_32z (DECDATA info, void * _dst)
+void gscale_32z (DECDATA info, void * _dst)
 {
 	uint32 * dst   = _dst;
 	int16   width = info->DthWidth;
@@ -1183,7 +1183,7 @@ inline void gscale_32z (DECDATA info, void * _dst)
 	} while (--width);
 }
 
-inline void dither_32z (DECDATA info, void * _dst)
+void dither_32z (DECDATA info, void * _dst)
 {
 	uint32  *dst	= _dst;
 	int16   width	= info->DthWidth;
