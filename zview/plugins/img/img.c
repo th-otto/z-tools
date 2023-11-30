@@ -124,6 +124,25 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	}
 #endif
 
+	switch (hdr.planes)
+	{
+	case 1:
+	case 15:
+	case 16:
+	case 24:
+	case 32:
+		info->indexed_color = FALSE;
+		break;
+	case 2:
+	case 4:
+	case 8:
+		info->indexed_color = TRUE;
+		break;
+	default:
+		Fclose(handle);
+		return FALSE;
+	}
+
 	ref = (IMG_REF *)malloc(sizeof(*ref));
 	if (ref == NULL)
 	{
@@ -329,25 +348,6 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	}
 
 	free(temp);
-
-	switch (hdr.planes)
-	{
-	case 1:
-	case 16:
-	case 24:
-	case 32:
-		info->indexed_color = FALSE;
-		break;
-	case 2:
-	case 4:
-	case 8:
-		info->indexed_color = TRUE;
-		break;
-	default:
-		free(ref->bmap);
-		free(ref);
-		return FALSE;
-	}
 
 	info->planes = hdr.planes;
 	info->width = hdr.width;
