@@ -19,7 +19,7 @@ cd tmp
 #
 # get & install the sharedlibs
 #
-for f in bzip2108.zip exif0622.zip freetype2101.zip lzma544.zip tiff450.zip zlib13-mint.zip jpeg8d.tbz png1639.tbz
+for f in bzip2108-mint.zip exif0622-mint.tar.bz2 freetype2101-mint.zip lzma544-mint.zip tiff450-mint.zip zlib13-mint.zip jpeg8d-mint.tbz png1639-mint.tbz
 do
 	wget -q $URL/$f || exit 1
 	case $f in
@@ -45,8 +45,8 @@ done
 #
 # Get & install binutils & compiler
 #
-for package in binutils gcc mintbin; do
-	wget -q -O - "$DOWNLOAD_DIR/${package}/${package}-latest.tar.bz2" | sudo tar -C / -xjf - || exit 1
+for package in binutils-mint-current gcc-mint-current mintbin-mint-latest; do
+	wget -q -O - "$DOWNLOAD_DIR/${package%%-*}/${package}.tar.bz2" | sudo tar -C / -xjf - || exit 1
 done
 
 #
