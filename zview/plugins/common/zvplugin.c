@@ -17,6 +17,20 @@
 #include "plugver.h"
 #include "slbload.h"
 #include "../../unicodemap.h"
+#define NF_DEBUG 1
+#if NF_DEBUG
+#include <mint/arch/nf_ops.h>
+#else
+#define nf_debugprintf(format, ...)
+#endif
+
+
+/*
+ * redirect all management of dependant libraries to us
+ */
+SLB *__CDECL (*p_slb_get)(long lib) = plugin_slb_get;
+long __CDECL (*p_slb_open)(long lib, const char *slbpath) = plugin_slb_open;
+void __CDECL (*p_slb_close)(long lib) = plugin_slb_close;
 
 static struct _zview_plugin_funcs zview_plugin_funcs;
 
@@ -29,6 +43,11 @@ static struct _zview_plugin_funcs zview_plugin_funcs;
 #endif
 
 #undef errno
+
+typedef struct {
+	SLB slb;
+	unsigned int refcount;
+} ZVSLB;
 
 static zv_int_t __CDECL get_errno(void)
 {
@@ -130,224 +149,320 @@ static long __CDECL slb_unloaded(SLB_HANDLE slb, long fn, short nwords, ...)
 }
 
 
-static SLB zlib_slb = { 0, slb_not_loaded };
+static void slb_unref(ZVSLB *lib, const char *which)
+{
+	if (!lib->slb.handle)
+	{
+		nf_debugprintf("slb_unref(%s): not loaded\n", which);
+		return;
+	}
+	if (lib->refcount == 0)
+	{
+		nf_debugprintf("slb_unref(%s): underflow\n", which);
+		return;
+	}
+	if (--lib->refcount == 0)
+	{
+		nf_debugprintf("slb_unref(%s): unloading\n", which);
+		slb_unload(lib->slb.handle);
+		lib->slb.handle = 0;
+		lib->slb.exec = slb_unloaded;
+	}
+}
+
+
+
+/*
+ * ZLIB is always needed, since it is used by PNGLIB.
+ * It might also be used by TIFF, ZSTD & FREETYPE
+ */
+static ZVSLB zlib = { { 0, slb_not_loaded }, 0 };
 
 SLB *slb_zlib_get(void)
 {
-	return &zlib_slb;
+	return &zlib.slb;
 }
 
 
 void slb_zlib_close(void)
 {
-	SLB *zlib = slb_zlib_get();
-
-	if (!zlib->handle)
-		return;
-	slb_unload(zlib->handle);
-	zlib->handle = 0;
-	zlib->exec = slb_unloaded;
+	slb_unref(&zlib, "zlib");
 }
 
 
-static SLB pnglib_slb = { 0, slb_not_loaded };
+/*
+ * PNGLIB is always needed, since it is used by the png plugin.
+ * It might also be used by XPDF
+ */
+static ZVSLB pnglib = { { 0, slb_not_loaded }, 0 };
 
 SLB *slb_pnglib_get(void)
 {
-	return &pnglib_slb;
+	return &pnglib.slb;
 }
 
 
 void slb_pnglib_close(void)
 {
-	SLB *pnglib = slb_pnglib_get();
-
-	if (!pnglib->handle)
-		return;
-	slb_unload(pnglib->handle);
-	pnglib->handle = 0;
-	pnglib->exec = slb_unloaded;
+#if 0
+	slb_zlib_close();
+#endif
+	slb_unref(&pnglib, "pnglib");
 }
 
 
-static SLB jpeglib_slb = { 0, slb_not_loaded };
+/*
+ * JPEG is always needed, since it is used by the jpeg plugin.
+ * It might also be used by TIFF
+ */
+static ZVSLB jpeglib = { { 0, slb_not_loaded }, 0 };
 
 SLB *slb_jpeglib_get(void)
 {
-	return &jpeglib_slb;
+	return &jpeglib.slb;
 }
 
 
 void slb_jpeglib_close(void)
 {
-	SLB *jpeglib = slb_jpeglib_get();
-
-	if (!jpeglib->handle)
-		return;
-	slb_unload(jpeglib->handle);
-	jpeglib->handle = 0;
-	jpeglib->exec = slb_unloaded;
+	slb_unref(&jpeglib, "jpeg");
 }
 
 
-static SLB exif_slb = { 0, slb_not_loaded };
+/*
+ * EXIF is always needed, since it is used by the jpeg plugin.
+ */
+static ZVSLB exif = { { 0, slb_not_loaded }, 0 };
 
 SLB *slb_exif_get(void)
 {
-	return &exif_slb;
+	return &exif.slb;
 }
 
 
 void slb_exif_close(void)
 {
-	SLB *exif = slb_exif_get();
-
-	if (!exif->handle)
-		return;
-	slb_unload(exif->handle);
-	exif->handle = 0;
-	exif->exec = slb_unloaded;
+	slb_unref(&exif, "exif");
 }
 
 
-static SLB tiff_slb = { 0, slb_not_loaded };
+/*
+ * TIFF is always needed, since it is used by the tiff plugin.
+ */
+static ZVSLB tiff = { { 0, slb_not_loaded }, 0 };
 
 SLB *slb_tiff_get(void)
 {
-	return &tiff_slb;
+	return &tiff.slb;
 }
 
 
 void slb_tiff_close(void)
 {
-	SLB *tiff = slb_tiff_get();
-
-	if (!tiff->handle)
-		return;
-	slb_unload(tiff->handle);
-	tiff->handle = 0;
-	tiff->exec = slb_unloaded;
+	slb_unref(&tiff, "tiff");
 }
 
 
-static SLB lzma_slb = { 0, slb_not_loaded };
+/*
+ * currently, only the TIFF library might use LZMA compression,
+ * and tiffconf.h defines LZMA_SUPPORT in this case
+ */
+#if defined(LZMA_SUPPORT) && defined(LZMA_SLB)
+static ZVSLB lzma = { { 0, slb_not_loaded }, 0 };
 
 SLB *slb_lzma_get(void)
 {
-	return &lzma_slb;
+	return &lzma.slb;
 }
 
 
 void slb_lzma_close(void)
 {
-	SLB *lzma = slb_lzma_get();
-
-	if (!lzma->handle)
-		return;
-	slb_unload(lzma->handle);
-	lzma->handle = 0;
-	lzma->exec = slb_unloaded;
+	slb_unref(&lzma, "lzma");
 }
+#endif
 
 
-static SLB bzip2_slb = { 0, slb_not_loaded };
+/*
+ * BZIP2 is always needed, since it is used by XPDF.
+ */
+static ZVSLB bzip2 = { { 0, slb_not_loaded }, 0 };
 
 SLB *slb_bzip2_get(void)
 {
-	return &bzip2_slb;
+	return &bzip2.slb;
 }
 
 
 void slb_bzip2_close(void)
 {
-	SLB *bzip2 = slb_bzip2_get();
-
-	if (!bzip2->handle)
-		return;
-	slb_unload(bzip2->handle);
-	bzip2->handle = 0;
-	bzip2->exec = slb_unloaded;
+	slb_unref(&bzip2, "bzip2");
 }
 
 
-static SLB freetype_slb = { 0, slb_not_loaded };
+/*
+ * FREETYPE is always needed, since it is used by XPDF.
+ */
+static ZVSLB freetype = { { 0, slb_not_loaded }, 0 };
 
 SLB *slb_freetype_get(void)
 {
-	return &freetype_slb;
+	return &freetype.slb;
 }
 
 
 void slb_freetype_close(void)
 {
-	SLB *freetype = slb_freetype_get();
-
-	if (!freetype->handle)
-		return;
-	slb_unload(freetype->handle);
-	freetype->handle = 0;
-	freetype->exec = slb_unloaded;
+	slb_unref(&freetype, "freetype");
 }
 
 
+/*
+ * WEBP_SLB is currently not used, since the only
+ * library using it is the webp plugin, and there is
+ * no shared lib for it yet
+ */
 #ifdef WEBP_SLB
-static SLB webp_slb = { 0, slb_not_loaded };
+static ZVSLB webp = { { 0, slb_not_loaded }, 0 };
 
 SLB *slb_webp_get(void)
 {
-	return &webp_slb;
+	return &webp.slb;
 }
 
 
 void slb_webp_close(void)
 {
-	SLB *webp = slb_webp_get();
-
-	if (!webp->handle)
-		return;
-	slb_unload(webp->handle);
-	webp->handle = 0;
-	webp->exec = slb_unloaded;
+	slb_unref(&webp, "webp");
 }
 #endif
 
 
-static long __CDECL plugin_slb_try_open(zv_int_t lib, const char *path)
+/*
+ * currently, only the TIFF library might use ZSTD compression,
+ * and tiffconf.h defines ZSTD_SUPPORT in this case
+ */
+#if defined(ZSTD_SUPPORT) && defined(ZSTD_SLB)
+static ZVSLB zstd = { { 0, slb_not_loaded }, 0 };
+
+SLB *slb_zstd_get(void)
 {
-	switch (lib)
+	return &zstd.slb;
+}
+
+
+void slb_zstd_close(void)
+{
+	slb_unref(&zstd, "zstd");
+}
+#endif
+
+
+static long slb_ref(ZVSLB *lib, long (*openit)(const char *path), const char *path, const char *which)
+{
+	long ret;
+
+	if (lib->refcount == 0)
+	{
+		/*
+		 * the loading function may call slb_unload on failure.
+		 * prevent underflow of the refcount
+		 */
+		++lib->refcount;
+		ret = openit(path);
+		if (ret < 0)
+		{
+			lib->refcount = 0;
+			return ret;
+		}
+		lib->refcount = 0;
+		nf_debugprintf("slb_ref(%s): loaded\n", which);
+	}
+	if (++lib->refcount == 0)
+	{
+		nf_debugprintf("slb_ref(%s): overflow\n", which);
+		lib->refcount = -1;
+	}
+	nf_debugprintf("slb_ref(%s): refcount=%u\n", which, lib->refcount);
+	return 0;
+}
+
+
+#if 0
+/*
+ * when loading pnglib, and zlib was not loaded before,
+ * it will open zlib on its own. That would however
+ * not use our reference counter, so load it here.
+ */
+static long slb_open_zlib_and_pnglib(const char *path)
+{
+	long ret;
+	
+	ret = slb_ref(&zlib, slb_zlib_open, path, "zlib");
+	if (ret >= 0)
+	{
+		ret = slb_pnglib_open(path);
+		if (ret < 0)
+			slb_zlib_close();
+	}
+	return ret;
+}
+#endif
+
+
+static long __CDECL plugin_slb_try_open(long lib, const char *path)
+{
+	switch ((int) lib)
 	{
 	case LIB_PNG:
-		return slb_pnglib_open(path);
+#if 0
+		return slb_ref(&pnglib, slb_open_zlib_and_pnglib, path, "pnglib");
+#else
+		return slb_ref(&pnglib, slb_pnglib_open, path, "pnglib");
+#endif
 	case LIB_Z:
-		return slb_zlib_open(path);
+		return slb_ref(&zlib, slb_zlib_open, path, "zlib");
 	case LIB_JPEG:
-		return slb_jpeglib_open(path);
+		return slb_ref(&jpeglib, slb_jpeglib_open, path, "jpeg");
 	case LIB_TIFF:
-		return slb_tiff_open(path);
+		return slb_ref(&tiff, slb_tiff_open, path, "tiff");
+#if defined(LZMA_SUPPORT) && defined(LZMA_SLB)
 	case LIB_LZMA:
-		return slb_lzma_open(path);
+		return slb_ref(&lzma, slb_lzma_open, path, "lzma");
+#endif
 	case LIB_EXIF:
-		return slb_exif_open(path);
+		return slb_ref(&exif, slb_exif_open, path, "exif");
 	case LIB_BZIP2:
-		return slb_bzip2_open(path);
+		return slb_ref(&bzip2, slb_bzip2_open, path, "bzip");
 	case LIB_FREETYPE:
-		return slb_freetype_open(path);
+		return slb_ref(&freetype, slb_freetype_open, path, "freetype");
 #ifdef WEBP_SLB
 	case LIB_WEBP:
-		return slb_webp_open(path);
+		return slb_ref(&webp, slb_webp_open, path, "webp");
+#endif
+#if defined(ZSTD_SUPPORT) && defined(ZSTD_SLB)
+	case LIB_ZSTD:
+		return slb_ref(&zszd, slb_zstd_open, path, "zstd");
 #endif
 	}
 	return -ENOENT;
 }
 
 
-long __CDECL plugin_slb_open(zv_int_t lib)
+long __CDECL plugin_slb_open(long lib, const char *path)
 {
 	long ret;
 	
+	(void)path;
+	/*
+	 * try CPU dependant directory first <path-to-zview>/slb/000
+	 */
 	ret = plugin_slb_try_open(lib, zview_slb_dir);
 	if (ret < 0)
 	{
+		/*
+		 * try zview directory next <zview>/slb
+		 */
 		char c = *zview_slb_dir_end;
 		*zview_slb_dir_end = '\0';
 		ret = plugin_slb_try_open(lib, zview_slb_dir);
@@ -355,15 +470,18 @@ long __CDECL plugin_slb_open(zv_int_t lib)
 	}
 	if (ret < 0)
 	{
+		/*
+		 * try mints directory last ($SLBPATH)
+		 */
 		ret = plugin_slb_try_open(lib, NULL);
 	}
 	return ret;
 }
 
 
-void __CDECL plugin_slb_close(zv_int_t lib)
+void __CDECL plugin_slb_close(long lib)
 {
-	switch (lib)
+	switch ((int) lib)
 	{
 	case LIB_PNG:
 		slb_pnglib_close();
@@ -377,9 +495,11 @@ void __CDECL plugin_slb_close(zv_int_t lib)
 	case LIB_TIFF:
 		slb_tiff_close();
 		break;
+#if defined(LZMA_SUPPORT) && defined(LZMA_SLB)
 	case LIB_LZMA:
 		slb_lzma_close();
 		break;
+#endif
 	case LIB_EXIF:
 		slb_exif_close();
 		break;
@@ -389,18 +509,23 @@ void __CDECL plugin_slb_close(zv_int_t lib)
 	case LIB_FREETYPE:
 		slb_freetype_close();
 		break;
-	case LIB_WEBP:
 #ifdef WEBP_SLB
+	case LIB_WEBP:
 		slb_webp_close();
-#endif
 		break;
+#endif
+#if defined(ZSTD_SUPPORT) && defined(ZSTD_SLB)
+	case LIB_ZSTD:
+		slb_zstd_close();
+		break;
+#endif
 	}
 }
 
 
-SLB *__CDECL plugin_slb_get(zv_int_t lib)
+SLB *__CDECL plugin_slb_get(long lib)
 {
-	switch (lib)
+	switch ((int) lib)
 	{
 	case LIB_PNG:
 		return slb_pnglib_get();
@@ -410,8 +535,10 @@ SLB *__CDECL plugin_slb_get(zv_int_t lib)
 		return slb_jpeglib_get();
 	case LIB_TIFF:
 		return slb_tiff_get();
+#if defined(LZMA_SUPPORT) && defined(LZMA_SLB)
 	case LIB_LZMA:
 		return slb_lzma_get();
+#endif
 	case LIB_EXIF:
 		return slb_exif_get();
 	case LIB_BZIP2:
@@ -421,6 +548,10 @@ SLB *__CDECL plugin_slb_get(zv_int_t lib)
 #ifdef WEBP_SLB
 	case LIB_WEBP:
 		return slb_webp_get();
+#endif
+#if defined(ZSTD_SUPPORT) && defined(ZSTD_SLB)
+	case LIB_ZSTD:
+		return slb_zstd_get();
 #endif
 	}
 	return NULL;

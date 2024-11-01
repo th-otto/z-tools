@@ -26,6 +26,7 @@ char const program_date[] = VERSION_DATE;
 WINDOW *win_catalog = NULL;
 
 char 	zview_path[MAX_PATH];
+char 	zview_plugin_path[MAX_PATH];
 char *zview_slb_dir;
 char *zview_slb_dir_end;
 char 	startup_path[MAX_PATH];

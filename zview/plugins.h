@@ -3,9 +3,6 @@
 
 #include <mint/slb.h>
 
-extern int16 	plugins_init( void);
-extern void 	plugins_quit( void);
-
 struct _img_info;
 
 struct _ldg_funcs {
@@ -26,8 +23,19 @@ typedef struct {
 #define CODEC_NONE     0  /* empty slot */
 #define CODEC_LDG      1  /* old LDG style codec */
 #define CODEC_SLB      2  /* new SLB style codec */
+	unsigned int state;
+/*
+ * bitmasks for codec.state
+ */
+#define CODEC_DECODER_INITIALIZED   0x0001
+#define CODEC_ENCODER_INITIALIZED   0x0002
+#define CODEC_RESIDENT              0x0004
+	unsigned int refcount;
 	union {
-		LDG *ldg;
+		struct {
+			LDG *ldg;
+			struct _ldg_funcs *funcs;
+		} ldg;
 		SLB slb;
 	} c;
 	long capabilities;
@@ -36,12 +44,17 @@ typedef struct {
 } CODEC;
 #define MAX_CODECS 200
 
+
 extern CODEC *codecs[MAX_CODECS];
 extern int16 plugins_nbr;
 extern int16 encoder_plugins_nbr;
 
-extern struct _ldg_funcs ldg_funcs;
 extern CODEC *curr_input_plugin;
 extern CODEC *curr_output_plugin;
+
+int16 plugins_init(void);
+void plugins_quit(void);
+boolean plugin_ref(CODEC *codec);
+void plugin_unref(CODEC *codec);
 
 #endif /* __ZVIEW_PLUGINS_H__ */

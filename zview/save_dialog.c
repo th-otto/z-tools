@@ -21,58 +21,56 @@ static const char *source_file;
 unsigned int get_option_mask(CODEC *codec)
 {
 	unsigned int have_options = 0;
-	SLB *slb;
-	int i;
-	LDG *ldg;
-
-	ldg_funcs.set_jpg_option = NULL;	
-	ldg_funcs.set_tiff_option = NULL;
-	ldg_funcs.set_webp_option = NULL;
-	switch (codec->type)
-	{
-	case CODEC_LDG:
-		ldg = codec->c.ldg;
-		ldg_funcs.set_jpg_option = ldg_find( "set_jpg_option", ldg);
-		if (ldg_funcs.set_jpg_option)
-			have_options |= (1 << OPTION_QUALITY) | (1 << OPTION_COLOR_SPACE) | (1 << OPTION_PROGRESSIVE);
-		ldg_funcs.set_tiff_option = ldg_find( "set_tiff_option", ldg);
-		if (ldg_funcs.set_tiff_option)
-			have_options |= (1 << OPTION_QUALITY) | (1 << OPTION_COMPRESSION);
-		ldg_funcs.set_webp_option = ldg_find( "set_webp_option", ldg);
-		if (ldg_funcs.set_webp_option)
-			have_options |= (1 << OPTION_QUALITY) | (1 << OPTION_COMPRLEVEL);
-		break;
-	case CODEC_SLB:
-		slb = &codec->c.slb;
-		for (i = OPTION_QUALITY; i < 32; i++)
-			if (plugin_get_option(slb, i) >= 0)
-				have_options |= 1 << i;
-		break;
-	}
-	return have_options;
-}
-
-static boolean encoder_plugin_setup( WINDOW *win, int encoder_selected, const char *name)
-{
-	CODEC *codec = codecs[encoder_selected];
-	OBJECT *tree = get_tree( SAVE_DIAL);
-	
-	curr_output_plugin = NULL;
 
 	switch (codec->type)
 	{
 	case CODEC_LDG:
 		{
-			LDG *ldg;
+			struct _ldg_funcs *funcs;
 
-			ldg = codec->c.ldg;
-			ldg_funcs.encoder_init 		= ldg_find( "encoder_init", ldg);
-			ldg_funcs.encoder_write 		= ldg_find( "encoder_write", ldg);
-			ldg_funcs.encoder_quit 		= ldg_find( "encoder_quit", ldg);
-		
-			if ( !ldg_funcs.encoder_init || !ldg_funcs.encoder_write || !ldg_funcs.encoder_quit)
+			funcs = codec->c.ldg.funcs;
+			if (funcs->set_jpg_option)
+				have_options |= (1 << OPTION_QUALITY) | (1 << OPTION_COLOR_SPACE) | (1 << OPTION_PROGRESSIVE);
+			if (funcs->set_tiff_option)
+				have_options |= (1 << OPTION_QUALITY) | (1 << OPTION_COMPRESSION);
+			if (funcs->set_webp_option)
+				have_options |= (1 << OPTION_QUALITY) | (1 << OPTION_COMPRLEVEL);
+		}
+		break;
+	case CODEC_SLB:
+		{
+			SLB *slb;
+			int i;
+
+			slb = &codec->c.slb;
+			for (i = OPTION_QUALITY; i < 32; i++)
+				if (plugin_get_option(slb, i) >= 0)
+					have_options |= 1 << i;
+		}
+		break;
+	}
+	return have_options;
+}
+
+static boolean encoder_plugin_setup(WINDOW *win, int encoder_selected, const char *name)
+{
+	CODEC *codec = codecs[encoder_selected];
+	OBJECT *tree = get_tree(SAVE_DIAL);
+
+	curr_output_plugin = NULL;
+
+	if (!plugin_ref(codec))
+		return FALSE;
+	switch (codec->type)
+	{
+	case CODEC_LDG:
+		{
+			struct _ldg_funcs *funcs;
+
+			funcs = codec->c.ldg.funcs;
+			if (!funcs->encoder_init || !funcs->encoder_write || !funcs->encoder_quit)
 			{
-				errshow(codec->extensions, LDG_ERR_BASE + ldg_error());
+				errshow(codec->name, LDG_ERR_BASE + LDG_NO_FUNC);
 				return FALSE;
 			}
 			curr_output_plugin = codec;
@@ -90,17 +88,17 @@ static boolean encoder_plugin_setup( WINDOW *win, int encoder_selected, const ch
 		return FALSE;
 	}
 
-	strcpy( tree[SAVE_DIAL_FORMAT].ob_spec.free_string, name);
+	strcpy(tree[SAVE_DIAL_FORMAT].ob_spec.free_string, name);
 
 	if (win)
 	{
 		if (get_option_mask(codec))
-			ObjcChange( OC_FORM, win, SAVE_DIAL_OPTIONS, NORMAL, 0);
+			ObjcChange(OC_FORM, win, SAVE_DIAL_OPTIONS, NORMAL, 0);
 		else
-			ObjcChange( OC_FORM, win, SAVE_DIAL_OPTIONS, DISABLED, 0);
-	   	ObjcDraw( OC_FORM, win, SAVE_DIAL_FORMAT, 1);
-   		ObjcDraw( OC_FORM, win, SAVE_DIAL_OPTIONS, 1);
-	} else	
+			ObjcChange(OC_FORM, win, SAVE_DIAL_OPTIONS, DISABLED, 0);
+	   	ObjcDraw(OC_FORM, win, SAVE_DIAL_FORMAT, 1);
+   		ObjcDraw(OC_FORM, win, SAVE_DIAL_OPTIONS, 1);
+	} else
 	{
 		if (get_option_mask(codec))
 			tree[SAVE_DIAL_OPTIONS].ob_state &= ~OS_DISABLED;
@@ -126,39 +124,43 @@ static void format_type(CODEC *codec, char *str)
 }
 
 
-static void format_popup( WINDOW *win, int obj_index) 
+static void format_popup(WINDOW *win, int obj_index)
 {
 	char items[MAX_CODECS][MAX_TYPENAME_LEN];
 	char *items_ptr[MAX_CODECS];
 	int16 i, x, y;
 	int choice;
-	
-	for( i = 0; i < encoder_plugins_nbr; i++)
+
+	for (i = 0; i < encoder_plugins_nbr; i++)
 	{
 		format_type(codecs[i], items[i]);
 		items_ptr[i] = items[i];
 	}
 
-	objc_offset( FORM(win), obj_index, &x, &y);
+	objc_offset(FORM(win), obj_index, &x, &y);
 
-	choice = MenuPopUp ( items_ptr, x, y, encoder_plugins_nbr, -1, last_choice, P_LIST | P_WNDW | P_CHCK);
+	choice = MenuPopUp(items_ptr, x, y, encoder_plugins_nbr, -1, last_choice, P_LIST | P_WNDW | P_CHCK);
 
 	if (choice > 0)
 	{
-		if(last_choice != choice)
-			encoder_plugin_setup( win, choice - 1, items_ptr[choice - 1]);
-	
-		last_choice = choice;
-	
-		if( last_choice)
-			ObjcChange( OC_FORM, win, SAVE_DIAL_SAVE, NORMAL, TRUE);
-		else		
-			ObjcChange( OC_FORM, win, SAVE_DIAL_SAVE, DISABLED, TRUE);	
+		if (last_choice != choice)
+		{
+			plugin_unref(curr_output_plugin);
+			encoder_plugin_setup(win, choice - 1, items_ptr[choice - 1]);
+		}
+
+		if (curr_output_plugin)
+			last_choice = choice;
+
+		if (curr_output_plugin)
+			ObjcChange(OC_FORM, win, SAVE_DIAL_SAVE, NORMAL, TRUE);
+		else
+			ObjcChange(OC_FORM, win, SAVE_DIAL_SAVE, DISABLED, TRUE);
 	}
 }
 
 
-static void __CDECL save_dialog_event( WINDOW *win EVNT_BUFF_PARAM)
+static void __CDECL save_dialog_event(WINDOW *win EVNT_BUFF_PARAM)
 {
 	char target_file[MAX_PATH+MAXNAMLEN];
 	char target_file_path[MAX_PATH];
@@ -173,84 +175,88 @@ static void __CDECL save_dialog_event( WINDOW *win EVNT_BUFF_PARAM)
 	switch (object)
 	{
 		case SAVE_DIAL_FORMAT:
-			format_popup( win, object);
-			ObjcChange( OC_FORM, win, object, NORMAL, TRUE);
+			format_popup(win, object);
+			ObjcChange(OC_FORM, win, object, NORMAL, TRUE);
 			break;
 
 		case SAVE_DIAL_OPTIONS:
-			ObjcChange( OC_FORM, win, object, NORMAL, TRUE);
+			ObjcChange(OC_FORM, win, object, NORMAL, TRUE);
 			save_option_dialog(source_file, codecs[last_choice - 1]);
 			break;
 
 		case SAVE_DIAL_SAVE:
-			source_file_len = ( int16)strlen( source_file);
-			
-			source_path_len = source_file_len;	
-		
+			source_file_len = (int16)strlen(source_file);
+
+			source_path_len = source_file_len;
+
 			while(source_path_len > 0 && source_file[source_path_len] != '/' && source_file[source_path_len] != '\\')
 				source_path_len--;
 
-			strcpy( target_file_path, source_file);
+			strcpy(target_file_path, source_file);
 
-			target_file_path[source_path_len] = '\0';	
+			target_file_path[source_path_len] = '\0';
 
 			source_path_len++;
-							
+
 			strcpy(target_file_name, source_file + source_path_len);
-	
-			/* copy the source's name in the target's name with the new extension for exemple ( "toto.gif" to "toto.jpg") */
-			zstrncpy( extension, codecs[last_choice - 1]->extensions, 4);
-			str2lower( extension);
+
+			/* copy the source's name in the target's name with the new extension for exemple ("toto.gif" to "toto.jpg") */
+			zstrncpy(extension, codecs[last_choice - 1]->extensions, 4);
+			str2lower(extension);
 			dot = strrchr(target_file_name, '.');
 			if (dot)
 				strcpy(dot + 1, extension);
-				
-			/* The file mask ( for exemple *.jpg) */
-			strcpy( file_mask, "*.");
-			strcat( file_mask, extension);
 
-			ObjcChange( OC_FORM, win, object, NORMAL, FALSE);
-			close_modal( win EVNT_BUFF_NULL);
+			/* The file mask (for exemple *.jpg) */
+			strcpy(file_mask, "*.");
+			strcat(file_mask, extension);
 
-			if( FselInput( target_file_path, target_file_name, file_mask, get_string( SAVE_TITLE), NULL, NULL)) 
+			ObjcChange(OC_FORM, win, object, NORMAL, FALSE);
+			close_modal(win EVNT_BUFF_NULL);
+
+			if (FselInput(target_file_path, target_file_name, file_mask, get_string(SAVE_TITLE), NULL, NULL))
 			{
-				strcpy( target_file, target_file_path);
+				strcpy(target_file, target_file_path);
 
-				strcat( target_file, target_file_name);
+				strcat(target_file, target_file_name);
 
 				/* the source can't be the same that the destination */
-				if( strcasecmp( source_file, target_file) == 0)
+				if (strcasecmp(source_file, target_file) == 0)
 				{
-					errshow( NULL, SOURCE_TARGET_SAME);
+					errshow(NULL, SOURCE_TARGET_SAME);
 					break;
 				}
 
-				if( !pic_save( source_file, target_file))
-					break;
-
-				/* if the new file is added in the same dir that win_catalog, we refresh it */
-				if( win_catalog)
+				if (pic_save(source_file, target_file))
 				{
-					WINDICON *wicones = (WINDICON *)DataSearch( win_catalog, WD_ICON);
-					
-					if( strcasecmp( target_file_path, wicones->directory) == 0)
+					/* if the new file is added in the same dir that win_catalog, we refresh it */
+					if (win_catalog)
 					{
-						( void)scan_dir( win_catalog, wicones->directory);
-						WinCatalog_filelist_redraw();
-						ObjcDraw( OC_TOOLBAR, win_catalog, TOOLBAR_DELETE, 1);
-						ObjcDraw( OC_TOOLBAR, win_catalog, TOOLBAR_INFO, 1);
-						ObjcDraw( OC_TOOLBAR, win_catalog, TOOLBAR_SAVE, 1);
-						menu_ienable( get_tree( MENU_BAR), MENU_BAR_DELETE, 0);	 
-						menu_ienable( get_tree( MENU_BAR), MENU_BAR_INFORMATION, 0);
-						menu_ienable( get_tree( MENU_BAR), MENU_BAR_SAVE, 0);						
+						WINDICON *wicones = (WINDICON *)DataSearch(win_catalog, WD_ICON);
+
+						if (strcasecmp(target_file_path, wicones->directory) == 0)
+						{
+							(void)scan_dir(win_catalog, wicones->directory);
+							WinCatalog_filelist_redraw();
+							ObjcDraw(OC_TOOLBAR, win_catalog, TOOLBAR_DELETE, 1);
+							ObjcDraw(OC_TOOLBAR, win_catalog, TOOLBAR_INFO, 1);
+							ObjcDraw(OC_TOOLBAR, win_catalog, TOOLBAR_SAVE, 1);
+							menu_ienable(get_tree(MENU_BAR), MENU_BAR_DELETE, 0);
+							menu_ienable(get_tree(MENU_BAR), MENU_BAR_INFORMATION, 0);
+							menu_ienable(get_tree(MENU_BAR), MENU_BAR_SAVE, 0);
+						}
 					}
 				}
-		    }	
+		    }
+			plugin_unref(curr_input_plugin);
+		    plugin_unref(curr_output_plugin);
 			break;
 
 		case SAVE_DIAL_ABORT:
-			ObjcChange( OC_FORM, win, object, NORMAL, FALSE);
+			ObjcChange(OC_FORM, win, object, NORMAL, FALSE);
 			close_win(win);
+			plugin_unref(curr_input_plugin);
+		    plugin_unref(curr_output_plugin);
 			break;
 	}
 }
@@ -265,19 +271,19 @@ static void __CDECL save_dialog_event( WINDOW *win EVNT_BUFF_PARAM)
  * returns: 																		*
  *      --																			*
  *==================================================================================*/
-void save_dialog( const char *fullfilename)
+void save_dialog(const char *fullfilename)
 {
 	WINDOW 		*win_save_dialog;
 	OBJECT *tree;
 	int16 i;
 	CODEC *input;
 
-	if( !encoder_plugins_nbr)
+	if (!encoder_plugins_nbr)
 		return;
 
 	source_file = fullfilename;
 
-	tree = get_tree( SAVE_DIAL);
+	tree = get_tree(SAVE_DIAL);
 
 	if (last_choice <= 0 && (input = get_codec(source_file)) != NULL)
 	{
@@ -286,19 +292,20 @@ void save_dialog( const char *fullfilename)
 			{
 				char name[MAX_TYPENAME_LEN];
 				format_type(input, name);
-				encoder_plugin_setup(NULL, i, name);
+				if (!encoder_plugin_setup(NULL, i, name))
+					return;
 				last_choice = i + 1;
 				tree[SAVE_DIAL_SAVE].ob_state &= ~OS_DISABLED;
 				break;
 			}
 	}
 
-	win_save_dialog = FormCreate( tree, NAME|MOVER, save_dialog_event, get_string( SAVE_TITLE), NULL, TRUE, FALSE);
+	win_save_dialog = FormCreate(tree, NAME|MOVER, save_dialog_event, get_string(SAVE_TITLE), NULL, TRUE, FALSE);
 
 	/* Make this window modal */
-	WindSet( win_save_dialog, WF_BEVENT, BEVENT_MODAL, 0, 0, 0);
+	WindSet(win_save_dialog, WF_BEVENT, BEVENT_MODAL, 0, 0, 0);
 
-	EvntAttach( win_save_dialog, WM_CLOSED, close_modal);
+	EvntAttach(win_save_dialog, WM_CLOSED, close_modal);
 
 	MenuDisable();
 }

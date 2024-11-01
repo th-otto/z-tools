@@ -10,8 +10,6 @@
 #include "pic_save.h"
 #include "plugins/common/zvplugin.h"
 
-static boolean encoder_init_done = FALSE;
-
 
 
 static int16 setup_encoder ( IMGINFO in_info, IMGINFO out_info, DECDATA data)
@@ -101,7 +99,7 @@ static boolean write_img( IMGINFO in_info, IMGINFO out_info, DECDATA data)
 				plugin_reader_read(&curr_input_plugin->c.slb, in_info, data->RowBuf);
 				break;
 			case CODEC_LDG:
-				ldg_funcs.decoder_read(in_info, data->RowBuf);
+				curr_input_plugin->c.ldg.funcs->decoder_read(in_info, data->RowBuf);
 				break;
 			}
 			( *raster)( data, dst);
@@ -112,7 +110,7 @@ static boolean write_img( IMGINFO in_info, IMGINFO out_info, DECDATA data)
 				ret &= plugin_encoder_write(&curr_output_plugin->c.slb, out_info, dst);
 				break;
 			case CODEC_LDG:
-				ret &= ldg_funcs.encoder_write(out_info, dst);
+				ret &= curr_output_plugin->c.ldg.funcs->encoder_write(out_info, dst);
 				break;
 			}
 			if (!ret)
@@ -136,7 +134,7 @@ static boolean write_img( IMGINFO in_info, IMGINFO out_info, DECDATA data)
 				plugin_reader_read(&curr_input_plugin->c.slb, in_info, data->RowBuf);
 				break;
 			case CODEC_LDG:
-				ldg_funcs.decoder_read(in_info, data->RowBuf);
+				curr_input_plugin->c.ldg.funcs->decoder_read(in_info, data->RowBuf);
 				break;
 			}
 			( *raster)( data, dst);
@@ -158,7 +156,7 @@ static boolean write_img( IMGINFO in_info, IMGINFO out_info, DECDATA data)
 				ret &= plugin_encoder_write(&curr_output_plugin->c.slb, out_info, dst);
 				break;
 			case CODEC_LDG:
-				ret &= ldg_funcs.encoder_write(out_info, dst);
+				ret &= curr_output_plugin->c.ldg.funcs->encoder_write(out_info, dst);
 				break;
 			}
 			if (!ret)
@@ -187,7 +185,7 @@ static void exit_pic_save( IMGINFO in_info, IMGINFO out_info, DECDATA data)
 	if( data->RowBuf) 
 		free( data->RowBuf);
 
-	if (encoder_init_done)
+	if (curr_output_plugin && (curr_output_plugin->state & CODEC_ENCODER_INITIALIZED))
 	{
 		switch (curr_output_plugin->type)
 		{
@@ -195,12 +193,13 @@ static void exit_pic_save( IMGINFO in_info, IMGINFO out_info, DECDATA data)
 			plugin_encoder_quit(&curr_output_plugin->c.slb, out_info);
 			break;
 		case CODEC_LDG:
-			ldg_funcs.encoder_quit(out_info);
+			curr_output_plugin->c.ldg.funcs->encoder_quit(out_info);
 			break;
 		}
+		curr_output_plugin->state &= ~CODEC_ENCODER_INITIALIZED;
 	}
 	
-	if (decoder_init_done)
+	if (curr_input_plugin && (curr_input_plugin->state & CODEC_DECODER_INITIALIZED))
 	{
 		switch (curr_input_plugin->type)
 		{
@@ -208,9 +207,10 @@ static void exit_pic_save( IMGINFO in_info, IMGINFO out_info, DECDATA data)
 			plugin_reader_quit(&curr_input_plugin->c.slb, in_info);
 			break;
 		case CODEC_LDG:
-			ldg_funcs.decoder_quit( in_info);
+			curr_input_plugin->c.ldg.funcs->decoder_quit( in_info);
 			break;
 		}
+		curr_input_plugin->state &= ~CODEC_DECODER_INITIALIZED;
 	}
 	
 	free( data);
@@ -218,9 +218,6 @@ static void exit_pic_save( IMGINFO in_info, IMGINFO out_info, DECDATA data)
 	free( in_info);
 	
 	graf_mouse( ARROW, NULL);	
-
-	encoder_init_done = FALSE;
-	decoder_init_done = FALSE;
 }
 
 
@@ -265,7 +262,7 @@ int16 pic_save( const char *in_file, const char *out_file)
 	in_info->background_color	= 0xFFFFFF;
 	in_info->thumbnail			= FALSE;
 
-	if ((decoder_init_done = get_pic_info(in_file, in_info)) == FALSE)
+	if (get_pic_info(in_file, in_info) == FALSE)
 	{
 		exit_pic_save(in_info, out_info, data);
 		errshow(in_file, CANT_SAVE_IMG);
@@ -278,16 +275,17 @@ int16 pic_save( const char *in_file, const char *out_file)
 	/* copy information from input's information to output's information struct */
 	*out_info = *in_info;
 
+	ret = FALSE;
 	switch (curr_output_plugin->type)
 	{
 	case CODEC_SLB:
-		encoder_init_done = plugin_encoder_init(&curr_output_plugin->c.slb, out_file, out_info);
+		ret = plugin_encoder_init(&curr_output_plugin->c.slb, out_file, out_info);
 		break;
 	case CODEC_LDG:
-		encoder_init_done = ldg_funcs.encoder_init(out_file, out_info);
+		ret = curr_output_plugin->c.ldg.funcs->encoder_init(out_file, out_info);
 		break;
 	}
-	if (encoder_init_done == FALSE)
+	if (ret == FALSE)
 	{
 		errshow(out_file, CANT_SAVE_IMG);
 		exit_pic_save(in_info, out_info, data);

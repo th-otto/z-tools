@@ -79,9 +79,9 @@ long plugin_slb_control(SLB *slb, long fn, void *arg);
 /*
  * callback functions used to load other shared libs like zlib etc.
  */
-long __CDECL plugin_slb_open(zv_int_t lib);
-void __CDECL plugin_slb_close(zv_int_t lib);
-SLB *__CDECL plugin_slb_get(zv_int_t lib);
+long __CDECL plugin_slb_open(long lib, const char *path);
+void __CDECL plugin_slb_close(long lib);
+SLB *__CDECL plugin_slb_get(long lib);
 
 
 /*

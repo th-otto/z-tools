@@ -23,6 +23,7 @@
 #ifndef __SLB_H
 #include <mint/slb.h>
 #endif
+#include <slb/slbids.h>
 #ifdef __GNUC__
 #include <unistd.h>
 #endif
@@ -63,23 +64,6 @@
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
 
-/*
- * 3rd-party libraries the application knows about.
- * Codecs that need some of these libraries should
- * arrange to call back to the application in order
- * to load them, via p_slb_open/p_slb_close/p_slb_get
- * defined in the zview_plugin_funcs struct
- */
-#define LIB_PNG      0
-#define LIB_Z        1
-#define LIB_JPEG     2
-#define LIB_TIFF     3
-#define LIB_LZMA     4
-#define LIB_EXIF     5
-#define LIB_BZIP2    6
-#define LIB_FREETYPE 7
-#define LIB_WEBP     8
-#define LIB_ZSTD     9
 
 #include "plugver.h"
 
@@ -102,9 +86,9 @@ struct _zview_plugin_funcs {
 	 */
 	long interface_version;
 
-	long __CDECL (*p_slb_open)(zv_int_t lib);
-	void __CDECL (*p_slb_close)(zv_int_t lib);
-	SLB *__CDECL (*p_slb_get)(zv_int_t lib);
+	long __CDECL (*p_slb_open)(long lib, const char *path);
+	void __CDECL (*p_slb_close)(long lib);
+	SLB *__CDECL (*p_slb_get)(long lib);
 	
 	void *__CDECL (*p_memset)(void *, zv_int_t, size_t);
 	void *__CDECL (*p_memcpy)(void *, const void *, size_t);
@@ -350,6 +334,8 @@ void nf_debugprintf(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
  */
 #undef ENOSYS
 #define ENOSYS 32
+#undef ENOENT
+#define ENOENT 33
 #undef EINVAL
 #define EINVAL 25
 #undef ENOMEM

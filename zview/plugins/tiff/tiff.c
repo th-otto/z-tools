@@ -4,7 +4,7 @@
 #include "zvplugin.h"
 #include "zvtiff.h"
 
-#define VERSION 0x200
+#define VERSION 0x201
 #define NAME    "Tagged Image File Format"
 #define AUTHOR  "Zorro"
 #define DATE     __DATE__ " " __TIME__
@@ -76,17 +76,21 @@ long __CDECL set_option(zv_int_t which, zv_int_t value)
 static long init_tiff_slb(void)
 {
 	struct _zview_plugin_funcs *funcs;
-	SLB *slb;
 	long ret;
 
 	funcs = get_slb_funcs();
-	slb = get_slb_funcs()->p_slb_get(LIB_TIFF);
-	if (slb->handle == 0)
-	{
-		if ((ret = funcs->p_slb_open(LIB_TIFF)) < 0)
-			return ret;
-	}
+	if ((ret = funcs->p_slb_open(LIB_TIFF, NULL)) < 0)
+		return ret;
 	return 0;
+}
+
+
+static void quit_tiff_slb(void)
+{
+	struct _zview_plugin_funcs *funcs;
+
+	funcs = get_slb_funcs();
+	funcs->p_slb_close(LIB_TIFF);
 }
 #endif
 
@@ -397,6 +401,9 @@ void __CDECL reader_quit( IMGINFO info)
 	info->_priv_ptr = 0;
 	TIFFClose( tif);
 	info->__priv_ptr_more = 0;
+#ifdef PLUGIN_SLB
+	quit_tiff_slb();
+#endif
 }
 
 
@@ -416,6 +423,11 @@ void __CDECL reader_quit( IMGINFO info)
 boolean __CDECL encoder_init( const char *name, IMGINFO info)
 {	
 	TIFF *tif;
+
+#ifdef PLUGIN_SLB
+	if (init_tiff_slb() < 0)
+		return FALSE;
+#endif
 
 	if(( tif = TIFFOpen( name, "w")) == NULL)
 	{
@@ -495,4 +507,7 @@ void __CDECL encoder_quit( IMGINFO info)
 	TIFF 	*tif = ( TIFF*)info->_priv_ptr;
 
 	TIFFClose( tif);
+#ifdef PLUGIN_SLB
+	quit_tiff_slb();
+#endif
 }

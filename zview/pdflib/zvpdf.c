@@ -164,7 +164,7 @@ long __CDECL slb_control(long fn, void *arg)
 long zvpdf_freetype_open(void)
 {
 	CHECK(slb_open, return -33);
-	return get_slb_funcs()->p_slb_open(LIB_FREETYPE);
+	return get_slb_funcs()->p_slb_open(LIB_FREETYPE, NULL);
 }
 
 

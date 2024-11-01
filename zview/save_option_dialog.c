@@ -126,12 +126,17 @@ static void __CDECL option_ok_event(WINDOW *win, int obj_index, int mode, void *
 			plugin_set_option(&curr_output_plugin->c.slb, OPTION_PROGRESSIVE, progressive);
 			break;
 		case CODEC_LDG:
-			if (ldg_funcs.set_tiff_option)
 			{
-				ldg_funcs.set_tiff_option(quality, compression);
-			} else if (ldg_funcs.set_jpg_option)
-			{
-				ldg_funcs.set_jpg_option(quality, color_space, progressive);
+				struct _ldg_funcs *funcs;
+
+				funcs = curr_output_plugin->c.ldg.funcs;
+				if (funcs->set_tiff_option)
+				{
+					funcs->set_tiff_option(quality, compression);
+				} else if (funcs->set_jpg_option)
+				{
+					funcs->set_jpg_option(quality, color_space, progressive);
+				}
 			}
 			break;
 		}

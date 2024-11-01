@@ -17,17 +17,15 @@ typedef struct _dec_data
 } dec_data;
 
 
-extern boolean decoder_init_done;
+extern void (*raster)(DECDATA, void *dst);
+extern void (*raster_cmap)(DECDATA, void *);
+extern void (*raster_true)(DECDATA, void *);
+extern void (*rasterize_32)(DECDATA, void *);
+extern void (*cnvpal_color)(IMGINFO, DECDATA);
+extern void (*raster_gray)(DECDATA, void *);
 
-extern void ( *raster)	  	( DECDATA, void *dst);
-extern void ( *raster_cmap) ( DECDATA, void *);
-extern void ( *raster_true) ( DECDATA, void *);
-extern void ( *rasterize_32) ( DECDATA, void *);
-extern void ( *cnvpal_color)( IMGINFO, DECDATA);
-extern void ( *raster_gray) ( DECDATA, void *);
+CODEC *get_codec(const char *file);
+CODEC *find_codec(const char *file);
+boolean get_pic_info(const char *file, IMGINFO info);
 
-CODEC *get_codec( const char *file);
-boolean get_pic_info( const char *file, IMGINFO info);
-void quit_img( IMGINFO info, DECDATA data);
-
-boolean pic_load( const char *file, IMAGE *img, boolean quiet);
+boolean pic_load(const char *file, IMAGE *img, boolean quiet);

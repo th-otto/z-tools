@@ -346,7 +346,7 @@ void infobox( void)
 			{
 				LDG *ldg;
 
-				ldg = img->codec->c.ldg;
+				ldg = img->codec->c.ldg.ldg;
 				objc_multiline(infotext, (long)(ldg->list[0].info != NULL && strncmp(ldg->list[0].info, "Codec: ", 7) == 0 ? ldg->list[0].info + 7 : 0), FILE_CODEC_NAME_FIRST, FILE_CODEC_NAME_LAST);
 				sprintf(temp, "%d.%02x", (unsigned short)ldg->vers >> 8, ldg->vers & 0xff);
 				ObjcStrnCpy(infotext, FILE_CODEC_VERSION, temp);

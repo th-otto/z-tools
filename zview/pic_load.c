@@ -14,37 +14,33 @@
 #include "resample.h"
 #include "plugins/common/zvplugin.h"
 
-boolean decoder_init_done;
-
-
-void 		  ( *raster)	  			( DECDATA, void *dst);
-void 		  ( *raster_cmap) 			( DECDATA, void *);
-void 		  ( *raster_true) 			( DECDATA, void *);
-void 		  ( *cnvpal_color)			( IMGINFO, DECDATA);
-void 		  ( *raster_gray) 			( DECDATA, void *);
-struct _ldg_funcs ldg_funcs;
+void 		  (*raster)	  			(DECDATA, void *dst);
+void 		  (*raster_cmap) 		(DECDATA, void *);
+void 		  (*raster_true) 		(DECDATA, void *);
+void 		  (*cnvpal_color)		(IMGINFO, DECDATA);
+void 		  (*raster_gray) 		(DECDATA, void *);
 CODEC *curr_input_plugin;
 CODEC *curr_output_plugin;
 
 
 
-static int16 setup ( IMAGE *img, IMGINFO info, DECDATA data)
+static int16 setup(IMAGE *img, IMGINFO info, DECDATA data)
 {
 	int16   i, n_planes = info->planes == 1 && info->components == 1 ? 1 : app.nplanes;
 	uint16	display_w, display_h;
 	double	precise_x, precise_y, factor;
 	size_t	src_line_size;
 
-	if( img->view_mode && ( info->width > thumbnail[thumbnail_size][0] || info->height > thumbnail[thumbnail_size][1]) && ( !smooth_thumbnail || n_planes < 16))
+	if (img->view_mode && (info->width > thumbnail[thumbnail_size][0] || info->height > thumbnail[thumbnail_size][1]) && (!smooth_thumbnail || n_planes < 16))
 	{
-		factor	  = MAX( ( ( double)info->height / ( double)thumbnail[thumbnail_size][1]), ( ( double)info->width / ( double)thumbnail[thumbnail_size][0]));
-		precise_x = ( double)info->width  / factor;
-		precise_y = ( double)info->height / factor;
+		factor	  = MAX(((double)info->height / (double)thumbnail[thumbnail_size][1]), ((double)info->width / (double)thumbnail[thumbnail_size][0]));
+		precise_x = (double)info->width  / factor;
+		precise_y = (double)info->height / factor;
 
-		display_w 		= ( uint16)( precise_x > 0 ? precise_x : 16);
-		display_h 		= ( uint16)( precise_y > 0 ? precise_y : 16);
-		data->IncXfx    = ((( uint32)info->width  << 16) + ( display_w >> 1)) / display_w;
-		data->IncYfx    = ((( uint32)info->height << 16) + ( display_h >> 1)) / display_h;
+		display_w 		= (uint16)(precise_x > 0 ? precise_x : 16);
+		display_h 		= (uint16)(precise_y > 0 ? precise_y : 16);
+		data->IncXfx    = (((uint32)info->width  << 16) + (display_w >> 1)) / display_w;
+		data->IncYfx    = (((uint32)info->height << 16) + (display_h >> 1)) / display_h;
 	}
 	else
 	{
@@ -54,27 +50,27 @@ static int16 setup ( IMAGE *img, IMGINFO info, DECDATA data)
 		data->IncYfx	= 0x10000uL;
 	}
 
-	if( img->view_mode)
+	if (img->view_mode)
 		/* if we are in preview mode, we decompress only one image */
 		img->page = 1;
 	else
 		img->page = info->page;
 
 
-	if( ( img->image = ( MFDB *)calloc(img->page, sizeof( MFDB))) == NULL)
-		return( 0);
+	if ((img->image = (MFDB *)calloc(img->page, sizeof(MFDB))) == NULL)
+		return FALSE;
 
 
-	for ( i = 0 ; i < img->page ; i++)	
+	for (i = 0 ; i < img->page ; i++)
 	{
-		if ( !init_mfdb( &img->image[i], display_w, display_h, n_planes))
+		if (!init_mfdb(&img->image[i], display_w, display_h, n_planes))
 			return FALSE;
 	}
 
 	/* 	we initialise the txt_data struct...  */
-	if( !init_txt_data( img, info->num_comments, info->max_comments_length))
-		return ( 0);
-		
+	if (!init_txt_data(img, info->num_comments, info->max_comments_length))
+		return FALSE;
+
 	if (curr_input_plugin)
 	{
 		switch (curr_input_plugin->type)
@@ -94,7 +90,7 @@ static int16 setup ( IMAGE *img, IMGINFO info, DECDATA data)
 				 * LDG plugins need the strings preallocated, so we must only
 				 * call decoder_get_txt if there are actually infos
 				 */
-				ldg_funcs.decoder_get_txt(info, img->comments);
+				curr_input_plugin->c.ldg.funcs->decoder_get_txt(info, img->comments);
 			}
 			break;
 		}
@@ -107,43 +103,44 @@ static int16 setup ( IMAGE *img, IMGINFO info, DECDATA data)
 	 * we assume that the pixel size is minimum 8 bits because some GNU libraries return 1 and 4 bits format like 8 bits ones.
 	 * We add also a little more memory for avoid buffer overflow for plugin badly coded.
 	 */
-	src_line_size = ( info->width + 64) * info->components;
+	src_line_size = (info->width + 64) * info->components;
 
-	data->RowBuf = ( uint8*)malloc( src_line_size);	
+	data->RowBuf = (uint8*)malloc(src_line_size);
 
-	if( !data->RowBuf)
-		return ( 0);
-	
-	if(( info->planes == 1 && info->components == 1) || app.nplanes > 8)
-		data->DthBuf = NULL;
-	else
+	if (!data->RowBuf)
+		return FALSE;
+
+	if ((info->planes == 1 && info->components == 1) || app.nplanes > 8)
 	{
-		size_t size = ( display_w + 15) * 3;
-		
-		if( ( data->DthBuf = malloc( size)) == NULL) 
-			return ( 0);
-			
-		memset( data->DthBuf, 0, size);
+		data->DthBuf = NULL;
+	} else
+	{
+		size_t size = (display_w + 15) * 3;
+
+		if ((data->DthBuf = malloc(size)) == NULL)
+			return FALSE;
+
+		memset(data->DthBuf, 0, size);
 	}
 
 	data->DthWidth 	= display_w;
-	data->PixMask  	= ( 1 << info->planes) - 1;
+	data->PixMask  	= (1 << info->planes) - 1;
 	data->LnSize   	= img->image[0].fd_wdwidth * n_planes;
 
-	if ( info->planes == 1 && info->components == 1) 
+	if (info->planes == 1 && info->components == 1)
 	{
-		cnvpal_mono( info, data);
+		cnvpal_mono(info, data);
 		raster = raster_mono;
 	}
 	else
 	{
-		if ( info->indexed_color)
+		if (info->indexed_color)
 		{
-			( *cnvpal_color)( info, data);
+			(*cnvpal_color)(info, data);
 			raster = raster_cmap;
 		}
 		else
-			raster = ( info->components >= 3 ? raster_true : raster_gray);
+			raster = (info->components >= 3 ? raster_true : raster_gray);
 	}
 
 	img->img_w      = info->real_width;
@@ -151,10 +148,10 @@ static int16 setup ( IMAGE *img, IMGINFO info, DECDATA data)
 	img->colors		= info->colors;
 	img->bits   	= info->planes;
 
-	strcpy( img->info, 			info->info);
-	strcpy( img->compression, 	info->compression);	
+	strcpy(img->info, 			info->info);
+	strcpy(img->compression, 	info->compression);
 
-	return( 1);
+	return TRUE;
 }
 
 
@@ -167,28 +164,28 @@ static int16 setup ( IMAGE *img, IMGINFO info, DECDATA data)
  *----------------------------------------------------------------------------------*
  * returns: 	-																	*
  *==================================================================================*/
-static inline void read_img ( IMAGE *img, IMGINFO info, DECDATA data)
+static inline void read_img(IMAGE *img, IMGINFO info, DECDATA data)
 {
 	uint16 		*dst;
 	int16  		y_dst, i, y, progress_counter = 0, img_h 	= info->height;
 	int32		line_size = data->LnSize, line_to_decode = img_h * img->page;
 	uint8  		*buf = data->RowBuf;
 
-	for ( i = 0; i < img->page; i++)
+	for (i = 0; i < img->page; i++)
 	{
-		uint32 scale = ( data->IncYfx + 1) >> 1;
+		uint32 scale = (data->IncYfx + 1) >> 1;
 		y_dst  		 = img->image[0].fd_h;
 		dst   		 = img->image[i].fd_addr;
 
-		if( info->orientation == DOWN_TO_UP)
+		if (info->orientation == DOWN_TO_UP)
 		{
-			dst += data->LnSize * ( y_dst - 1);			
+			dst += data->LnSize * (y_dst - 1);
 			line_size = -data->LnSize;
 		}
 
 		info->page_wanted = i;
 
-		for( y = 1; y <= img_h && y_dst; y++)
+		for (y = 1; y <= img_h && y_dst; y++)
 		{
 			switch (curr_input_plugin->type)
 			{
@@ -197,26 +194,26 @@ static inline void read_img ( IMAGE *img, IMGINFO info, DECDATA data)
 					return;
 				break;
 			case CODEC_LDG:
-				if( !ldg_funcs.decoder_read( info, buf))
+				if (!curr_input_plugin->c.ldg.funcs->decoder_read(info, buf))
 					return;
 				break;
 			}
 
-			while(( scale >> 16) < y) 
+			while ((scale >> 16) < y)
 			{
-				( *raster)( data, dst);
+				(*raster)(data, dst);
 				dst   += line_size;
 				scale += data->IncYfx;
 				if (!--y_dst) break;
 			}
 
-			if( img->progress_bar)
+			if (img->progress_bar)
 			{
 				progress_counter++;
-				win_progress(( int16)((( int32)progress_counter * 150L) / line_to_decode));
+				win_progress((int16)(((int32)progress_counter * 150L) / line_to_decode));
 			}
 		}
-		
+
 		img->delay[i]  	= info->delay;
 	}
 }
@@ -232,9 +229,9 @@ static inline void read_img ( IMAGE *img, IMGINFO info, DECDATA data)
  * returns: 	-																	*
  *==================================================================================*/
 
-void quit_img( IMGINFO info, DECDATA data)
+static void quit_img(IMGINFO info, DECDATA data)
 {
-	if (decoder_init_done)
+	if (curr_input_plugin && (curr_input_plugin->state & CODEC_DECODER_INITIALIZED))
 	{
 		switch (curr_input_plugin->type)
 		{
@@ -242,21 +239,20 @@ void quit_img( IMGINFO info, DECDATA data)
 			plugin_reader_quit(&curr_input_plugin->c.slb, info);
 			break;
 		case CODEC_LDG:
-			ldg_funcs.decoder_quit(info);
+			curr_input_plugin->c.ldg.funcs->decoder_quit(info);
 			break;
 		}
+		curr_input_plugin->state &= ~CODEC_DECODER_INITIALIZED;
 	}
-	
-	if( data->DthBuf != NULL) 
-	   	free( data->DthBuf);
 
-	if( data->RowBuf != NULL) 
-	   free( data->RowBuf);
+	if (data->DthBuf != NULL)
+	   	free(data->DthBuf);
 
-	free( data);
-	free( info); 
+	if (data->RowBuf != NULL)
+	   free(data->RowBuf);
 
-	decoder_init_done = FALSE;
+	free(data);
+	free(info);
 }
 
 
@@ -277,77 +273,99 @@ static boolean codec_handles_extension(const char *extensions, const char *exten
 }
 
 
-CODEC *get_codec( const char *file)
+/*
+ * Find the codec that is responsible to handle an image file.
+ * Only checks already parsed meta-information, but does not load it
+ */
+CODEC *find_codec(const char *file)
 {
 	int16 i;
-	LDG *ldg;
 	const char *dot;
 	char extension[MAXNAMLEN];
+	CODEC *codec;
 
-	curr_input_plugin = NULL;
 	dot = strrchr(file, '.');
 	if (dot == NULL)
-		return FALSE;
+		return NULL;
 	strcpy(extension, dot + 1);
 	str2upper(extension);
 
-	/* We check if a plug-ins can do the job */
-	for( i = 0; i < plugins_nbr; i++)
+	for (i = 0; i < plugins_nbr; i++)
 	{
-		CODEC *codec = codecs[i];
-		
-		switch (codec->type)
-		{
-		case CODEC_LDG:
-			ldg = codec->c.ldg;
-			if (codec_handles_extension(codec->extensions, extension))
-			{
-				if ( !( ldg_funcs.decoder_init 	= ldg_find( "reader_init", ldg))
-				  || !( ldg_funcs.decoder_read 	= ldg_find( "reader_read", ldg)) 
-				  || !( ldg_funcs.decoder_quit 	= ldg_find( "reader_quit", ldg))
-				  || !( ldg_funcs.decoder_get_txt = ldg_find( "reader_get_txt", ldg)))
-				{
-					errshow(codec->extensions, LDG_ERR_BASE + ldg_error());
-					return NULL;
-				}				
-
-				/* decoder_get_page_size = ldg_find( "reader_get_page_size", ldg); */
-
-				curr_input_plugin = codec;
-				return codec;
-			}
-			break;
-		case CODEC_SLB:
-			if (codec_handles_extension(codec->extensions, extension))
-			{
-				curr_input_plugin = codec;
-				return codec;
-			}
-			break;
-		}
+		codec = codecs[i];
+		if (codec_handles_extension(codec->extensions, extension))
+			return codec;
 	}
-	
+
+	return NULL;
+}
+
+
+/*
+ * Find & load the codec that is responsible to handle an image file,
+ * and make it the current input plugin
+ */
+CODEC *get_codec(const char *file)
+{
+	CODEC *codec;
+
+	curr_input_plugin = NULL;
+
+	if ((codec = find_codec(file)) != NULL)
+		if (plugin_ref(codec))
+		{
+			curr_input_plugin = codec;
+			return codec;
+		}
+
 	/* I wish that it will never happen ! */
 	return NULL;
 }
 
 
-boolean get_pic_info( const char *file, IMGINFO info)
+boolean get_pic_info(const char *file, IMGINFO info)
 {
-	if (get_codec(file))
+	boolean ret = FALSE;
+	CODEC *codec;
+
+	if ((codec = get_codec(file)) != NULL)
 	{
-		if (curr_input_plugin->capabilities & CAN_DECODE)
+		if (codec->capabilities & CAN_DECODE)
 		{
-			switch (curr_input_plugin->type)
+			switch (codec->type)
 			{
 			case CODEC_SLB:
-				return plugin_reader_init(&curr_input_plugin->c.slb, file, info);
+				ret = plugin_reader_init(&codec->c.slb, file, info);
+				/*
+				 * must not call deinit if initialization fails,
+				 * some badly written plugins may have already freed buffers,
+				 * but not initialized them to NULL, causing double-frees
+				 */
+				if (ret)
+					codec->state |= CODEC_DECODER_INITIALIZED;
+				break;
 			case CODEC_LDG:
-				return ldg_funcs.decoder_init(file, info);
+				ret = codec->c.ldg.funcs->decoder_init(file, info);
+				/*
+				 * must not call deinit if initialization fails,
+				 * some badly written plugins may have already freed buffers,
+				 * but not initialized them to NULL, causing double-frees
+				 */
+				if (ret)
+					codec->state |= CODEC_DECODER_INITIALIZED;
+				break;
 			}
+			/*
+			 * Most likely, the codec will be needed by more than one image.
+			 * Make it resident to avoid loading/unloading it every time
+			 */
+			codec->state |= CODEC_RESIDENT;
+		} else
+		{
+			errshow(codec->extensions, LDG_ERR_BASE + LDG_NO_FUNC);
 		}
 	}
-	return FALSE;
+	return ret;
 }
 
 
@@ -361,80 +379,80 @@ boolean get_pic_info( const char *file, IMGINFO info)
  * returns: 	'0' if error or picture not supported								*
  *==================================================================================*/
 
-boolean pic_load( const char *file, IMAGE *img, boolean quiet)
+boolean pic_load(const char *file, IMAGE *img, boolean quiet)
 {
 	IMGINFO info;
 	DECDATA data;
 
-	info = ( img_info *) calloc(1, sizeof( img_info));
-	
-	if ( !info)
+	info = (img_info *) calloc(1, sizeof(img_info));
+
+	if (!info)
 	{
 		errshow(NULL, -ENOMEM);
 		return FALSE;
 	}
 
-	data = ( dec_data *) calloc(1, sizeof( dec_data));
+	data = (dec_data *) calloc(1, sizeof(dec_data));
 
-	if ( !data)
+	if (!data)
 	{
 		errshow(NULL, -ENOMEM);
-		free( info);
+		free(info);
 		return FALSE;
 	}
 
-	if( img->progress_bar)
+	if (img->progress_bar)
 		win_progress_begin(get_string(PLEASE_WAIT));
 
 	/* We initialise some variables needed by the codecs */
 	info->background_color	= 0xFFFFFF;
 	info->thumbnail			= img->view_mode;
 
-	chrono_on(); 
-	
-	if(( decoder_init_done = get_pic_info( file, info)) == FALSE)
+	chrono_on();
+
+	if (get_pic_info(file, info) == FALSE)
 	{
-		free( data);
-		free( info);
+		quit_img(info, data);
 		win_progress_end();
 		if (!quiet)
 			errshow(NULL, IMG_NO_VALID);
 		return FALSE;
 	}
 
-	if( !setup ( img, info, data))
+	if (!setup(img, info, data))
 	{
 		errshow(NULL, -ENOMEM);
-		quit_img( info, data);
-		delete_mfdb( img->image, img->page);
+		quit_img(info, data);
+		delete_mfdb(img->image, img->page);
 		img->image = NULL;
 		win_progress_end();
 		return FALSE;
 	}
 
-	read_img ( img, info, data);
+	read_img(img, info, data);
 
-	quit_img( info, data);
-	
+	quit_img(info, data);
+	plugin_unref(curr_input_plugin);
+
 	win_progress_end();
 
-	if( img->view_mode && ( img->image[0].fd_w > thumbnail[thumbnail_size][0] || img->image[0].fd_h > thumbnail[thumbnail_size][1]) && smooth_thumbnail && img->image[0].fd_nplanes >= 16)
+	if (img->view_mode && (img->image[0].fd_w > thumbnail[thumbnail_size][0] || img->image[0].fd_h > thumbnail[thumbnail_size][1]) && smooth_thumbnail && img->image[0].fd_nplanes >= 16)
 	{
 		MFDB 	resized_image;
 		double	precise_x, precise_y, factor;
 		uint16	display_w, display_h;
 
-		factor	  = MAX((( double)img->image[0].fd_h / ( double)thumbnail[thumbnail_size][1]), (( double)img->image[0].fd_w / ( double)thumbnail[thumbnail_size][0]));
-		precise_x = ( double)img->image[0].fd_w  / factor;
-		precise_y = ( double)img->image[0].fd_h / factor;
-		display_w = ( uint16)( precise_x > 0 ? precise_x : 16);
-		display_h = ( uint16)( precise_y > 0 ? precise_y : 16);
-		
-		init_mfdb( &resized_image, display_w, display_h, img->image[0].fd_nplanes);
+		factor	  = MAX(((double)img->image[0].fd_h / (double)thumbnail[thumbnail_size][1]), ((double)img->image[0].fd_w / (double)thumbnail[thumbnail_size][0]));
+		precise_x = (double)img->image[0].fd_w  / factor;
+		precise_y = (double)img->image[0].fd_h / factor;
+		display_w = (uint16)(precise_x > 0 ? precise_x : 16);
+		display_h = (uint16)(precise_y > 0 ? precise_y : 16);
 
-		smooth_resize( &img->image[0], &resized_image, smooth_thumbnail);
+		init_mfdb(&resized_image, display_w, display_h, img->image[0].fd_nplanes);
 
-		free( img->image[0].fd_addr);
+		smooth_resize(&img->image[0], &resized_image, smooth_thumbnail);
+
+		free(img->image[0].fd_addr);
 
 		img->image[0].fd_addr 		= resized_image.fd_addr;
 		img->image[0].fd_w 			= resized_image.fd_w;
@@ -442,7 +460,7 @@ boolean pic_load( const char *file, IMAGE *img, boolean quiet)
 		img->image[0].fd_wdwidth	= resized_image.fd_wdwidth;
 	}
 
-	chrono_off( img->working_time);
-		
+	chrono_off(img->working_time);
+
 	return TRUE;
 }

@@ -2,8 +2,12 @@
 #include "zvplugin.h"
 #include <png.h>
 #include <wchar.h>
+#ifdef PLUGIN_SLB
+#define NF_DEBUG 1
+#include "nfdebug.h"
+#endif
 
-#define VERSION 0x201
+#define VERSION 0x202
 #define NAME    "Portable Network Graphics"
 #define AUTHOR  "Zorro, Thorsten Otto"
 #define DATE     __DATE__ " " __TIME__
@@ -119,17 +123,23 @@ static void mypng_warning_handler(png_structp png_ptr, png_const_charp msg)
 static long init_png_slb(void)
 {
 	struct _zview_plugin_funcs *funcs;
-	SLB *slb;
 	long ret;
 
 	funcs = get_slb_funcs();
-	slb = get_slb_funcs()->p_slb_get(LIB_PNG);
-	if (slb->handle == 0)
-	{
-		if ((ret = funcs->p_slb_open(LIB_PNG)) < 0)
-			return ret;
-	}
+	nf_debugprintf("zvpng: open pnglib\n");
+	if ((ret = funcs->p_slb_open(LIB_PNG, NULL)) < 0)
+		return ret;
 	return 0;
+}
+
+
+static void quit_png_slb(void)
+{
+	struct _zview_plugin_funcs *funcs;
+
+	funcs = get_slb_funcs();
+	nf_debugprintf("zvpng: close pnglib\n");
+	funcs->p_slb_close(LIB_PNG);
 }
 #endif
 
@@ -588,5 +598,8 @@ void __CDECL reader_quit(IMGINFO info)
 		}
 		free(myinfo);
 		info->_priv_ptr = NULL;
+#ifdef PLUGIN_SLB
+		quit_png_slb();
+#endif
 	}
 }

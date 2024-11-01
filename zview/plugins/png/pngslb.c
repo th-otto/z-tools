@@ -80,9 +80,13 @@ struct _zview_plugin_funcs *get_slb_funcs(void)
 
 
 /*
- * these are not optional and cannot be set
+ * slb_init/slb_exit/slb_open/slb_close are not optional and cannot be set
  * to zero in the header, even if they
- * currently don't do anything
+ * don't do anything
+ */
+
+/*
+ * called when the library is loaded
  */
 #pragma GCC diagnostic ignored "-Warray-bounds"
 long __CDECL slb_init(void)
@@ -93,11 +97,17 @@ long __CDECL slb_init(void)
 #pragma GCC diagnostic warning "-Warray-bounds"
 
 
+/*
+ * called when the library is unloaded
+ */
 void __CDECL slb_exit(void)
 {
 }
 
 
+/*
+ * called when the process is attached to the library
+ */
 long __CDECL slb_open(BASEPAGE *bp)
 {
 	pid_t pid = slb_user();
@@ -119,6 +129,9 @@ long __CDECL slb_open(BASEPAGE *bp)
 }
 
 
+/*
+ * called when the process is detached from the library
+ */
 void __CDECL slb_close(BASEPAGE *bp)
 {
 	pid_t pid = slb_user();
@@ -151,7 +164,9 @@ static long set_imports(struct _zview_plugin_funcs *funcs)
 	if (funcs->int_size != sizeof(int))
 		return -ERANGE;
 	proc->funcs = funcs;
-
+	p_slb_get = funcs->p_slb_get;
+	p_slb_open = funcs->p_slb_open;
+	p_slb_close = funcs->p_slb_close;
 	return 0;
 }
 
@@ -207,4 +222,10 @@ void *(memmove)(void *dest, const void *src, size_t len) __attribute__((alias("m
 SLB *slb_pnglib_get(void)
 {
 	return get_slb_funcs()->p_slb_get(LIB_PNG);
+}
+
+
+SLB *slb_zlib_get(void)
+{
+	return get_slb_funcs()->p_slb_get(LIB_Z);
 }

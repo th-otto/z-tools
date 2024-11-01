@@ -19,9 +19,9 @@ struct _zvpdf_funcs {
 	 */
 	long interface_version;
 
-	long __CDECL (*p_slb_open)(zv_int_t lib);
-	void __CDECL (*p_slb_close)(zv_int_t lib);
-	SLB *__CDECL (*p_slb_get)(zv_int_t lib);
+	long __CDECL (*p_slb_open)(long lib, const char *path);
+	void __CDECL (*p_slb_close)(long lib);
+	SLB *__CDECL (*p_slb_get)(long lib);
 
 	/*
 	 * functions defined in application

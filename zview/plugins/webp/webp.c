@@ -242,17 +242,21 @@ long __CDECL set_option(zv_int_t which, zv_int_t value)
 static long init_webp_slb(void)
 {
 	struct _zview_plugin_funcs *funcs;
-	SLB *slb;
 	long ret;
 
 	funcs = get_slb_funcs();
-	slb = get_slb_funcs()->p_slb_get(LIB_WEBP);
-	if (slb->handle == 0)
-	{
-		if ((ret = funcs->p_slb_open(LIB_WEBP)) < 0)
-			return ret;
-	}
+	if ((ret = funcs->p_slb_open(LIB_WEBP)) < 0)
+		return ret;
 	return 0;
+}
+
+
+static void quit_webp_slb(void)
+{
+	struct _zview_plugin_funcs *funcs;
+
+	funcs = get_slb_funcs();
+	funcs->p_slb_close(LIB_JPEG);
 }
 #endif
 
@@ -1148,6 +1152,9 @@ void __CDECL reader_quit(IMGINFO info)
 		free(myinfo);
 		info->_priv_ptr = NULL;
 	}
+#if defined(PLUGIN_SLB) && defined(WEBP_SLB)
+	quit_webp_slb();
+#endif
 }
 
 struct _myencode_info {
@@ -1377,4 +1384,7 @@ void __CDECL encoder_quit(IMGINFO info)
 		free(myinfo);
 		info->_priv_ptr = NULL;
 	}
+#if defined(PLUGIN_SLB) && defined(WEBP_SLB)
+	quit_webp_slb();
+#endif
 }

@@ -299,7 +299,7 @@ void set_entry_icon( Entry *entry)
 		}
 	}
 
-	if (get_codec(entry->name))
+	if (find_codec(entry->name))
 	{
 		entry->type	= ET_IMAGE;
 		entry->icon	= &icon_image.image[0];
@@ -308,7 +308,7 @@ void set_entry_icon( Entry *entry)
 	
 	entry->type		= ET_FILE;
 	entry->icon		= &icon_file.image[0];
-}	
+}
 
 
 /*==================================================================================*
