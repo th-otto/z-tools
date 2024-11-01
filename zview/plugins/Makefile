@@ -5,6 +5,7 @@ PLUGINS = \
 	bmp \
 	degas \
 	doodle \
+	esm \
 	eureka \
 	gif \
 	godpaint \
