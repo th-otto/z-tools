@@ -159,6 +159,10 @@ distclean: clean
 
 dist:: all
 	cp -a $(PROGRAM) zview.rsc _dist
+	@mkdir -p _dist/rsc/en
+	cp -a zview.rsc _dist/rsc/en
+	@mkdir -p _dist/rsc/fr
+	cp -a rsc/fr/zview.rsc _dist/rsc/fr
 	@mkdir -p _dist/slb/$(SLB_SUBDIR)
 	cp -a slb/$(SLB_SUBDIR)zvpdf.slb _dist/slb/$(SLB_SUBDIR)
 	$(MAKE) -C plugins $@

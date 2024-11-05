@@ -26,6 +26,9 @@
  * New plugin for WebP image format
  * Update PDF library to 4.04
  * New plugin for NetPbm image format(s)
+ * New plugin for TmS Cranach images (*.ESM)
+ * New plugin for PortFolio images (*.PGF/*.PGC/*.PGX)
+ * French resource file (contributed by @marss)
 
  Bug Fixes:
  ----------
