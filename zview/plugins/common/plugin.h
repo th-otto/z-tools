@@ -171,6 +171,7 @@ struct _zview_plugin_funcs {
 
 #undef memset
 #undef memcpy
+#undef memmove
 #undef memchr
 #undef memcmp
 
@@ -242,6 +243,7 @@ struct _zview_plugin_funcs *get_slb_funcs(void);
 
 #define memset(d, c, l) get_slb_funcs()->p_memset(d, c, l)
 #define memcpy(d, s, l) get_slb_funcs()->p_memcpy(d, s, l)
+#define memmove(d, s, l) get_slb_funcs()->p_memcpy(d, s, l)
 #define memchr(d, c, l) get_slb_funcs()->p_memchr(d, c, l)
 #define memcmp(d, s, l) get_slb_funcs()->p_memcmp(d, s, l)
 

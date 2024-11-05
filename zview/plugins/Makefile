@@ -14,6 +14,7 @@ PLUGINS = \
 	neochrome \
 	png \
 	pnm \
+	pofo \
 	signum \
 	spectrum \
 	stad \
