@@ -1,0 +1,502 @@
+                Specification for the PGX file format
+
+
+                jointly developed by
+
+
+                Don Messerli (Software Vineyard)
+
+
+                BJ Gleason (Thin Air Labs)
+
+
+
+
+
+Specification Version: 1
+
+
+Dated: 11/25/91
+
+
+
+
+
+Intent
+
+
+------
+
+
+
+
+
+The PGX specification is intended to provide a universal file format for
+
+
+storing multiple graphics and text screens in one large file.  This makes
+
+
+for easier transfer, disk housekeeping, and faster access by host
+
+
+applications.
+
+
+
+
+
+PGX files can be used by programs that provide animation, rolling demos,
+
+
+graphic library facilities, or any program that requires multiple pictures
+
+
+and text screens.
+
+
+
+
+
+Designed with the future in mind
+
+
+--------------------------------
+
+
+
+
+
+The PGX specification was designed with an eye toward expandability.  This
+
+
+means that in the future, PGX files can be used to store more than graphics
+
+
+and text, and possibly contain complete executeable applications.
+
+
+
+
+
+Even though the format is non-proprietary and is meant to be a universal format
+
+
+for all to use, it is recommended that those wishing to make extensions to
+
+
+the PGX specification register those changes with the format's authors.  The
+
+
+PGX spec does contain a facility for making application-specific (non-official)
+
+
+extensions.
+
+
+
+
+
+The file format
+
+
+---------------
+
+
+
+
+
+A PGX file's general format is as follows:
+
+
+
+
+
+        PGX header              8 bytes
+
+
+        frame 1 header          8 bytes
+
+
+        frame 1 contents        size varies depending on frame type
+
+
+        .
+
+
+        .
+
+
+        frame n header          8 bytes
+
+
+        frame n contents        size varies
+
+
+        eof frame header        8 bytes
+
+
+
+
+
+The PGX header contains the following information:
+
+
+
+
+
+name            size    example         comments
+
+
+----            ----    -------         --------
+
+
+signature       byte    'P'             PGX signature
+
+
+                byte    'G'
+
+
+                byte    'X'
+
+
+version         byte    01h             PGX version number
+
+
+                byte    0               reserved for future use
+
+
+                byte    0                    "         "
+
+
+                byte    0                    "         "
+
+
+                byte    0                    "         "
+
+
+
+
+
+Each frame header contains the following information:
+
+
+
+
+
+name            size    example*        comments
+
+
+----            ----    -------         --------
+
+
+type            byte    0               see below
+
+
+fsize           word    06D2h           size of the frame in bytes
+
+
+                                        (not including the header)
+
+
+control         byte    1               depends on frame type
+
+
+res1            byte    0                  "        "
+
+
+res2            byte    0                  "        "
+
+
+res3            byte    0                  "        "
+
+
+res4            byte    0                  "        "
+
+
+
+
+
+* this example is for a PGC frame that waits for a keypress before proceeding
+
+
+
+
+
+Frame Types
+
+
+-----------
+
+
+
+
+
+The are currently only 4 frame types.  This document will be updated as new
+
+
+frame types are added to the specification.
+
+
+
+
+
+type    name            header values used (Y = YES, N = Not currently)
+
+
+                        fsize   control         res1    res2    res3    res4
+
+
+----    ----            -----   -------         ----    ----    ----    ----
+
+
+00h     PGC             Y       Y               Y       Y       N       N
+
+
+01h     PGT             N       Y               Y       Y       N       N
+
+
+FEh     APPS            Y       Y               Y       Y       Y       Y
+
+
+FFh     EOF             N       N               N       N       N       N
+
+
+
+
+
+PGC Frames
+
+
+----------
+
+
+
+
+
+PGC frames contain PGC files.  For information the PGC file format, please find
+
+
+a copy of PGCSPEC.TXT (available on CompuServe or GEnie).  Please note that the
+
+
+PGC file is stored minus the 3 byte PGC signature ("PG\x01").
+
+
+
+
+
+PGC frame header:
+
+
+fsize contains the size of the PGC image in bytes
+
+
+control contains one of the following values:
+
+
+        00h     no additional display control defined
+
+
+        01h     wait for a keypress before continuing
+
+
+        02h     delay for a given number of seconds
+
+
+                (# of seconds stored in res1)
+
+
+
+
+
+PGT Frames
+
+
+----------
+
+
+
+
+
+PGT frames contain PGT files.  There isn't a formal specification for PGT files.
+
+
+They are simply Portfolio text screen dumps consisting of 320 bytes of data
+
+
+stored as 40 columns and 8 rows of ascii characters, in row major order.
+
+
+PGT files can be created with the Portfolio's Screen Save/Restore routine
+
+
+(Save characters only).  Conversely, they can be displayed using the
+
+
+"Restore characters only" subservice of the same routine.  PGT files can also
+
+
+be created and displayed using the SCRSAVE and SCRLOAD statements in PBASIC.
+
+
+
+
+
+PGT frame header:
+
+
+fsize field contains the size of the PGT image in bytes (currently 320)
+
+
+control contains one of the following values: (same as PGC)
+
+
+        00h     no additional display control defined
+
+
+        01h     wait for a keypress before continuing
+
+
+        02h     delay for a given number of seconds
+
+
+                (# of seconds stored in res1)
+
+
+
+
+
+APPS Frames (application specific)
+
+
+----------------------------------
+
+
+
+
+
+APPS frames are provided for applications that need to store additional data
+
+
+(i.e. filenames) in a PGX file.  These are frame types that are very specific
+
+
+to a given application and there is no need to add them to the PGX
+
+
+specification.  If in doubt, ask and see if your frame type might be useful
+
+
+to others.
+
+
+
+
+
+The header bytes can be used in any way you see fit, except for fsize.  The
+
+
+fsize field must contain the size of the frame contents so that other programs
+
+
+can skip the frame and go on to the next one.
+
+
+
+
+
+APPS frame header:
+
+
+fsize field MUST contain the size of the frame
+
+
+all other fields are application specific
+
+
+
+
+
+Suggestion:  If your application uses more than one APPS frame type, use the
+
+
+control field in the frame header to differentiate between them.
+
+
+
+
+
+EOF Frames
+
+
+----------
+
+
+
+
+
+Every PGX file should have an EOF frame as it's last frame.  This makes
+
+
+file processing faster because the program doesn't have to keep checking for
+
+
+eof on a read from disk.  The only header field currently used is type (FFh).
+
+
+The other fields could be used in the future, so don't store anything in them.
+
+
+
+
+
+EOF frame header:
+
+
+all fields except type are ignored for now (don't mess with the others).
+
+
+
+
+
+How to contact the PGX authors:
+
+
+
+
+
+Donald Messerli
+
+
+Software Vineyard
+
+
+CompuServe: 72500,1671
+
+
+GEnie: D.MESS
+
+
+
+
+
+BJ Gleason
+
+
+Thin Air Labs
+
+
+CompuServe: 75300,2517
+
+
+
+
+
+
+
+
+
+
+
+
