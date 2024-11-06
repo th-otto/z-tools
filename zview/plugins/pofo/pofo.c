@@ -262,7 +262,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	info->orientation = UP_TO_DOWN;
 	info->num_comments = 0;				/* required - disable exif tab */
 	info->_priv_var = 0;				/* y position in bmap */
-	info->_priv_var_more = -1;			/* current page returned */
+	info->_priv_var_more = 0;			/* current line in bmap */
 	info->_priv_ptr = img;
 	
 	return TRUE;
@@ -278,13 +278,12 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 	uint16_t x;
 	
 	pos = info->_priv_var;
-	if ((int32_t) info->page_wanted != info->_priv_var_more)
+	if (pos == 0)
 	{
-		info->_priv_var_more = info->page_wanted;
-		pos = 0;
-		if (info->_priv_var_more < 0 || info->_priv_var_more >= img->imagecount)
+		if (info->page_wanted >= (uint16_t)img->imagecount)
 			return FALSE;
 		info->delay = img->delay[info->page_wanted];
+		info->_priv_var_more = 0;
 	}
 	bmap = img->image_buf[info->page_wanted];
 

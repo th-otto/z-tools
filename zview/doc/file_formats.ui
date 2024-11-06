@@ -11,6 +11,8 @@ supported features of the formats.
 !hline
  Animaster     !! .asb/.msk         !! Any             !! 4              !! None            !! Animation
 !hline
+ Animatic      !! .flm              !! Any             !! 4              !! None            !! Animation
+!hline
  BMP           !! .bmp              !! Any             !! 1/4/8/24/32    !! None/RLE        !!
 !hline
  DEGAS         !! .pi1/.pc1         !! 320x200         !! 4              !! None/RLE

@@ -31,6 +31,7 @@
  * French resource file (contributed by @marss)
  * New plugin for Animaster sprite banks (*.ASB/*.MSK)
  * New plugin from RECOIL with 552 file formats
+ * New plugin for Animatic films (*.FLM)
 
  Bug Fixes:
  ----------

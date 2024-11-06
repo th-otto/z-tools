@@ -1,23 +1,26 @@
 #include "plugin.h"
 #include "zvplugin.h"
+#define NF_DEBUG 0
+#include "nfdebug.h"
 
 #define VERSION		0x0200
 #define AUTHOR      "Thorsten Otto"
-#define NAME        "Animaster (Sprite Bank)"
+#define NAME        "Animatic (Film)"
 #define DATE        __DATE__ " " __TIME__
 
 
-struct frame_header {
-	uint16_t width;
-	uint16_t height;
-	uint16_t planes;
-};
 struct file_header {
 	uint16_t num_frames;
-	uint16_t frame_size;
-	uint8_t icon_w;
-	uint8_t icon_h;
 	uint16_t palette[16];
+	uint16_t speed;
+	uint16_t direction;
+	uint16_t end_action;
+	int16_t width;
+	int16_t height;
+	uint16_t version_major;
+	uint16_t version_minor;
+	uint32_t magic;
+	uint32_t reserved[3];
 };
 
 
@@ -29,7 +32,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long)("ASB\0" "MSK\0");
+		return (long)("FLM\0");
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -64,10 +67,10 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	uint8_t *ptr;
 	uint8_t *end;
 	struct file_header *file_header;
-	struct frame_header *frame_header;
-	uint16_t i;
+	uint16_t i, j;
 	uint16_t num_frames;
-	
+	size_t frame_size;
+		
 	handle = (int16_t) Fopen(name, FO_READ);
 	if (handle < 0)
 	{
@@ -98,39 +101,69 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	ptr = data;
 	end = data + file_size;
 	file_header = (struct file_header *)ptr;
-
-	num_frames = file_header->num_frames + 1;
+	if (file_header->magic != 0x27182818L)
+	{
+		free(data);
+		free(img);
+		return FALSE;
+	}
+	
+	num_frames = file_header->num_frames;
 	ptr += sizeof(*file_header);
+	frame_size = (((((size_t)file_header->width + 15) >> 4) * 2) * 4) * file_header->height;
 	
 	for (i = 0; i < num_frames && i < ZVIEW_MAX_IMAGES && ptr < end; i++)
 	{
-		frame_header = (struct frame_header *)ptr;
-		if (frame_header->planes != 4)
-		{
-			free(data);
-			free(img);
-			return FALSE;
-		}
-		if (i == 0)
-		{
-			info->width = frame_header->width + 1;
-			info->height = frame_header->height + 1;
-		} else if (frame_header->width + 1 != info->width || frame_header->height + 1 != info->height)
-		{
-			free(data);
-			free(img);
-			return FALSE;
-		}
-		img->image_buf[i] = ptr + sizeof(*frame_header);
-		img->delay[i] = 10;
-		ptr += file_header->frame_size;
+		img->image_buf[i] = ptr;
+		img->delay[i] = file_header->speed / 5;
+		if (img->delay[i] == 0)
+			img->delay[i] = 1;
+		ptr += frame_size;
 	}
-	img->imagecount = i;
-	if (i == 0)
+	num_frames = i;
+	nf_debugprintf("frames = %u\n", num_frames);
+	if (num_frames == 0)
 	{
 		free(data);
 		data = NULL;
+	} else
+	{
+		if (file_header->direction != 0)
+		{
+			uint8_t *tmp;
+			
+			/* play backwards */
+			nf_debugprintf("play backwards\n");
+			j = num_frames - 1;
+			for (i = 0; i < j; j--, i++)
+			{
+				tmp = img->image_buf[i];
+				img->image_buf[i] = img->image_buf[j];
+				img->image_buf[j] = tmp;
+			}
+		}
+
+		if (file_header->end_action == 2 && num_frames > 1)
+		{
+			uint16_t k;
+			
+			/* reverse direction at end of play */
+			nf_debugprintf("reverse direction at end\n");
+			k = num_frames;
+			j = num_frames;
+			for (i = 0; i < num_frames && k < ZVIEW_MAX_IMAGES; k++, i++)
+			{
+				--j;
+				img->image_buf[k] = img->image_buf[j];
+				img->delay[k] = img->delay[j];
+			}
+			num_frames = k;
+		}
 	}
+	
+	img->imagecount = num_frames;
+	info->width = file_header->width;
+	info->height = file_header->height;
 	info->planes = 4;
 	info->components = 3;
 	info->indexed_color = TRUE;
@@ -138,14 +171,14 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	info->real_width = info->width;
 	info->real_height = info->height;
 	info->memory_alloc = TT_RAM;
-	info->page = img->imagecount;				/* required - more than 1 = animation */
+	info->page = num_frames;			/* required - more than 1 = animation */
 	info->orientation = UP_TO_DOWN;
 	info->num_comments = 0;				/* required - disable exif tab */
 	info->_priv_var = 0;				/* y position in bmap */
-	info->_priv_var_more = -1;			/* current page returned */
+	info->_priv_var_more = -1;			/* current frame displayed */
 	info->_priv_ptr = img;
 	info->_priv_ptr_more = data;
-	strcpy(info->info, "Animaster (Sprite Bank)");
+	strcpy(info->info, "Animatic (Film)");
 	strcpy(info->compression, "None");
 	
 	/* if (info->indexed_color) */
@@ -180,6 +213,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 	{
 		info->_priv_var_more = info->page_wanted;
 		pos = 0;
+		nf_debugprintf("decode frame %u of %u\n", info->page_wanted, img->imagecount);
 		if (info->page_wanted >= img->imagecount)
 			return FALSE;
 		info->delay = img->delay[info->page_wanted];
