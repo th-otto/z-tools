@@ -1,0 +1,30 @@
+PROCEDURE frame_load(file$,VAR f$())
+  '
+  ' Call this procedure with:
+  ' @Frame_load("MYSPRITE.ASB",frame$())
+  '
+  OPEN "I",#1,file$
+  frames_created&=INP&(#1)
+  length&=INP&(#1)
+  icon_w|=INP(#1)
+  icon_h|=INP(#1)
+  DIM f$(frames_created&)
+  '
+  ' *** Get Colour Palette ***
+  ' To set the palette from the sprite file, alter the line:
+  ' ~INP&(#1)
+  '
+  ' to read:
+  ' SETCOLOR n&,INP&(#1)
+  '
+  FOR n%=0 TO 15
+    ~INP&(#1)
+  NEXT n%
+  '
+  ' *** Get The Frames off disk!! ***
+  FOR n%=0 TO frames_created&
+    f$(n%)=SPACE$(length&)
+    BGET #1,V:f$(n%),length&
+  NEXT n%
+  CLOSE #1
+RETURN

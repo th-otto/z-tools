@@ -301,6 +301,12 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 		buffer[x++] = b & 0x02 ? 1 : 0;
 		buffer[x++] = b & 0x01 ? 1 : 0;
 	} while (x < info->width);
+
+	if (pos == 1920)
+	{
+		pos = 0;
+	}
+
 	info->_priv_var = pos;
 
 	return TRUE;

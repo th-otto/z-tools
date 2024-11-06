@@ -22,13 +22,14 @@
  * BMP files can now be saved (uncompressed only)
  * For most codecs, a info box is now available
  * HyperText documentation has been updated.
- * New plugin for signum image format
+ * New plugin for signum image format (*.ISM)
  * New plugin for WebP image format
  * Update PDF library to 4.04
- * New plugin for NetPbm image format(s)
+ * New plugin for NetPbm image format(s) (*.PPM/*.PGM/*.PBM/*.PAM)
  * New plugin for TmS Cranach images (*.ESM)
  * New plugin for PortFolio images (*.PGF/*.PGC/*.PGX)
  * French resource file (contributed by @marss)
+ * New plugin for Animaster sprite banks (*.ASB/*.MSK)
 
  Bug Fixes:
  ----------
