@@ -30,6 +30,7 @@
  * New plugin for PortFolio images (*.PGF/*.PGC/*.PGX)
  * French resource file (contributed by @marss)
  * New plugin for Animaster sprite banks (*.ASB/*.MSK)
+ * New plugin from RECOIL with 552 file formats
 
  Bug Fixes:
  ----------

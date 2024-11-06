@@ -1,7 +1,7 @@
 /*
- * signum/exports.h - internal header with definitions of all exported functions
+ * recoil/exports.h - internal header with definitions of all exported functions
  *
- * Copyright (C) 2019 Thorsten Otto
+ * Copyright (C) 2024 Thorsten Otto
  *
  * For conditions of distribution and use, see copyright file.
  */

@@ -145,7 +145,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	info->_priv_var_more = -1;			/* current page returned */
 	info->_priv_ptr = img;
 	strcpy(info->info, "Animaster (Sprite Bank)");
-	strcpy(info->compression, "none");
+	strcpy(info->compression, "None");
 	
 	/* if (info->indexed_color) */
 	{

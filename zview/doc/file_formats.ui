@@ -1,13 +1,15 @@
 !begin_node Supported File Formats
 !html_name file_formats
 
-zView can load several picture formats, one picture/animation format
-(GIF) and one document format (PDF). The following table shows the
+zView can load several picture formats, a few picture/animation format
+and one document format (PDF). The following table shows the
 supported features of the formats.
 
 !begin_table [llllll]
 (!B)Format(!b) !! (!B)File(!b)      !! (!B)Picture(!b) !! (!B)Colour(!b) !! (!B)Packing(!b) !! (!B)Misc(!b)
                !! (!B)Extension(!b) !! (!B)Size(!b)    !! (!B)Depth(!b)  !! (!B)Method(!b)
+!hline
+ Animaster     !! .asb/.msk         !! Any             !! 4              !! None            !! Animation
 !hline
  BMP           !! .bmp              !! Any             !! 1/4/8/24/32    !! None/RLE        !!
 !hline
@@ -44,6 +46,12 @@ supported features of the formats.
  PNM           !! .pbm/.pgm         !! Any             !! 1/2/4/8/       !! None            !!
                !! .ppm/.pam         !!                 !! 16/24/32       !!                 !!
 !hline
+ Portfolio     !! .pgf/.pgc/.pgx    !! 240x64          !! 1              !! None/RLE        !! Animation
+!hline
+ Signum        !! .imc              !! 640x400         !! 1              !! None
+!hline
+ Spectrum      !! .spu/.spc/.sps    !! 320x200         !! 12/15          !! RLE
+!hline
  TGA           !! .tga              !! Any             !! 16/24/32       !! None/RLE        !! Alpha Channel
 !hline
  TIFF          !! .tif              !! Any             !! 1-8/16/        !! None/RLE/       !! Colour Models
@@ -53,11 +61,11 @@ supported features of the formats.
                !!                   !!                 !!                !! Group 3         !! 
                !!                   !!                 !!                !! and 4 (!link [[4!]] [[4!]]) !!
 !hline
- Signum        !! .imc              !! 640x400         !! 1              !! None
+ TmS Cranach   !! .esm              !! Any             !! 1              !! None            !! 
 !hline
- Spectrum      !! .spu/.spc/.sps    !! 320x200         !! 12/15          !! RLE
+ WebP          !! .web/.webp        !! Any             !! 24/32          !! None            !! Animation
 !hline
- WebP          !! .web/.webp        !! Any             !! 24/32          !! None
+ RECOIL        !! Many              !! Any             !! Depends        !! None
 !hline
 
 !end_table

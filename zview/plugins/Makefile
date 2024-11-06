@@ -16,6 +16,7 @@ PLUGINS = \
 	png \
 	pnm \
 	pofo \
+	recoil \
 	signum \
 	spectrum \
 	stad \

@@ -263,6 +263,8 @@ static boolean codec_handles_extension(const char *extensions, const char *exten
 	p = extensions;
 	while (*p)
 	{
+		if (*p == '*')
+			return TRUE;
 		if (strcmp(extension, p) == 0)
 		{
 			return TRUE;

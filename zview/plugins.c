@@ -203,7 +203,7 @@ static boolean check_duplicates(void)
 		{
 			for (p2 = this_codec->extensions; *p2; p2 += strlen(p2) + 1)
 			{
-				if (strcmp(p1, p2) == 0)
+				if (*p1 != '*' && *p2 != '*' && strcmp(p1, p2) == 0)
 				{
 					return warn_duplicates(i, last_codec, p1, this_codec);
 				}
@@ -480,6 +480,20 @@ int16 plugins_init(void)
 		}
 	}
 	encoder_plugins_nbr = j;
+
+	/*
+	 * Sort "catch all" decoders last
+	 */
+	for (i = 0; i < j; i++)
+	{
+		if (!(codecs[i]->capabilities & CAN_ENCODE) && codecs[i]->extensions[0] == '*')
+		{
+			CODEC *tmp = codecs[i];
+			--j;
+			codecs[i] = codecs[j];
+			codecs[j] = tmp;
+		}
+	}
 
 	return plugins_nbr;
 }
