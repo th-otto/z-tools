@@ -5,6 +5,7 @@ PLUGINS = \
 	aim \
 	animaster \
 	animatic \
+	arabesque \
 	bmp \
 	degas \
 	doodle \
