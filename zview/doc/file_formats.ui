@@ -13,6 +13,9 @@ supported features of the formats.
 !hline
  Animatic      !! .flm              !! Any             !! 4              !! None            !! Animation
 !hline
+ AIM           !! .col/.im          !! 256x256         !! 8/24           !! None            !! 8 planes is grayscale
+               !!                   !! 128x128         !!                !!                 !! 
+!hline
  BMP           !! .bmp              !! Any             !! 1/4/8/24/32    !! None/RLE        !!
 !hline
  DEGAS         !! .pi1/.pc1         !! 320x200         !! 4              !! None/RLE

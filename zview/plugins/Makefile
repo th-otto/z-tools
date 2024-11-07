@@ -2,7 +2,9 @@ top_srcdir=../..
 include $(top_srcdir)/configvars
 
 PLUGINS = \
+	aim \
 	animaster \
+	animatic \
 	bmp \
 	degas \
 	doodle \

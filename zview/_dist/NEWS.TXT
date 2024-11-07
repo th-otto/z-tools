@@ -32,6 +32,7 @@
  * New plugin for Animaster sprite banks (*.ASB/*.MSK)
  * New plugin from RECOIL with 552 file formats
  * New plugin for Animatic films (*.FLM)
+ * New plugin for Aatari Image Manager (*.COL/*.IM)
 
  Bug Fixes:
  ----------
