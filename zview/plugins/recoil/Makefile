@@ -1,10 +1,11 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
+CFLAGS += -Wextra -Wno-unused
 
 LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
 STACKSIZE = 1k
 
-CPPFLAGS		+= -I../../../common -I../common -I../..
+CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
 SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvrecoil.slb\"
 
 all:: recoil.ldg zvrecoil.slb
@@ -18,7 +19,10 @@ zvrecoil.slb: header.lo recoislb.lo recoimod.lo recoil.lo
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
-header.lo recoislb.lo recoimod.lo: ../common/plugin.h ../common/zview.h
+header.lo: ../common/header.S exports.h
+	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
+
+recoislb.lo recoimod.lo: ../common/plugin.h ../common/zview.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb

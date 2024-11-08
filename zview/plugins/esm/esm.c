@@ -124,7 +124,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		return FALSE;
 	}
 	Fseek(header.head_size, handle, SEEK_SET);
-	if (Fread(handle, datasize, bmap) != datasize)
+	if ((uint32_t)Fread(handle, datasize, bmap) != datasize)
 	{
 		free(bmap);
 		Fclose(handle);
@@ -281,7 +281,7 @@ boolean __CDECL encoder_init(const char *name, IMGINFO info)
 		header.green_tab[i] = i;
 		header.red_tab[i] = i;
 	}
-	if (Fwrite(handle, sizeof(header), &header) != sizeof(header))
+	if ((size_t)Fwrite(handle, sizeof(header), &header) != sizeof(header))
 	{
 		Fclose(handle);
 		return FALSE;
@@ -309,7 +309,7 @@ boolean __CDECL encoder_write(IMGINFO info, uint8_t *buffer)
 	int16_t handle = (int16_t)info->_priv_var;
 	uint32_t line_size = (uint32_t)info->_priv_ptr_more;
 
-	if (Fwrite(handle, line_size, buffer) != line_size)
+	if ((uint32_t)Fwrite(handle, line_size, buffer) != line_size)
 	{
 		return FALSE;
 	}

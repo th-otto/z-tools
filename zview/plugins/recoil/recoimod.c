@@ -44,6 +44,7 @@ static int RECOILStdio_ReadFile(const RECOIL *self, const char *filename, uint8_
 {
 	int fd;
 	
+	(void)self;
 	fd = Fopen(filename, FO_READ);
 	if (fd < 0)
 		return -1;

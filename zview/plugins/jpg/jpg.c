@@ -354,7 +354,7 @@ zv_boolean __CDECL reader_init( const char *name, IMGINFO info)
 	jmp_buf 				escape;
 	FILE* 					jpeg_file;
 	int16_t 				header = 0;
-	zv_boolean ret = FALSE;
+	zv_boolean volatile ret = FALSE;
 
 	dsp_decoding = FALSE;
 	/* If Brainstorm cookie is used, we try to decode with it*/
@@ -563,7 +563,7 @@ zv_boolean __CDECL reader_init( const char *name, IMGINFO info)
 				{
 					ExifContent* content = exifData->ifd[i];
 	
-					for ( l = 0; l < content->count; l++)
+					for ( l = 0; l < (int)content->count; l++)
 					{
 						const char *tag;
 						ExifEntry *e;

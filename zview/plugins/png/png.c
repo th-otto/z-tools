@@ -180,7 +180,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	if ((png_file = fopen(name, "rb")) == NULL)
 		return FALSE;
 
-	if (fread(header, 1, header_size, png_file) != header_size || png_sig_cmp(header, 0, header_size))
+	if ((int)fread(header, 1, header_size, png_file) != header_size || png_sig_cmp(header, 0, header_size))
 	{
 		fclose(png_file);
 		return FALSE;

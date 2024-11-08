@@ -5,7 +5,7 @@ CFLAGS += -Wextra
 LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
 STACKSIZE = 1k
 
-CPPFLAGS		+= -I../../../common -I../common -I../..
+CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
 SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvaim.slb\"
 
 all:: aim.ldg zvaim.slb
@@ -19,7 +19,10 @@ zvaim.slb: header.lo aimslb.lo aim.lo
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
-header.lo aimslb.lo aim.lo: ../common/plugin.h ../common/zview.h
+header.lo: ../common/header.S exports.h
+	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
+
+aimslb.lo aim.lo: ../common/plugin.h ../common/zview.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb

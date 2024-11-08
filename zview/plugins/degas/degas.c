@@ -103,7 +103,7 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 	}
 	file_size = lof(handle);
 
-	if (Fread(handle, sizeof(HEADER), &hdr) != sizeof(HEADER))
+	if ((size_t)Fread(handle, sizeof(HEADER), &hdr) != sizeof(HEADER))
 	{
 		Fclose(handle);
 		bail("Fread failed");
@@ -176,7 +176,7 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 
 	if (cf)
 	{
-		if (Fread(handle, file_size - sizeof(HEADER), bmap) != file_size - sizeof(HEADER))
+		if ((size_t)Fread(handle, file_size - sizeof(HEADER), bmap) != file_size - sizeof(HEADER))
 		{
 			free(bmap);
 			Fclose(handle);
@@ -272,7 +272,7 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 
 	if (info->indexed_color)
 	{
-		int16_t i;
+		uint16_t i;
 
 		for (i = 0; i < info->colors; i++)
 		{

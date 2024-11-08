@@ -89,7 +89,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		Fclose(handle);
 		return FALSE;
 	}
-	if (Fread(handle, file_size, data) != file_size)
+	if ((uint32_t) Fread(handle, file_size, data) != file_size)
 	{
 		free(data);
 		free(img);

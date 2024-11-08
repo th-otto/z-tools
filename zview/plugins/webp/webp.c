@@ -401,6 +401,7 @@ static WebPInfoStatus ParseRIFFHeader(WebPInfo *webp_info, MemBuffer *mem)
 	const size_t min_size = RIFF_HEADER_SIZE + CHUNK_HEADER_SIZE;
 	size_t riff_size;
 
+	(void)webp_info;
 	if (MemDataSize(mem) < min_size)
 	{
 		LOG_ERROR("Truncated data detected when parsing RIFF header.");
@@ -435,6 +436,8 @@ static WebPInfoStatus ParseRIFFHeader(WebPInfo *webp_info, MemBuffer *mem)
 
 static WebPInfoStatus ParseChunk(const WebPInfo *webp_info, MemBuffer *mem, ChunkData *chunk_data)
 {
+	(void)webp_info;
+
 	memset(chunk_data, 0, sizeof(*chunk_data));
 	if (MemDataSize(mem) < CHUNK_HEADER_SIZE)
 	{
@@ -659,6 +662,7 @@ static WebPInfoStatus ProcessImageChunk(const ChunkData *chunk_data, WebPInfo *w
 
 static WebPInfoStatus ProcessALPHChunk(const ChunkData *chunk_data, WebPInfo *webp_info)
 {
+	(void)chunk_data;
 	if (webp_info->is_processing_anim_frame)
 	{
 		++webp_info->anmf_subchunk_counts[2];
@@ -1282,18 +1286,24 @@ boolean __CDECL encoder_init(const char *name, IMGINFO info)
 	{
 		ret = WebPConfigLosslessPreset(&myinfo->config, compression_level);
 		if (!ret)
+		{
 			nf_debugprint((DEBUG_PREFIX "WebPConfigLosslessPreset() failed\n"));
+		}
 	} else
 	{
 		ret = WebPConfigPreset(&myinfo->config, WEBP_PRESET_DEFAULT, quality);
 		if (!ret)
+		{
 			nf_debugprint((DEBUG_PREFIX "WebPConfigreset() failed\n"));
+		}
 	}
 	if (ret)
 	{
 		ret = WebPPictureInit(&myinfo->picture);
 		if (!ret)
+		{
 			nf_debugprint((DEBUG_PREFIX "WebPPictureInit() failed\n"));
+		}
 	}
 	if (!ret)
 	{

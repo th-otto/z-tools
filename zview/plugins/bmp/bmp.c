@@ -734,7 +734,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	{
 	case BMP_RGB:					/* uncompressed */
 		strcpy(info->compression, "None");
-		if (Fread(handle, datasize, bmap) != datasize)
+		if ((uint32_t) Fread(handle, datasize, bmap) != datasize)
 		{
 			free(bmap);
 			Fclose(handle);

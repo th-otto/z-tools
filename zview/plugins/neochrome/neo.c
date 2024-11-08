@@ -146,7 +146,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		bail("Malloc(bitmap) failed");
 		return FALSE;
 	}
-	if (Fread(handle, bms, bmap) != bms)
+	if ((uint32_t)Fread(handle, bms, bmap) != bms)
 	{
 		free(bmap);
 		Fclose(handle);
@@ -243,7 +243,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 
 	if (info->indexed_color)
 	{
-		for (i = 0; i < info->colors; i++)
+		for (i = 0; i < (int)info->colors; i++)
 		{
 			uint16_t c;
 			

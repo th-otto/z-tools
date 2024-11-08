@@ -5,7 +5,7 @@ CFLAGS += -Wextra
 LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
 STACKSIZE = 1k
 
-CPPFLAGS		+= -I../../../common -I../common -I../..
+CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
 SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvstad.slb\"
 
 all:: stad.ldg zvstad.slb
@@ -19,7 +19,10 @@ zvstad.slb: header.lo stadslb.lo stad.lo
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
-header.lo stadslb.lo stad.lo: ../common/plugin.h ../common/zview.h
+header.lo: ../common/header.S exports.h
+	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
+
+stadslb.lo stad.lo: ../common/plugin.h ../common/zview.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb

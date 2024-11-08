@@ -370,7 +370,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		if (vdi)
 		{								/* vdi format in hardware order */
 			j = skip;
-			for (i = 0; i < info->colors; i++)
+			for (i = 0; i < (int)info->colors; i++)
 			{
 				r = ((uint16_t) head[j] << 8) | (uint16_t) head[j + 1];
 				g = ((uint16_t) head[j + 2] << 8) | (uint16_t) head[j + 3];
@@ -383,7 +383,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		} else if (xbios)
 		{								/* xbios format */
 			j = skip;
-			for (i = 0; i < info->colors; i++)
+			for (i = 0; i < (int)info->colors; i++)
 			{
 				uint16_t rgb = ((uint16_t) head[j] << 8) | (uint16_t) head[j + 1];
 
@@ -458,14 +458,15 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		if (flip)
 		{								/* has palette */
 			uint8_t *bmap = ref->bmap;
+			uint32_t ii;
 
 #if DEBUG
 			if (pflg)
 				printf("mono reversed\n");
 #endif
-			for (i = 0; i < bms; i++)
+			for (ii = 0; ii < bms; ii++)
 			{
-				bmap[i] = ~bmap[i];
+				bmap[ii] = ~bmap[ii];
 			}
 		}
 	}

@@ -5,7 +5,7 @@ LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
 LIB       = -lpng -lz -lm
 STACKSIZE = 64k
 
-CPPFLAGS		+= -I../../../common -I../common -I../..
+CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
 SFLAGS += -DPLUGIN_SLB -DPNGLIB_SLB -DZLIB_SLB -DSHAREDLIB=\"zvpng.slb\"
 
 LIBPNG_OBJS = libpng/png.o libpng/pngerror.o \
@@ -26,7 +26,10 @@ zvpng.slb: header.lo pngslb.lo png.lo $(LIBPNG_SOBJS)
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) -lpng.slb -lz.slb -lm $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
-header.lo pngslb.lo png.lo: ../common/plugin.h ../common/zview.h
+header.lo: ../common/header.S exports.h
+	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
+
+pngslb.lo png.lo: ../common/plugin.h ../common/zview.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb libpng/*.o libpng/*.lo

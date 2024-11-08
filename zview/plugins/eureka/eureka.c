@@ -68,7 +68,7 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 
 	Fseek( 0L, handle, 0);
 
-	if ( Fread( handle, 4, header) != 4)
+	if (Fread(handle, 4, header) != 4)
 	{
 		Fclose( handle);
 		return FALSE;	
@@ -112,7 +112,7 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 
 	if( info->indexed_color)
 	{
-		int16_t i;
+		uint16_t i;
 
 		if (Fread( handle, 3072, palette) != 3072)
 		{
@@ -129,7 +129,7 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 	}
 	else
 	{
-		int16_t i;
+		uint16_t i;
 
 		info->indexed_color	= TRUE;
 
