@@ -26,8 +26,9 @@ supported features of the formats.
  ASCII         !! .txt              !! Any             !! 8              !! None            !! grayscale
                !!                   !!                 !!                !!                 !! Encoder
 !hline
-!hline
  BMP           !! .bmp              !! Any             !! 1/4/8/24/32    !! None/RLE        !! Encoder
+!hline
+ Calamus       !! .crg              !! Any             !! 1              !! RLE             !!
 !hline
  DEGAS         !! .pi1/.pc1         !! 320x200         !! 4              !! None/RLE
                !! .pi2/.pc2         !! 640x200         !! 2              !! None/RLE        !!

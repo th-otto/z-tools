@@ -1,5 +1,5 @@
 /*
- * asciislb.c - initialization code for the shared library
+ * calaslb.c - initialization code for the shared library
  *
  * Copyright (C) 2019 Thorsten Otto
  *

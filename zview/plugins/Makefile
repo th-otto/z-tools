@@ -9,6 +9,7 @@ PLUGINS = \
 	art \
 	ascii \
 	bmp \
+	calamus \
 	degas \
 	doodle \
 	esm \

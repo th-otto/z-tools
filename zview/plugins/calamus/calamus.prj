@@ -1,4 +1,4 @@
-ascii.ldg
+calamus.ldg
 
 .C[-I.]
 .C[-Ic:\pc\include]
@@ -27,8 +27,8 @@ ascii.ldg
 
 =
 pcstart.s
-asciildg.c
-ascii.c
+calaldg.c
+calamus.c
 
 ldglib\ldglib.c
 ldglib\stdpc.s
