@@ -6,6 +6,7 @@ PLUGINS = \
 	animaster \
 	animatic \
 	arabesque \
+	art \
 	bmp \
 	degas \
 	doodle \

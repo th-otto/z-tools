@@ -16,7 +16,14 @@ supported features of the formats.
  AIM           !! .col/.im          !! 256x256         !! 8/24           !! None            !! 8 planes is grayscale
                !!                   !! 128x128         !!                !!                 !! 
 !hline
- BMP           !! .bmp              !! Any             !! 1/4/8/24/32    !! None/RLE        !!
+ Arabesque     !! .abm/.puf         !! Any             !! 1              !! None            !!
+!hline
+ Art Director  !! .art              !! 320x200         !! 4              !! None            !!
+ Palette Master!! .art              !! 320x200         !! 24             !! None            !!
+ GFA Artist    !! .art              !! 320x200         !! 4/24           !! None            !!
+ The ArtiST    !! .art              !! 640x400         !! 1              !! None            !!
+!hline
+ BMP           !! .bmp              !! Any             !! 1/4/8/24/32    !! None/RLE        !! Encoder
 !hline
  DEGAS         !! .pi1/.pc1         !! 320x200         !! 4              !! None/RLE
                !! .pi2/.pc2         !! 640x200         !! 2              !! None/RLE        !!
@@ -30,7 +37,7 @@ supported features of the formats.
                !!                   !!                 !!                !!                 !! Animation
                !!                   !!                 !!                !!                 !! Textual data
 !hline
- GodPaint      !! .god              !! Any             !! 16             !! None            !! 
+ GodPaint      !! .god              !! Any             !! 16             !! None            !! Encoder
 !hline
  JPEG          !! .jpg              !! Any             !! 8/24           !! JPEG            !! Lossy compression
                !! .jpe              !!                 !!                !!                 !! Thumbnail
@@ -48,7 +55,7 @@ supported features of the formats.
  PNG           !! .png              !! Any             !! 1/2/4/8/       !! Deflate         !! Alpha Channel
                !!                   !!                 !! 16/24/32       !!                 !! Textual data
 !hline
- PNM           !! .pbm/.pgm         !! Any             !! 1/2/4/8/       !! None            !!
+ PNM           !! .pbm/.pgm         !! Any             !! 1/2/4/8/       !! None            !! Encoder
                !! .ppm/.pam         !!                 !! 16/24/32       !!                 !!
 !hline
  Portfolio     !! .pgf/.pgc/.pgx    !! 240x64          !! 1              !! None/RLE        !! Animation
@@ -58,6 +65,7 @@ supported features of the formats.
  Spectrum      !! .spu/.spc/.sps    !! 320x200         !! 12/15          !! RLE
 !hline
  TGA           !! .tga              !! Any             !! 16/24/32       !! None/RLE        !! Alpha Channel
+               !!                   !!                 !!                !!                 !! Encoder
 !hline
  TIFF          !! .tif              !! Any             !! 1-8/16/        !! None/RLE/       !! Colour Models
                !! .tiff             !!                 !! 24/32          !! LZW/JPEG/       !! Textual data
@@ -66,7 +74,7 @@ supported features of the formats.
                !!                   !!                 !!                !! Group 3         !! 
                !!                   !!                 !!                !! and 4 (!link [[4!]] [[4!]]) !!
 !hline
- TmS Cranach   !! .esm              !! Any             !! 1              !! None            !! 
+ TmS Cranach   !! .esm              !! Any             !! 1              !! None            !! Encoder
 !hline
  WebP          !! .web/.webp        !! Any             !! 24/32          !! None            !! Animation
 !hline
