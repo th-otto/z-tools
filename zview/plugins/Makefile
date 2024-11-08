@@ -7,6 +7,7 @@ PLUGINS = \
 	animatic \
 	arabesque \
 	art \
+	ascii \
 	bmp \
 	degas \
 	doodle \

@@ -23,6 +23,10 @@ supported features of the formats.
  GFA Artist    !! .art              !! 320x200         !! 4/24           !! None            !!
  The ArtiST    !! .art              !! 640x400         !! 1              !! None            !!
 !hline
+ ASCII         !! .txt              !! Any             !! 8              !! None            !! grayscale
+               !!                   !!                 !!                !!                 !! Encoder
+!hline
+!hline
  BMP           !! .bmp              !! Any             !! 1/4/8/24/32    !! None/RLE        !! Encoder
 !hline
  DEGAS         !! .pi1/.pc1         !! 320x200         !! 4              !! None/RLE
@@ -78,7 +82,7 @@ supported features of the formats.
 !hline
  WebP          !! .web/.webp        !! Any             !! 24/32          !! None            !! Animation
 !hline
- RECOIL        !! Many              !! Any             !! Depends        !! None
+ RECOIL        !! Many              !! Any             !! Depends        !! None            !! about 550 obscure formats
 !hline
 
 !end_table

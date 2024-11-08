@@ -35,6 +35,7 @@
  * New plugin for Atari Image Manager (*.COL/*.IM)
  * New plugin for Arabesque (*.ABM/*.PUF)
  * New plugin for Art Director/Palette Master/GFA Artist (*.ART)
+ * New plugin for ASCII import/export (*.TXT)
 
  Bug Fixes:
  ----------
