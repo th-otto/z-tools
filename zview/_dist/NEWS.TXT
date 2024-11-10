@@ -37,6 +37,7 @@
  * New plugin for Art Director/Palette Master/GFA Artist (*.ART)
  * New plugin for ASCII import/export (*.TXT)
  * New plugin for Calamus Raster Graphics (*.CRG)
+ * New plugin for Canvas (*.CNV/*.CPT/*.FUL)
 
  Bug Fixes:
  ----------

@@ -30,6 +30,10 @@ supported features of the formats.
 !hline
  Calamus       !! .crg              !! Any             !! 1              !! RLE             !!
 !hline
+ Canvas        !! .cnv/.cpt/.ful    !! 320x200         !! 4/12           !! None/RLE        !!
+               !!                   !! 640x200         !! 2              !! None/RLE        !!
+               !!                   !! 640x400         !! 1              !! None/RLE        !! 
+!hline
  DEGAS         !! .pi1/.pc1         !! 320x200         !! 4              !! None/RLE
                !! .pi2/.pc2         !! 640x200         !! 2              !! None/RLE        !!
                !! .pi3/.pc3         !! 640x400         !! 1              !! None/RLE        !! 
