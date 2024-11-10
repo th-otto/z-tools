@@ -38,6 +38,7 @@
  * New plugin for ASCII import/export (*.TXT)
  * New plugin for Calamus Raster Graphics (*.CRG)
  * New plugin for Canvas (*.CNV/*.CPT/*.FUL)
+ * New plugin for Cyperpaint images (*.CEL)
 
  Bug Fixes:
  ----------
