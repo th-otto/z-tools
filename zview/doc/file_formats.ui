@@ -35,6 +35,7 @@ supported features of the formats.
                !!                   !! 640x400         !! 1              !! None/RLE        !! 
 !hline
  Cyperpaint    !! .cel              !! Any             !! 4              !! None            !!
+               !! .seq              !! 320x200         !! 4              !! RLE             !! Animation
 !hline
  DEGAS         !! .pi1/.pc1         !! 320x200         !! 4              !! None/RLE
                !! .pi2/.pc2         !! 640x200         !! 2              !! None/RLE        !!

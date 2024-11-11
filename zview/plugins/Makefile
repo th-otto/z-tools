@@ -24,6 +24,7 @@ PLUGINS = \
 	pnm \
 	pofo \
 	recoil \
+	seq \
 	signum \
 	spectrum \
 	stad \

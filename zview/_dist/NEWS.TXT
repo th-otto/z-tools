@@ -39,6 +39,7 @@
  * New plugin for Calamus Raster Graphics (*.CRG)
  * New plugin for Canvas (*.CNV/*.CPT/*.FUL)
  * New plugin for Cyperpaint images (*.CEL)
+ * New plugin for Cyperpaint animations (*.SEQ)
 
  Bug Fixes:
  ----------
