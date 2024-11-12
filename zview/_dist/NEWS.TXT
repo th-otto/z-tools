@@ -40,6 +40,7 @@
  * New plugin for Canvas (*.CNV/*.CPT/*.FUL)
  * New plugin for Cyperpaint images (*.CEL)
  * New plugin for Cyperpaint animations (*.SEQ)
+ * New plugin for Colorburst (*.BST)
 
  Bug Fixes:
  ----------

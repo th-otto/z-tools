@@ -56,6 +56,14 @@ typedef int boolean;
 #endif
 #endif
 
+#ifndef ASM_NAME
+# ifdef __GNUC__
+#   define ASM_NAME(x) __asm__(x)
+# else
+#   define ASM_NAME(x)
+# endif
+#endif
+
 #if defined(__PUREC__) || defined(__MSHORT__)
 typedef long zv_int_t;
 typedef unsigned long zv_uint_t;

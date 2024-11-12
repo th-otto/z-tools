@@ -34,6 +34,9 @@ supported features of the formats.
                !!                   !! 640x200         !! 2              !! None/RLE        !!
                !!                   !! 640x400         !! 1              !! None/RLE        !! 
 !hline
+ Color Burst   !! .bst              !! 320x200         !! 4              !! RLE             !! Displayed with 3200 colors
+               !!                   !! 640x200         !! 2              !!                 !!
+!hline
  Cyperpaint    !! .cel              !! Any             !! 4              !! None            !!
                !! .seq              !! 320x200         !! 4              !! RLE             !! Animation
 !hline

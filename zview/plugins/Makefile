@@ -11,6 +11,8 @@ PLUGINS = \
 	bmp \
 	calamus \
 	canvas \
+	cel \
+	colorburst \
 	degas \
 	doodle \
 	esm \

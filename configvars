@@ -40,6 +40,7 @@ endif
 
 CFLAGS   = $(DEBUG) $(CPU_CFLAGS) $(CPPFLAGS) $(WINDOM_CFLAGS) $(OPTIMISATION) -Wall -Wshadow -Wno-pointer-sign -Wstrict-prototypes -Wmissing-prototypes -Werror
 CXXFLAGS = $(DEBUG) $(CPU_CFLAGS) $(CPPFLAGS) $(WINDOM_CFLAGS) $(OPTIMISATION) -Wall -Wshadow -Werror -fno-exceptions
+ASFLAGS = $(CFLAGS) -Wa,--register-prefix-optional
 LDFLAGS  = -s
 ARFLAGS  = rcs
 
