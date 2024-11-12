@@ -1,10 +1,26 @@
-#define	VERSION	     0x0103
-#define NAME        "ColorBurst II"
+#define	VERSION	     0x0108
+#define NAME        "C.O.L.R. Object Editor"
 #define AUTHOR      "Thorsten Otto"
 #define DATE        __DATE__ " " __TIME__
 
 #include "plugin.h"
 #include "zvplugin.h"
+
+/*
+C.O.L.R. Object Editor (Mural)    *.MUR (ST low resolution only)
+
+16000 words    image data (screen memory)
+-----------
+32000 bytes    total
+
+_______________________________________________________________________________
+
+Palettes are stored in separate *.PAL files:
+
+48 words    3 words per entry, VDI palette, in VDI order
+--------
+96 bytes    total
+*/
 
 #ifdef PLUGIN_SLB
 
@@ -15,7 +31,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("BST\0");
+		return (long) ("MUR\0");
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -32,66 +48,70 @@ long __CDECL get_option(zv_int_t which)
 }
 #endif
 
-/*
-ColorBurst II    *.BST
-
-16*200 words	 palette, 1 palette per scan line
-                   rgb bits are not in compatibility order (0321), instead 3210
-1 word           flags bits: vvvvvvvvvvvvvvvm
-                   v=version? 5=v1.2 10=v1.3
-                   m=mode: 0=st low, 1=st medium
-???? bytes       compressed image data
-
-Versions 1.2 & 1.3 appear to have different compression schemes.
-Currently there is no description of the compression methods.
-*/
-
-
 #define SCREEN_SIZE 32000u
-#define SCREEN_HEIGHT 200
 
 
-#define PALETTE_SIZE (SCREEN_HEIGHT * 16 * sizeof(*palettes))
-
-#if 0
-void __CDECL bst_decompress(const uint32_t *source, uint32_t *screen, int16_t *my_control) ASM_NAME("bst_decompress");
-#else
-
-static void bst_decompress(const uint32_t *source, uint32_t *screen)
+static int vdi2bios(int idx, int planes)
 {
-	int k;
-	int m;
-	int j = 0;
-	int16_t off;
-	const int16_t *my_control;
-	int cntrl_max;
-	int count;
-
-	my_control = (const int16_t *) source;
-	if (*my_control >= 30)
-		return;							/* punt, if unknown version     */
-	cntrl_max = *(my_control + 1);			/* get number of control words  */
-	cntrl_max -= 2;
-	off = cntrl_max / 2 + 1;
-	my_control += 2;
-	for (k = 0; k < cntrl_max; k++)
+	int xbios;
+	
+	switch (idx)
 	{
-		count = my_control[k];
-		if (count < 0)			/* deal with compressed stuff */
-		{
-			count = -count;
-			for (m = 0; m < count; m++)
-				screen[j++] = source[off];
-			off++;
-		} else							/* deal with raw stuff */
-		{
-			for (m = 0; m < count; m++)
-				screen[j++] = source[off++];
-		}
+	case 1:
+		xbios = (1 << planes) - 1;
+		break;
+	case 2:
+		xbios = 1;
+		break;
+	case 3:
+		xbios = 2;
+		break;
+	case 4:
+		xbios = idx;
+		break;
+	case 5:
+		xbios = 6;
+		break;
+	case 6:
+		xbios = 3;
+		break;
+	case 7:
+		xbios = 5;
+		break;
+	case 8:
+		xbios = 7;
+		break;
+	case 9:
+		xbios = 8;
+		break;
+	case 10:
+		xbios = 9;
+		break;
+	case 11:
+		xbios = 10;
+		break;
+	case 12:
+		xbios = idx;
+		break;
+	case 13:
+		xbios = 14;
+		break;
+	case 14:
+		xbios = 11;
+		break;
+	case 15:
+		xbios = 13;
+		break;
+	case 255:
+		xbios = 15;
+		break;
+	case 0:
+	default:
+		xbios = idx;
+		break;
 	}
+	return xbios;
 }
-#endif
-
 
 
 /*==================================================================================*
@@ -108,54 +128,86 @@ static void bst_decompress(const uint32_t *source, uint32_t *screen)
  *==================================================================================*/
 boolean __CDECL reader_init(const char *name, IMGINFO info)
 {
-	int resolution;
+	int i;
+	size_t file_size;
 	int16_t handle;
-	uint16_t *file_data;
-	uint16_t *palettes;
 	uint8_t *bmap;
-	uint16_t flags;
-	uint32_t file_size;
-	uint16_t planes;
+	char palname[256];
+	uint16_t paldata[16][3];
 
-	if ((handle = (int16_t) Fopen(name, FO_READ)) < 0)
+	handle = (int16_t) Fopen(name, FO_READ);
+	if (handle < 0)
 	{
 		return FALSE;
 	}
 	file_size = Fseek(0, handle, SEEK_END);
-	Fseek(PALETTE_SIZE, handle, SEEK_SET);
-	if ((size_t)Fread(handle, sizeof(flags), &flags) != sizeof(flags) ||
-		flags > 30)
+	if (file_size != SCREEN_SIZE)
 	{
 		Fclose(handle);
 		return FALSE;
 	}
 	Fseek(0, handle, SEEK_SET);
-	palettes = malloc(PALETTE_SIZE);
 	bmap = malloc(SCREEN_SIZE);
-	file_data = malloc(SCREEN_SIZE * 2);
-	
-	if (bmap == NULL || palettes == NULL || file_data == NULL ||
-		Fread(handle, PALETTE_SIZE, palettes) != PALETTE_SIZE ||
-		(size_t)Fread(handle, file_size - PALETTE_SIZE, file_data) != file_size - PALETTE_SIZE)
+	if (bmap == NULL)
 	{
-		free(file_data);
-		free(bmap);
-		free(palettes);
 		Fclose(handle);
 		return FALSE;
 	}
+	if ((size_t)Fread(handle, SCREEN_SIZE, bmap) != SCREEN_SIZE)
+	{
+		free(bmap);
+		Fclose(handle);
+		return FALSE;
+	}
+	strcpy(palname, name);
 
-	Fclose(handle);
-	resolution = flags & 1;
-	planes = 4 >> resolution;
-	bst_decompress((const uint32_t *)file_data, (uint32_t *)bmap);
-	free(file_data);
+	/*
+	 * Note: this is safe under the assumption that
+	 * this plugin is only ever called with filenames
+	 * that have atleast a ".mur" extension
+	 */
+	strcpy(palname + strlen(palname) - 3, "pal");
+	for (i = 0; i < 16; i++)
+	{
+		info->palette[i].red =
+		info->palette[i].green =
+		info->palette[i].blue = (i << 4) | i;
+	}
 
-	info->width = (resolution + 1) * 320;
+	strcpy(info->info, "C.O.L.R. Object Editor");
+	strcpy(info->compression, "None");
+
+	handle = (int16_t) Fopen(palname, FO_READ);
+	if (handle >= 0)
+	{
+		if ((size_t)Fseek(0, handle, SEEK_END) == sizeof(paldata))
+		{
+			int idx;
+			
+			Fseek(0, handle, SEEK_SET);
+			if (Fread(handle, sizeof(paldata), paldata) != sizeof(paldata))
+			{
+				free(bmap);
+				Fclose(handle);
+				return FALSE;
+			}
+			strcat(info->info, "+");
+			for (i = 0; i < 16; i++)
+			{
+				idx = vdi2bios(i, 4);
+				info->palette[idx].red = ((((long)paldata[i][0] << 8) - paldata[i][0]) + 500) / 1015;
+				info->palette[idx].green = ((((long)paldata[i][1] << 8) - paldata[i][1]) + 500) / 1015;
+				info->palette[idx].blue = ((((long)paldata[i][2] << 8) - paldata[i][2]) + 500) / 1015;
+			}
+		}
+		Fclose(handle);
+	}
+	
+	info->planes = 4;
+	info->colors = 1L << 4;
+	info->width = 320;
 	info->height = 200;
-	info->planes = 12;
-	info->colors = 1L << 12;
-	info->indexed_color = FALSE;
+	info->indexed_color = TRUE;
 	info->components = 3;
 	info->real_width = info->width;
 	info->real_height = info->height;
@@ -164,14 +216,8 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	info->orientation = UP_TO_DOWN;
 	info->num_comments = 0;				/* required - disable exif tab */
 	info->_priv_var = 0;				/* y position in bmap */
-	info->_priv_var_more = 0;			/* current line */
 	info->_priv_ptr = bmap;
-	info->_priv_ptr_more = palettes;
-	info->__priv_ptr_more = (void *)(intptr_t)planes;
 
-	strcpy(info->info, "ColorBurst II");
-	strcpy(info->compression, "RLE");
-	
 	return TRUE;
 }
 
@@ -189,49 +235,28 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
  *==================================================================================*/
 boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 {
-	uint32_t pos = info->_priv_var;
-	int y;
-	const uint16_t *screen16;
-	const uint16_t *palettes;
+	const uint16_t *screen16 = (const uint16_t *)info->_priv_ptr;
+	int pos = info->_priv_var;
 	int16_t x;
-	int16_t w;
 	int16_t i;
-	int byte;
-	int16_t plane;
-	uint16_t color;
-	int16_t planes;
+	uint16_t byte;
+	int plane;
 	
-	screen16 = (const uint16_t *)info->_priv_ptr;
-	palettes = (const uint16_t *)info->_priv_ptr_more;
-	planes = (int16_t)(intptr_t)info->__priv_ptr_more;
-	y = info->_priv_var_more;
-	palettes += y * 16;
-	y++;
-	info->_priv_var_more = y;
-
-	w = 0;
 	x = 0;
 	do
 	{
 		for (i = 15; i >= 0; i--)
 		{
-			for (plane = byte = 0; plane < planes; plane++)
+			for (plane = byte = 0; plane < 4; plane++)
 			{
 				if ((screen16[pos + plane] >> i) & 1)
 					byte |= 1 << plane;
 			}
-			color = palettes[byte];
-			byte = ((color >> 8) & 0x0f);
-			buffer[w++] = (byte << 4) | byte;
-			byte = ((color >> 4) & 0x0f);
-			buffer[w++] = (byte << 4) | byte;
-			byte = ((color) & 0x0f);
-			buffer[w++] = (byte << 4) | byte;
+			buffer[x] = byte;
 			x++;
 		}
-		pos += planes;
+		pos += 4;
 	} while (x < info->width);
-
 	info->_priv_var = pos;
 	
 	return TRUE;
@@ -253,8 +278,6 @@ void __CDECL reader_quit(IMGINFO info)
 {
 	free(info->_priv_ptr);
 	info->_priv_ptr = 0;
-	free(info->_priv_ptr_more);
-	info->_priv_ptr_more = 0;
 }
 
 

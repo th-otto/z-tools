@@ -39,6 +39,8 @@ supported features of the formats.
  Color Burst   !! .bst              !! 320x200         !! 4              !! RLE             !! Displayed with 3200 colors
                !!                   !! 640x200         !! 2              !!                 !!
 !hline
+ C.O.L.R.      !! .mur              !! 320x200         !! 16             !! None            !!
+!hline
  Cyperpaint    !! .cel              !! Any             !! 4              !! None            !!
                !! .seq              !! 320x200         !! 4              !! RLE             !! Animation
 !hline
@@ -100,7 +102,7 @@ supported features of the formats.
 
 !end_table
 
-zView is able to save a loaded picture in JPEG, TIFF or GodPaint 
+zView is able to save a loaded picture in JPEG, TIFF, BMP or GodPaint 
 format. The next table shows the options for saving.
 
 !begin_table [ll]

@@ -1,4 +1,4 @@
-clrburst.ldg
+colr.ldg
 
 .C[-I.]
 .C[-Ic:\pc\include]
@@ -27,9 +27,8 @@ clrburst.ldg
 
 =
 pcstart.s
-bstldg.c
-clrburst.c
-;bst.s
+colrldg.c
+colr.c
 
 ldglib\ldglib.c
 ldglib\stdpc.s
