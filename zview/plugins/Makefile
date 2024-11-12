@@ -12,6 +12,7 @@ PLUGINS = \
 	calamus \
 	canvas \
 	cel \
+	coke \
 	colorburst \
 	degas \
 	doodle \
