@@ -16,6 +16,7 @@ PLUGINS = \
 	colorburst \
 	colostar \
 	colr \
+	compeyes \
 	degas \
 	doodle \
 	esm \

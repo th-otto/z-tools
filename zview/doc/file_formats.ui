@@ -43,6 +43,10 @@ supported features of the formats.
 !hline
  C.O.L.R.      !! .mur              !! 320x200         !! 16             !! None            !!
 !hline
+ CompEyes      !! .ce1              !! 320x200         !! 18             !! None            !!
+               !! .ce2              !! 640x200         !! 15             !! None            !!
+               !! .ce3              !! 640x400         !! 6              !! None            !!
+!hline
  Cyperpaint    !! .cel              !! Any             !! 4              !! None            !!
                !! .seq              !! 320x200         !! 4              !! RLE             !! Animation
 !hline

@@ -44,6 +44,7 @@
  * New plugin for COKE format (*.TG1)
  * New plugin for C.O.L.R. format (*.MUR)
  * New plugin for ColorSTar format (*.OBJ)
+ * New plugin for CompEyes format (*.CE1/*.CE2/*.CE3)
 
  Bug Fixes:
  ----------

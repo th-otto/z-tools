@@ -1,0 +1,6 @@
+The sample images in this directory were not scanned using the ComputerEyes hardware.
+They were generated based on the information at the Atari ST Picture Format wiki.
+They were then loaded into the ComputerEyes software that came with the hardware and
+verified to look ok.
+
+They where also checked with PicSwitch v1.0.1 which does an even better job converting the images.
