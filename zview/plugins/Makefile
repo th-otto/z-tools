@@ -17,6 +17,7 @@ PLUGINS = \
 	colostar \
 	colr \
 	compeyes \
+	crackart \
 	degas \
 	doodle \
 	esm \

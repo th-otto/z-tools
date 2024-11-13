@@ -45,6 +45,7 @@
  * New plugin for C.O.L.R. format (*.MUR)
  * New plugin for ColorSTar format (*.OBJ)
  * New plugin for CompEyes format (*.CE1/*.CE2/*.CE3)
+ * New plugin for CrackArt format (*.CA1/*.CA2/*.CA3)
 
  Bug Fixes:
  ----------

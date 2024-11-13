@@ -47,6 +47,10 @@ supported features of the formats.
                !! .ce2              !! 640x200         !! 15             !! None            !!
                !! .ce3              !! 640x400         !! 6              !! None            !!
 !hline
+ CrackArt      !! .ca1              !! 320x200         !! 4              !! None/RLE        !!
+               !! .ca2              !! 640x200         !! 2              !! None/RLE        !!
+               !! .ca3              !! 640x400         !! 1              !! None/RLE        !!
+!hline
  Cyperpaint    !! .cel              !! Any             !! 4              !! None            !!
                !! .seq              !! 320x200         !! 4              !! RLE             !! Animation
 !hline
