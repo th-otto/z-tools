@@ -14,6 +14,7 @@ PLUGINS = \
 	cel \
 	coke \
 	colorburst \
+	colostar \
 	colr \
 	degas \
 	doodle \

@@ -43,6 +43,7 @@
  * New plugin for Colorburst (*.BST)
  * New plugin for COKE format (*.TG1)
  * New plugin for C.O.L.R. format (*.MUR)
+ * New plugin for ColorSTar format (*.OBJ)
 
  Bug Fixes:
  ----------

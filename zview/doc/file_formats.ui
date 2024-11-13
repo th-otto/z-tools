@@ -39,6 +39,8 @@ supported features of the formats.
  Color Burst   !! .bst              !! 320x200         !! 4              !! RLE             !! Displayed with 3200 colors
                !!                   !! 640x200         !! 2              !!                 !!
 !hline
+ ColorSTar     !! .obj              !! Any             !! 1/4            !! None            !!
+!hline
  C.O.L.R.      !! .mur              !! 320x200         !! 16             !! None            !!
 !hline
  Cyperpaint    !! .cel              !! Any             !! 4              !! None            !!

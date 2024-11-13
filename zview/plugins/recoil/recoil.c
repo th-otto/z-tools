@@ -3170,7 +3170,7 @@ static int Stream_ReadHexByte(Stream *self)
 	int lo = Stream_ReadHexDigit(self);
 	if (lo < 0)
 		return -1;
-	return hi << 4 | lo;
+	return (hi << 4) | lo;
 }
 
 static int Stream_ParseInt(Stream *self, int b, int maxValue)
@@ -3205,7 +3205,7 @@ static int GdosFntStream_ReadWord(GdosFntStream *self)
 	int first = self->base.content[self->base.contentOffset];
 	int second = self->base.content[self->base.contentOffset + 1];
 	self->base.contentOffset += 2;
-	return self->bigEndian ? first << 8 | second : first | second << 8;
+	return self->bigEndian ? (first << 8) | second : first | (second << 8);
 }
 
 static int GdosFntStream_ReadInt(GdosFntStream *self)
@@ -3337,7 +3337,7 @@ static int VplStream_Decode(VplStream *self)
 			VplStream_SkipWhitespace(self);
 			if (Stream_ParseInt(&self->base, 16, 15) < 0)
 				return -1;
-			self->palette[colors++] = r << 16 | g << 8 | b;
+			self->palette[colors++] = (r << 16) | (g << 8) | b;
 			switch (VplStream_SkipWhitespace(self)) {
 			case -1:
 				return colors;
@@ -3371,11 +3371,11 @@ static int BitStream_ReadBit(BitStream *self)
 	if ((self->bits & 127) == 0) {
 		if (self->base.contentOffset >= self->base.contentLength)
 			return -1;
-		self->bits = self->base.content[self->base.contentOffset++] << 1 | 1;
+		self->bits = (self->base.content[self->base.contentOffset++] << 1) | 1;
 	}
 	else
 		self->bits <<= 1;
-	return self->bits >> 8 & 1;
+	return (self->bits >> 8) & 1;
 }
 
 static int BitStream_ReadBits(BitStream *self, int count)
@@ -3385,7 +3385,7 @@ static int BitStream_ReadBits(BitStream *self, int count)
 		int bit = self->vtbl->readBit(self);
 		if (bit < 0)
 			return -1;
-		result = result << 1 | bit;
+		result = (result << 1) | bit;
 	}
 	return result;
 }
@@ -3484,11 +3484,11 @@ static int Mx1Stream_ReadBit(Mx1Stream *self)
 		int d = self->decodeTable[e];
 		if (d >= 128)
 			return -1;
-		self->base.base.bits = d << 1 | 1;
+		self->base.base.bits = (d << 1) | 1;
 	}
 	else
 		self->base.base.bits <<= 1;
-	return self->base.base.bits >> 7 & 1;
+	return (self->base.base.bits >> 7) & 1;
 }
 
 static void MppPaletteStream_Construct(MppPaletteStream *self)
@@ -3502,12 +3502,12 @@ static int MppPaletteStream_Read(MppPaletteStream *self)
 	switch (self->base.base.content[4] & 3) {
 	case 0:
 		rgb = BitStream_ReadBits(&self->base, 9);
-		rgb = (rgb & 448) << 10 | (rgb & 56) << 5 | (rgb & 7);
-		return rgb << 5 | rgb << 2 | (rgb >> 1 & 197379);
+		rgb = ((rgb & 448) << 10) | ((rgb & 56) << 5) | (rgb & 7);
+		return (rgb << 5) | (rgb << 2) | ((rgb >> 1) & 197379);
 	case 1:
 		rgb = BitStream_ReadBits(&self->base, 12);
-		rgb = (rgb & 1792) << 9 | (rgb & 2160) << 5 | (rgb & 135) << 1 | (rgb & 8) >> 3;
-		return rgb << 4 | rgb;
+		rgb = ((rgb & 1792) << 9) | ((rgb & 2160) << 5) | ((rgb & 135) << 1) | ((rgb & 8) >> 3);
+		return (rgb << 4) | rgb;
 	case 3:
 		return RECOIL_GetSteInterlacedColor(BitStream_ReadBits(&self->base, 15));
 	default:
@@ -9343,7 +9343,7 @@ static boolean RECOIL_DecodeSev(RECOIL *self, uint8_t const *content, int conten
 
 static boolean RECOIL_DecodeCh8(RECOIL *self, uint8_t const *content, int contentLength)
 {
-	if ((contentLength & 7) != 0 || !RECOIL_SetSize(self, 256, (contentLength + 248) >> 8 << 3, RECOILResolution_SPECTRUM1X1, 1))
+	if ((contentLength & 7) != 0 || !RECOIL_SetSize(self, 256, ((contentLength + 248) >> 8) << 3, RECOILResolution_SPECTRUM1X1, 1))
 		return FALSE;
 	RECOIL_DecodeBlackAndWhiteFont(self, content, 0, contentLength, 8);
 	return TRUE;
@@ -12618,7 +12618,7 @@ static boolean RECOIL_Decode64c(RECOIL *self, uint8_t const *content, int conten
 {
 	if (contentLength < 10 || contentLength > 2050 || content[0] != 0)
 		return FALSE;
-	RECOIL_SetSize(self, 256, (contentLength + 253) >> 8 << 3, RECOILResolution_C641X1, 1);
+	RECOIL_SetSize(self, 256, ((contentLength + 253) >> 8) << 3, RECOILResolution_C641X1, 1);
 	RECOIL_DecodeBlackAndWhiteFont(self, content, 2, contentLength, 8);
 	return TRUE;
 }
@@ -15083,7 +15083,7 @@ static boolean RECOIL_DecodeStLowWithStride(RECOIL *self, uint8_t const *bitmap,
 
 static boolean RECOIL_DecodeStLow(RECOIL *self, uint8_t const *bitmap, int bitmapOffset, uint8_t const *palette, int paletteOffset, int width, int height, int frames)
 {
-	return RECOIL_DecodeStLowWithStride(self, bitmap, bitmapOffset, (width + 15) >> 4 << 3, palette, paletteOffset, width, height, frames);
+	return RECOIL_DecodeStLowWithStride(self, bitmap, bitmapOffset, ((width + 15) >> 4) << 3, palette, paletteOffset, width, height, frames);
 }
 
 static void RECOIL_DecodeStMedium(RECOIL *self, uint8_t const *bitmap, int bitmapOffset, uint8_t const *palette, int paletteOffset, int width, int height, int frames)
@@ -15272,7 +15272,7 @@ static boolean RECOIL_DecodeCel(RECOIL *self, uint8_t const *content, int conten
 		return FALSE;
 	int width = content[58] << 8 | content[59];
 	int height = content[60] << 8 | content[61];
-	return contentLength == 128 + ((width + 15) >> 4 << 3) * height && RECOIL_DecodeStLow(self, content, 128, content, 4, width, height, 1);
+	return contentLength == 128 + (((width + 15) >> 4) << 3) * height && RECOIL_DecodeStLow(self, content, 128, content, 4, width, height, 1);
 }
 
 static boolean RECOIL_DecodeMur(RECOIL *self, const char *filename, uint8_t const *content, int contentLength)
@@ -15339,7 +15339,7 @@ static boolean RECOIL_DecodeObj(RECOIL *self, uint8_t const *content, int conten
 		return FALSE;
 	int width = (content[contentOffset] << 8) + content[contentOffset + 1] + 1;
 	int height = content[contentOffset + 3] + 1;
-	int stride = (width + 15) >> 4 << 3;
+	int stride = ((width + 15) >> 4) << 3;
 	if (contentOffset + 6 + height * stride != contentLength || !RECOIL_SetSize(self, width, height, RECOILResolution_ST1X1, 1))
 		return FALSE;
 	RECOIL_DecodeBitplanes(self, content, contentOffset + 6, stride, 4, 0, width, height);
@@ -20130,7 +20130,7 @@ static boolean RECOIL_DecodeRip(RECOIL *self, uint8_t const *content, int conten
 		contentStride >>= 1;
 	int unpackedLength = contentStride * height;
 	if (content[7] == 48)
-		unpackedLength += (height + 1) >> 1 << 3;
+		unpackedLength += ((height + 1) >> 1) << 3;
 	uint8_t unpacked[20080];
 	memset(unpacked, 0, sizeof(unpacked));
 	switch (content[9]) {
