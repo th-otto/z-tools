@@ -18,6 +18,8 @@ PLUGINS = \
 	colr \
 	compeyes \
 	crackart \
+	cybrmate \
+	dali \
 	degas \
 	doodle \
 	esm \

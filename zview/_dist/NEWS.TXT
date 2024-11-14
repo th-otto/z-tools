@@ -47,6 +47,7 @@
  * New plugin for CompEyes format (*.CE1/*.CE2/*.CE3)
  * New plugin for CrackArt format (*.CA1/*.CA2/*.CA3)
  * New plugin for CyberMate Animation format (*.DLT)
+ * New plugin for Dali format (*.SD0/*.SD1/*.SD2/*.LPK/*.MPK/*.HPK)
 
  Bug Fixes:
  ----------
