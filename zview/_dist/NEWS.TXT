@@ -46,6 +46,7 @@
  * New plugin for ColorSTar format (*.OBJ)
  * New plugin for CompEyes format (*.CE1/*.CE2/*.CE3)
  * New plugin for CrackArt format (*.CA1/*.CA2/*.CA3)
+ * New plugin for CyberMate Animation format (*.DLT)
 
  Bug Fixes:
  ----------

@@ -54,6 +54,10 @@ supported features of the formats.
  Cyperpaint    !! .cel              !! Any             !! 4              !! None            !!
                !! .seq              !! 320x200         !! 4              !! RLE             !! Animation
 !hline
+ CyberMate     !! .dlt              !! 320x200         !! 4              !! DLTa            !! Animation
+               !!                   !! 640x200         !! 2              !!                 !!
+               !!                   !! 640x400         !! 1              !!                 !!
+!hline
  DEGAS         !! .pi1/.pc1         !! 320x200         !! 4              !! None/RLE
                !! .pi2/.pc2         !! 640x200         !! 2              !! None/RLE        !!
                !! .pi3/.pc3         !! 640x400         !! 1              !! None/RLE        !! 
