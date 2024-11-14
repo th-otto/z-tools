@@ -21,6 +21,7 @@ PLUGINS = \
 	cybrmate \
 	dali \
 	degas \
+	degasx \
 	doodle \
 	esm \
 	eureka \
