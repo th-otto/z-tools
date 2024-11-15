@@ -50,6 +50,11 @@
  * New plugin for Dali format (*.SD0/*.SD1/*.SD2/*.LPK/*.MPK/*.HPK)
  * New plugin for DelmPaint format (*.DEL/*.DPH)
  * New plugin for DeskPic format (*.GFB)
+ * New plugin for DuneGraph format (*.DC1/*.DG1)
+
+Since the RECOIL plugin handles so many formats, it is
+assigned to all file extensions. If there is a specialized plugin
+for that format, it is prioritized.
 
  Bug Fixes:
  ----------
@@ -76,6 +81,9 @@
  * TIFF module no longer prints messages to the screen
  * Fix a bug in the TIFF codec that caused it to crash when loading
    images with embedded old jpeg files
+ * Lots of codecs have been rewritten from scratch,
+   since Lonny does not support the SLB plugins any longer,
+   and some of them had some memory leaks.
 
  Known Bugs:
  ----------

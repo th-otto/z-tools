@@ -71,6 +71,8 @@ supported features of the formats.
 !hline
  DeskPic       !! .gfb              !! Any             !! 1/2/4/8        !! None            !!
 !hline
+ DuneGraph     !! .dg1/.dc1         !! Any             !! 8              !! None/RLE        !!
+!hline
  Eureka RAW    !! .raw              !! Any             !! 8              !! None            !!
 !hline
  GEM (X)IMG    !! .img              !! Any             !! 1/2/4/8/24     !! None/RLE        !!
