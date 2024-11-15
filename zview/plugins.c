@@ -484,7 +484,8 @@ int16 plugins_init(void)
 	/*
 	 * Sort "catch all" decoders last
 	 */
-	for (i = 0; i < j; i++)
+	j = plugins_nbr;
+	for (i = 0; i < j; )
 	{
 		if (!(codecs[i]->capabilities & CAN_ENCODE) && codecs[i]->extensions[0] == '*')
 		{
@@ -492,6 +493,9 @@ int16 plugins_init(void)
 			--j;
 			codecs[i] = codecs[j];
 			codecs[j] = tmp;
+		} else
+		{
+			i++;
 		}
 	}
 
