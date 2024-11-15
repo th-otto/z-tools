@@ -26,6 +26,7 @@ PLUGINS = \
 	deskpic \
 	doodle \
 	dunegraph \
+	duo \
 	esm \
 	eureka \
 	gif \
