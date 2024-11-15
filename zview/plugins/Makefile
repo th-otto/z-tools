@@ -23,6 +23,7 @@ PLUGINS = \
 	degas \
 	degasx \
 	delmpaint \
+	deskpic \
 	doodle \
 	esm \
 	eureka \

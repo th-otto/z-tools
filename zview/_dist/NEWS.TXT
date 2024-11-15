@@ -49,6 +49,7 @@
  * New plugin for CyberMate Animation format (*.DLT)
  * New plugin for Dali format (*.SD0/*.SD1/*.SD2/*.LPK/*.MPK/*.HPK)
  * New plugin for DelmPaint format (*.DEL/*.DPH)
+ * New plugin for DeskPic format (*.GFB)
 
  Bug Fixes:
  ----------
