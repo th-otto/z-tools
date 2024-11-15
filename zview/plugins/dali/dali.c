@@ -118,12 +118,11 @@ static long read_int(int16_t fh)
 
 static void my_strupr(char *str)
 {
-	uint16_t i;
-	
-	for (i = 0; str[i] != '\0'; i++)
+	while (*str != '\0')
 	{
-		if (str[i] >= 'a' && str[i] <= 'z')
-			str[i] -= 'a' - 'A';
+		if (*str >= 'a' && *str <= 'z')
+			*str -= 'a' - 'A';
+		str++;
 	}
 }
 

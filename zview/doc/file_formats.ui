@@ -66,6 +66,9 @@ supported features of the formats.
                !! .pi2/.pc2         !! 640x200         !! 2              !! None/RLE        !!
                !! .pi3/.pc3         !! 640x400         !! 1              !! None/RLE        !! 
 !hline
+ DelmPaint     !! .del              !! 320x240         !! 8              !! RLE             !!
+               !! .dph              !! 640x480         !! 8              !! RLE             !!
+!hline
  Eureka RAW    !! .raw              !! Any             !! 8              !! None            !!
 !hline
  GEM (X)IMG    !! .img              !! Any             !! 1/2/4/8/24     !! None/RLE        !!

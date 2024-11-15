@@ -22,6 +22,7 @@ PLUGINS = \
 	dali \
 	degas \
 	degasx \
+	delmpaint \
 	doodle \
 	esm \
 	eureka \
