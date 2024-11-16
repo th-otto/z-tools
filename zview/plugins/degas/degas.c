@@ -250,6 +250,7 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 	{
 		Fclose(handle);
 		bail("Fread failed");
+		return FALSE;
 	}
 
 	/* flags -> cxxxx?rr */

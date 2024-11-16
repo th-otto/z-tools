@@ -6,24 +6,24 @@ LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
 STACKSIZE = 64k
 
 CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvdegas.slb\"
+SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvezap.slb\"
 
-all:: degas.ldg zvdegas.slb
+all:: ezartpro.ldg zvezap.slb
 
 include $(top_srcdir)/rules
 
-degas.ldg: degasldg.o degas.o $(LDGOBJS)
+ezartpro.ldg: ezartldg.o ezartpro.o $(LDGOBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) -Wl,--stack,$(STACKSIZE) $(LIB)
 
-zvdegas.slb: header.lo degasslb.lo degas.lo
+zvezap.slb: header.lo ezartslb.lo ezartpro.lo
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-degasslb.lo degas.lo: ../common/plugin.h ../common/zview.h
-degas.lo degas.o: degas.c packbits.c tanglbts.c
+ezartslb.lo ezartpro.lo: ../common/plugin.h ../common/zview.h
+ezartpro.lo ezartpro.o: ezartpro.c ../degas/packbits.c ../degas/tanglbts.c
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb

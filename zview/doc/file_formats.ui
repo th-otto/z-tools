@@ -86,6 +86,8 @@ supported features of the formats.
 !hline
  Eureka RAW    !! .raw              !! Any             !! 8              !! None            !!
 !hline
+ EZ-Art        !! .eza              !! 320x200         !! 4              !! RLE             !!
+!hline
  GEM (X)IMG    !! .img              !! Any             !! 1/2/4/8/24     !! None/RLE        !!
 !hline
  GIF           !! .gif              !! Any             !! 1-8            !! LZW             !! Transparency
