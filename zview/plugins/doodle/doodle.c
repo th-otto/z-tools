@@ -8,6 +8,17 @@
 #define MISCINFO "Parts of code taken from St2BMP,\n" \
                  "written by Hans Wessels"
 
+/*
+Dr. Doodle    *.DOO (usually ST high resolution)
+
+16000 words    image data (screen memory)
+-----------
+32000 bytes    total
+
+Note: Updated versions of Doodle have been found that work in all 3 ST
+resolutions and there's no easy way to determine the correct mode.
+*/
+
 static uint16_t const medpal[4] = {
 	0x0fff, 0x0f00, 0x00f0, 0x0000
 };

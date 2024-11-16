@@ -49,7 +49,12 @@ because of the 1000 color mode.
 -----------
 34360 bytes    total file size
 
+Regarding the '1000-Colors ON' mode. The layout of the rasters and how to
+calculate the color of a pixel at a given x/y coordinate is unknown.
 
+From an article titled "AT HOME WITH GFA" (ST World Magazine - Jan 1990 -
+Issue 47): The author Dirk van Asche states in an interview... "To do this I
+changed the color palette every three scan lines."
 */
 
 

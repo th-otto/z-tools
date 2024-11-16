@@ -6,6 +6,21 @@
 #include "plugin.h"
 #include "zvplugin.h"
 
+/*
+ColorBurst II    *.BST
+
+16*200 words	 palette, 1 palette per scan line
+                   rgb bits are not in compatibility order (0321), instead 3210
+1 word           flags bits: vvvvvvvvvvvvvvvm
+                   v=version? 5=v1.2 10=v1.3
+                   m=mode: 0=st low, 1=st medium
+???? bytes       compressed image data
+
+Versions 1.2 & 1.3 appear to have different compression schemes.
+Currently there is no description of the compression methods.
+*/
+
+
 #ifdef PLUGIN_SLB
 
 long __CDECL get_option(zv_int_t which)
@@ -31,21 +46,6 @@ long __CDECL get_option(zv_int_t which)
 	return -ENOSYS;
 }
 #endif
-
-/*
-ColorBurst II    *.BST
-
-16*200 words	 palette, 1 palette per scan line
-                   rgb bits are not in compatibility order (0321), instead 3210
-1 word           flags bits: vvvvvvvvvvvvvvvm
-                   v=version? 5=v1.2 10=v1.3
-                   m=mode: 0=st low, 1=st medium
-???? bytes       compressed image data
-
-Versions 1.2 & 1.3 appear to have different compression schemes.
-Currently there is no description of the compression methods.
-*/
-
 
 #define SCREEN_SIZE 32000u
 #define SCREEN_HEIGHT 200

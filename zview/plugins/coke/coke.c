@@ -137,18 +137,16 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 {
 	int16_t x;
-	int w;
 	const uint16_t *screen16;
 	uint16_t color;
 	
 	screen16 = (const uint16_t *)info->_priv_ptr + info->_priv_var;
-	w = 0;
 	for (x = 0; x < info->width; x++)
 	{
-		color = screen16[x];
-		buffer[w++] = ((color >> 11) & 0x1f) << 3;
-		buffer[w++] = ((color >> 5) & 0x3f) << 2;
-		buffer[w++] = ((color) & 0x1f) << 3;
+		color = *screen16++;
+		*buffer++ = ((color >> 11) & 0x1f) << 3;
+		*buffer++ = ((color >> 5) & 0x3f) << 2;
+		*buffer++ = ((color) & 0x1f) << 3;
 	}
 	info->_priv_var += info->width;
 	return TRUE;
@@ -200,7 +198,7 @@ boolean __CDECL encoder_init(const char *name, IMGINFO info)
 	uint8_t *outline;
 	
 	line_size = (uint32_t)info->width * 2;
-	outline = malloc(line_size + 256);
+	outline = malloc(line_size);
 	if (outline == NULL)
 	{
 		return FALSE;
@@ -244,18 +242,13 @@ boolean __CDECL encoder_write(IMGINFO info, uint8_t *buffer)
 	uint32_t line_size;
 	uint16_t *outline = (uint16_t *)info->_priv_ptr;
 	uint16_t x;
-	int w;
 	uint16_t color;
 
-	w = 0;
 	for (x = 0; x < info->width; x++)
 	{
-		color = (buffer[w] & 0xf8) << 8;
-		w++;
-		color |= (buffer[w] & 0xfc) << 3;
-		w++;
-		color |= (uint16_t)buffer[w] >> 3;
-		w++;
+		color = (*buffer++ & 0xf8) << 8;
+		color |= (*buffer++ & 0xfc) << 3;
+		color |= *buffer++ >> 3;
 		outline[x] = color;
 	}
 	handle = (int16_t)info->_priv_var;

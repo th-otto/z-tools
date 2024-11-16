@@ -1,6 +1,15 @@
 #include "plugin.h"
 #include "zvplugin.h"
 
+/*
+GodPaint     *.GOD
+
+1 word       file ID, 'G4' and $0400 have been seen. GodPaint ignores the ID.
+1 word       xres
+1 word       yres
+xres*yres*2 bytes Falcon high color data,  word RRRRRGGGGGGBBBBB
+*/
+
 #define VERSION 0x201
 #define NAME    "GodPaint"
 #define AUTHOR  "Zorro"

@@ -1,51 +1,59 @@
-#define	VERSION	     0x0200
-#define NAME        "TmS Cranach (Paint/Studio)"
+#define	VERSION	     0x0207
+#define NAME        "EggPaint/Spooky Sprites"
 #define AUTHOR      "Thorsten Otto"
 #define DATE        __DATE__ " " __TIME__
 
 #include "plugin.h"
 #include "zvplugin.h"
-#define NF_DEBUG 0
-#include "nfdebug.h"
 
 /*
-TmS Cranach Paint/TmS Cranach Studio    *.ESM
+EggPaint        *.TRP
 
-ESM is short for Enhanced Simplex
-This description is based on source code found in the GemView module devkit.
+1 long    file id, 'TRUP'
+1 word    xres
+1 word    yres
+xres*yres*2 bytes Falcon high color data,  word RRRRRGGGGGGBBBBB
 
-1 long       file id, 'TMS\0'
-1 word       header size [usually 812]
-1 word       width in pixels
-1 word       height in pixels
-1 word       planes [1, 8, or 24]
-1 word       number of components
-             [1 = monochrome, 3 = 8-bit indexed color or 24-bit true color]
-1 word       component depth red [usually 8]
-1 word       component depth green
-1 word       component depth blue
-1 word       depth black? [unknown use, usually 0]
-1 word       version [4]
-1 word       horizontal dpi [usually 100]
-1 word       vertical dpi [usually 100]
-1 word       line height [usually same as image height]
-1 word       line start [usually 0]
-1 word       line end [usually image height - 1]
-1 word       mask [unknown, usually 0]
-256 bytes    palette component red
-256 bytes    palette component green
-256 bytes    palette component blue
-4 words      ? [unknown, usually 0]
----------
-812 bytes    total for header
+Packed EggPaint pictures are packed with ICE 2.4.
 
-?            image data:
-   1 plane is monochrome, width assumed to be rounded up to the nearest byte
-       ignore palette, set bits=black
-   8 planes is color indexes into the palette tables
-   24 planes is true-color, RGB format, 3 bytes per pixel in R, G, B order
-       ignore palette
+
+Spooky Sprites    *.TRE (RLE compressed)
+                  *.TRP (uncompressed)
+
+Falcon high-color images.
+
+TRP - True Color Picture
+
+1 long    file id ['tru?']
+1 word    picture width in pixels
+1 word    picture height in pixels
+width*height words of picture data
+
+_______________________________________________________________________________
+
+TRE - Run Length Encoded True Color Picture
+
+1 long    file id ['tre1']
+1 word    picture width in pixels
+1 word    picture height in pixels
+1 long    number of chunks
+This is followed by all the data chunks. The first chunk is a raw data chunk.
+
+raw data chunk:
+
+1 byte    Number of raw data pixels. If this byte is 255 the number of pixels
+          will be the following word+255
+Number of pixels words of raw data.
+This chunk is followed by an RLE chunk.
+
+RLE chunk:
+
+1 byte    Number of RLE pixels. If this byte is 255 the number of RLE pixels
+          will be the following word+255. This is the number of times you
+          should draw the previous color again.
+This chunk is followed by a raw data chunk.
 */
+
 
 #ifdef PLUGIN_SLB
 
@@ -56,7 +64,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE | CAN_ENCODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("ESM\0");
+		return (long) ("TRP\0");
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -74,32 +82,11 @@ long __CDECL get_option(zv_int_t which)
 #endif
 
 
-#define ESM_MAGIC 0x544D5300L /* 'TMS\0' */
-
-typedef struct ESM_Header {
+struct file_header {
 	uint32_t magic;
-	uint16_t head_size;
-	uint16_t width;
-	uint16_t height;
-	uint16_t planes;
-	uint16_t components;
-	uint16_t red_depth;
-	uint16_t green_depth;
-	uint16_t blue_depth;
-	uint16_t black_depth;
-	uint16_t version;
-	uint16_t xdpi;
-	uint16_t ydpi;
-	uint16_t file_height;
-	uint16_t first_line;
-	uint16_t last_line;
-	uint16_t mask;
-	unsigned char red_tab[256];
-	unsigned char green_tab[256];
-	unsigned char blue_tab[256];
-	int32_t reserved[2];
-} ESM_Header;
-
+	int16_t xres;
+	int16_t yres;
+};
 
 /*==================================================================================*
  * boolean __CDECL reader_init:														*
@@ -115,65 +102,45 @@ typedef struct ESM_Header {
  *==================================================================================*/
 boolean __CDECL reader_init(const char *name, IMGINFO info)
 {
-	uint32_t datasize;
-	uint32_t line_size;
-	int i;
 	uint8_t *bmap;
 	int16_t handle;
-	ESM_Header header;
+	struct file_header file_header;
+	size_t screen_size;
 
 	handle = (int16_t) Fopen(name, FO_READ);
 	if (handle < 0)
 	{
 		return FALSE;
 	}
-	if (Fread(handle, sizeof(header), &header) != sizeof(header))
+
+	if ((handle = (int16_t) Fopen(name, FO_READ)) < 0)
+	{
+		return FALSE;
+	}
+	Fread(handle, sizeof(file_header), &file_header);
+	if (file_header.magic != 0x54525550L && /* 'TRUP' */
+		file_header.magic != 0x7472753FL) /* 'tru?' */
 	{
 		Fclose(handle);
 		return FALSE;
 	}
-	if (header.magic != ESM_MAGIC)
-	{
-		Fclose(handle);
-		return FALSE;
-	}
-	switch (header.planes)
-	{
-	case 24:
-		info->indexed_color = FALSE;
-		line_size = (uint32_t)header.width * 3;
-		break;
-	case 8:
-		info->indexed_color = TRUE;
-		line_size = header.width;
-		break;
-	case 1:
-		info->indexed_color = FALSE;
-		line_size = ((int32_t)header.width + 7) / 8;
-		break;
-	default:
-		Fclose(handle);
-		return FALSE;
-	}
-	datasize = line_size * header.height;
-	bmap = malloc(datasize + 256);
+	screen_size = (size_t)file_header.xres * file_header.yres * 2;
+	
+	bmap = malloc(screen_size + 256);
 	if (bmap == NULL)
 	{
 		Fclose(handle);
 		return FALSE;
 	}
-	Fseek(header.head_size, handle, SEEK_SET);
-	if ((uint32_t)Fread(handle, datasize, bmap) != datasize)
-	{
-		free(bmap);
-		Fclose(handle);
-		return FALSE;
-	}
+	Fread(handle, screen_size, bmap);
 	Fclose(handle);
-	info->planes = header.planes;
-	info->components = info->planes == 1 ? 1 : 3;
-	info->width = header.width;
-	info->height = header.height;
+	
+	info->width = file_header.xres;
+	info->height = file_header.yres;
+	info->planes = 16;
+	info->indexed_color = FALSE;
+	info->colors = 1L << 16;
+	info->components = 3;
 	info->colors = 1L << MIN(info->planes, 24);
 	info->real_width = info->width;
 	info->real_height = info->height;
@@ -181,21 +148,15 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	info->page = 1;
 	info->orientation = UP_TO_DOWN;
 	info->num_comments = 0;
-	strcpy(info->info, "TmS Cranach (Paint/Studio)");
+
+	if (file_header.magic == 0x54525550L)
+		strcpy(info->info, "EggPaint");
+	else if (file_header.magic == 0x7472753FL)
+		strcpy(info->info, "Spooky Sprites");
 	strcpy(info->compression, "None");
-	if (info->indexed_color)
-	{
-		for (i = 0; i < 256; i++)
-		{
-			info->palette[i].red = header.red_tab[i];
-			info->palette[i].green = header.green_tab[i];
-			info->palette[i].blue = header.blue_tab[i];
-		}
-	}
 
 	info->_priv_ptr = bmap;
 	info->_priv_var = 0;				/* y offset */
-	info->_priv_ptr_more = (void *)line_size;
 
 	return TRUE;
 }
@@ -214,35 +175,19 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
  *==================================================================================*/
 boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 {
-	uint16_t x;
-	uint8_t *bmap = (uint8_t *)info->_priv_ptr;
-	uint32_t pos = info->_priv_var;
-	uint32_t line_size = (uint32_t)info->_priv_ptr_more;
-	uint16_t w;
-	uint8_t b;
-
-	if (info->planes == 1)
+	int16_t x;
+	const uint16_t *screen16;
+	uint16_t color;
+	
+	screen16 = (const uint16_t *)info->_priv_ptr + info->_priv_var;
+	for (x = 0; x < info->width; x++)
 	{
-		for (w = 0, x = 0; w < line_size; w++)
-		{
-			b = bmap[pos++];
-			buffer[x++] = b & 0x80 ? 1 : 0;
-			buffer[x++] = b & 0x40 ? 1 : 0;
-			buffer[x++] = b & 0x20 ? 1 : 0;
-			buffer[x++] = b & 0x10 ? 1 : 0;
-			buffer[x++] = b & 0x08 ? 1 : 0;
-			buffer[x++] = b & 0x04 ? 1 : 0;
-			buffer[x++] = b & 0x02 ? 1 : 0;
-			buffer[x++] = b & 0x01 ? 1 : 0;
-		}
-	} else
-	{
-		memcpy(buffer, &bmap[pos], line_size);
-		pos += line_size;
+		color = *screen16++;
+		*buffer++ = ((color >> 11) & 0x1f) << 3;
+		*buffer++ = ((color >> 5) & 0x3f) << 2;
+		*buffer++ = ((color) & 0x1f) << 3;
 	}
-
-	info->_priv_var = pos;
-
+	info->_priv_var += info->width;
 	return TRUE;
 }
 
@@ -286,46 +231,31 @@ void __CDECL reader_get_txt(IMGINFO info, txt_data *txtdata)
 
 boolean __CDECL encoder_init(const char *name, IMGINFO info)
 {
-	int i;
-	ESM_Header header;
+	uint16_t *outline;
+	size_t linesize;
 	int16_t handle;
-	uint32_t line_size;
-
-	if ((handle = (int16_t) Fcreate(name, 0)) < 0)
+	struct file_header header;
+	
+	linesize = (size_t)info->width * 2;
+	outline = malloc(linesize);
+	if (outline == NULL)
 	{
 		return FALSE;
 	}
-	header.magic = ESM_MAGIC;
-	header.head_size = sizeof(header);
-	header.width = info->width;
-	header.height = info->height;
-	header.planes = 24;
-	header.components = 3;
-	header.red_depth = 8;
-	header.green_depth = 8;
-	header.blue_depth = 8;
-	header.black_depth = 0;
-	header.version = 4;
-	header.xdpi = 100;
-	header.ydpi = 100;
-	header.file_height = info->height;
-	header.first_line = 0;
-	header.last_line = info->height - 1;
-	header.mask = 0;
-	header.reserved[0] = 0;
-	header.reserved[1] = 0;
-	for (i = 0; i < 256; i++)
+	if ((handle = Fcreate(name, 0)) < 0)
 	{
-		header.blue_tab[i] = i;
-		header.green_tab[i] = i;
-		header.red_tab[i] = i;
+		free(outline);
+		return FALSE;
 	}
-	if ((size_t)Fwrite(handle, sizeof(header), &header) != sizeof(header))
+	header.magic = 0x54525550L;
+	header.xres = info->width;
+	header.yres = info->height;
+	if (Fwrite(handle, sizeof(header), &header) != sizeof(header))
 	{
 		Fclose(handle);
+		free(outline);
 		return FALSE;
 	}
-
 	info->planes = 24;
 	info->components = 3;
 	info->colors = 1L << 24;
@@ -333,11 +263,9 @@ boolean __CDECL encoder_init(const char *name, IMGINFO info)
 	info->memory_alloc = TT_RAM;
 	info->indexed_color = FALSE;
 	info->page = 1;
-
-	line_size = (uint32_t)info->width * 3;
-
 	info->_priv_var = handle;
-	info->_priv_ptr_more = (void *)line_size;
+	info->_priv_ptr = outline;
+	info->_priv_var_more = linesize;
 
 	return TRUE;
 }
@@ -345,10 +273,22 @@ boolean __CDECL encoder_init(const char *name, IMGINFO info)
 
 boolean __CDECL encoder_write(IMGINFO info, uint8_t *buffer)
 {
-	int16_t handle = (int16_t)info->_priv_var;
-	uint32_t line_size = (uint32_t)info->_priv_ptr_more;
+	int16_t handle;
+	size_t linesize;
+	uint16_t *outline = (uint16_t *)info->_priv_ptr;
+	uint16_t x;
+	uint16_t color;
 
-	if ((uint32_t)Fwrite(handle, line_size, buffer) != line_size)
+	for (x = 0; x < info->width; x++)
+	{
+		color = (*buffer++ & 0xf8) << 8;
+		color |= (*buffer++ & 0xfc) << 3;
+		color |= *buffer++ >> 3;
+		outline[x] = color;
+	}
+	handle = (int16_t)info->_priv_var;
+	linesize = (size_t)info->width * 2;
+	if ((size_t)Fwrite(handle, linesize, outline) != linesize)
 	{
 		return FALSE;
 	}
@@ -365,4 +305,6 @@ void __CDECL encoder_quit(IMGINFO info)
 		Fclose(handle);
 		info->_priv_var = 0;
 	}
+	free(info->_priv_ptr);
+	info->_priv_ptr = 0;
 }

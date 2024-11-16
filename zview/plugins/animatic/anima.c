@@ -8,6 +8,29 @@
 #define NAME        "Animatic (Film)"
 #define DATE        __DATE__ " " __TIME__
 
+/*
+Animatic Film   *.FLM (ST low resolution only)
+
+1 word      number of frames
+16 words    palette
+1 word      speed (0 - 99; value is 99 - # vblanks to delay between frames)
+1 word      direction (0 = forwards, 1 = backwards)
+1 word      end action (what to do after the last frame)
+            0 = pause, then repeat from beginning
+            1 = immediately repeat from beginning
+            2 = reverse (change direction)
+1 word      width of film in pixels
+1 word      height of film in pixels
+1 word      Animatic version number (major) [< 2]
+1 word      Animatic version number (minor)
+1 long      magic number $27182818
+3 longs     reserved for expansion (should be all zeros)
+--------
+32 words    total for header
+
+? words     image data (words of screen memory) for each frame, in order
+*/
+
 
 struct file_header {
 	uint16_t num_frames;

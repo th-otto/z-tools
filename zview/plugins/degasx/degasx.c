@@ -6,6 +6,21 @@
 #define AUTHOR      "Thorsten Otto"
 #define DATE        __DATE__ " " __TIME__
 
+/*
+FuckPaint       *.PI4, *.PI9
+
+FuckPaint was an early Atari Falcon drawing program. The format is still
+popular because its simplicity. The PI4 extension is used for 320x240 pictures,
+the PI9 for 320x200 pictures. Except for the extension the two formats are
+exactly the same.
+
+256 longs      palette 256 colors, in Falcon format, R, G, 0, B
+38400 words    image data, 8 interleaved bitplanes
+-----------
+77824 bytes    total
+*/
+
+
 #ifdef PLUGIN_SLB
 long __CDECL get_option(zv_int_t which)
 {
@@ -30,21 +45,6 @@ long __CDECL get_option(zv_int_t which)
 	return -ENOSYS;
 }
 #endif
-
-/*
-FuckPaint       *.PI4, *.PI9
-
-FuckPaint was an early Atari Falcon drawing program. The format is still
-popular because its simplicity. The PI4 extension is used for 320x240 pictures,
-the PI9 for 320x200 pictures. Except for the extension the two formats are
-exactly the same.
-
-256 longs      palette 256 colors, in Falcon format, R, G, 0, B
-38400 words    image data, 8 interleaved bitplanes
------------
-77824 bytes    total
-*/
-
 
 /*==================================================================================*
  * boolean __CDECL reader_init:														*

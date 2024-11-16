@@ -7,6 +7,8 @@
 #include "zvplugin.h"
 
 /*
+Calamus Raster Graphic    *.CRG
+
 10 bytes    file id, 'CALAMUSCRG'
 1 word      version? [$03E8]
 1 word      version? [$0002]

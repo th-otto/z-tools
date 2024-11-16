@@ -28,6 +28,7 @@ PLUGINS = \
 	dunegraph \
 	duo \
 	d_graph \
+	eggpaint \
 	esm \
 	eureka \
 	gif \

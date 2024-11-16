@@ -36,9 +36,8 @@ file extension seems to be the only way to determine the contents.
 ?           array of longs
 
 ?           image data:
-
-
 */
+
 
 #ifdef PLUGIN_SLB
 

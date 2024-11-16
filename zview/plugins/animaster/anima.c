@@ -6,6 +6,30 @@
 #define NAME        "Animaster (Sprite Bank)"
 #define DATE        __DATE__ " " __TIME__
 
+/*
+Animaster (Sprite Bank)    *.ASB (ST low resolution only)
+
+1 word      number of frames - 1
+1 word      frame length including 6 byte frame header
+1 byte      maximum width, in pixels
+1 byte      maximum height, in pixels
+16 words    palette
+--------
+38 bytes    total for header
+
+For each frame {
+1 word      width of this frame (in pixels) - 1
+1 word      height of this frame (in pixels) - 1
+1 word      number of color planes [always 4]
+? words     image data (words of screen memory)
+}
+
+Additional information:
+Each frame is actually the result of the GFABASIC command
+'GET  x1,y1,x2,y2,image$' where the contents of image$ is then written to the
+file unmodified.
+*/
+
 
 struct frame_header {
 	uint16_t width;
