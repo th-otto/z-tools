@@ -52,6 +52,7 @@
  * New plugin for DeskPic format (*.GFB)
  * New plugin for DuneGraph format (*.DC1/*.DG1)
  * New plugin for DUO format (*.DUO/*.DU1/*.DU2)
+ * New plugin for D-GRAPH format (*.P32/*.P3C)
 
 Since the RECOIL plugin handles so many formats, it is
 assigned to all file extensions. If there is a specialized plugin

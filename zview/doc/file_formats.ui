@@ -76,6 +76,8 @@ supported features of the formats.
  DUO           !! .duo/.du1         !! 416x273         !! 4              !! None            !!
                !! .du2              !! 832x273         !! 2              !! None            !!
 !hline
+ D-GRAPH       !! .p32/.p3c         !! 320x200         !! 4              !! None/RLE        !!
+!hline
  Eureka RAW    !! .raw              !! Any             !! 8              !! None            !!
 !hline
  GEM (X)IMG    !! .img              !! Any             !! 1/2/4/8/24     !! None/RLE        !!
