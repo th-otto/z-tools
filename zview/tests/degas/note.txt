@@ -1,0 +1,23 @@
+The extra word at the end of a Degas font file:
+  “half-height” flag:
+     0 = can be rendered at half-height
+     1 = font should not not be rendered at half-height
+
+======================================================================
+
+Taken from SilkFont v2.02 documention:
+
+About Degas / Warp 9 fonts
+ ==========================
+
+Since Degas and Warp 9 font files contain raw data with no identifying
+header, they are detected by length as follows:  A file with length
+4096 or 4098 bytes is loaded as a Warp 9 font; one with length 2048 or
+2050 bytes is loaded as a Degas font, overwriting just the bottom half
+of the character set.  Any other length causes a file to be tested for
+GDOS validity, then loaded or rejected as appropriate.
+
+A Degas or Warp 9 font file can generally be interpreted as containing
+8x8 or 8x16 data.
+
+*

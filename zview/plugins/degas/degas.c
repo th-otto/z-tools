@@ -23,6 +23,149 @@
 #define AUTHOR      "Lonny Pursell"
 #define DATE        __DATE__ " " __TIME__
 
+/*
+DEGAS          *.PI1 (ST low resolution)
+               *.PI2 (ST medium resolution)
+               *.PI3 (ST high resolution)
+               (PI4, PI5, PI6)
+
+1 word         resolution (0 = low res, 1 = medium res, 2 = high res)
+               Other bits may be used in the future; use a simple bit test
+               rather than checking for specific word values.
+16 words       palette
+16000 words    image data (screen memory)
+-----------
+32034 bytes    total
+
+Conny Pettersson of Unit Seventeen proposed to extend the Degas format with
+PI4 and PI5 for TT resolutions in a text file accompaning the viewst program:
+
+For saving the pictures, I have extended the standard Degas-format PI0 to
+the TT-resolutions. Following is a description of the format I use:
+               ST-Low           TT-Low           TT-Medium        TT-High
+Extension:     PI1              PI4              PI5              PI6
+Resolution:    1 word: $0000    1 word: $0007    1 word: $0004    1 word: $0006
+Colormap:      16 word          256 word         16 word          2 words
+Bitmap:        32000 bytes      153600 bytes     153600 bytes     153600 bytes
+Total length:  32034 bytes      154114 bytes     153634 bytes     153606
+
+This format is not in wide spread use as data compression on those huge screens
+really makes sense. Nevertheless various file extension descriptions on the
+internet assign the extensions PI4, PI5 and PI6 to TT Degas resolutions.
+
+DEGAS Elite     *.PI1 (low resolution)
+                *.PI2 (medium resolution)
+                *.PI3 (high resolution)
+
+1 word          resolution (0 = low res, 1 = medium res, 2 = high res)
+                Other bits may be used in the future; use a simple bit test
+                rather than checking for specific word values.
+16 words        palette
+                For high resolution pictures the least significant bit of the
+                first word determines whether the picture is black on white
+                (bit set) or white on black (bit not set)
+16000 words     image data (screen memory)
+4 words         left color animation limit table (starting color numbers)
+4 words         right color animation limit table (ending color numbers)
+4 words         animation channel direction flag (0 = left, 1 = off, 2 = right)
+4 words         128 - animation channel delay in 1/60's of a second. [0 - 128]
+                (I.e., subtract word from 128 to get 1/60th's of a second.)
+-----------
+32066 bytes     total
+
+DEGAS Elite (Block)    *.BL1 (ST low resolution)
+                       *.BL2 (ST medium resolution)
+                       *.BL3 (ST high resolution)
+
+Degas Elite block files are IFF files with a BL? extension. In a Degas block
+the following IFF chunks are found: ILBM, BMHD, CMAP and BODY.
+
+See the IFF file format description.
+
+DEGAS Elite (Compressed)        *.PC1 (st low resolution)
+                                *.PC2 (st medium resolution)
+                                *.PC3 (st high resolution)
+
+1 word          resolution (same as Degas, but high order bit is set; i.e., hex
+                8000 = low res, hex 8001 = medium res, hex 8002 = high res).
+                Other bits may be used in the future; use a simple bit test
+                rather than checking for specific word values.
+16 words        palette
+                For high resolution pictures the least significant bit of the
+                first word determines whether the picture is black on white
+                (bit set) or white on black (bit not set)
+< 32000 bytes   control/data bytes
+4 words         left color animation limit table (starting color numbers)
+4 words         right color animation limit table (ending color numbers)
+4 words         animation channel direction flag [0 = left, 1 = off, 2 = right]
+4 words         128 - animation channel delay in 1/60's of a second. [0 - 128]
+                (I.e., subtract word from 128 to get 1/60th's of a second.)
+-----------
+< 32066 bytes   total
+
+Compression Scheme:
+
+PackBits compression is used (see below). Each scan line is compressed
+separately; i.e., all data for a given scan line appears before any data for
+the next scan line. The scan lines are specified from top to bottom (i.e., 0 is
+first). For each scan line, all the data for a given bit plane appears before
+any data for the next higher order bit plane. Note that this is identical to
+the IFF 'BODY' image data.
+
+To clarify: The first data in the file will be the data for the lowest order
+bit plane of scan line zero, followed by the data for the next higher order bit
+plane of scan line zero, etc., until all bit planes have been specified for
+scan line zero. The next data in the file will be the data for the lowest order
+bit plane of scan line one, followed by the data for the next higher order bit
+plane of scan line one, etc., until all bit planes have been specified for all
+scan lines.
+
+Caveats:
+
+DEGAS Elite's picture loading routine places some restrictions on compressed
+DEGAS files:
+
+    o Elite uses a 40-byte buffer to store data being decompressed.
+
+    o Whenever a control command is encountered, bytes are stuffed in this
+      buffer.
+
+    o The buffer is only emptied when there are EXACTLY 40 characters in it.
+
+
+The important conclusion here is that
+
+    No control command may cause the buffer to have more than 40 bytes in it.
+    In other words, all control commands must end on or before the 40-byte
+    boundary.
+
+Any picture violating the last condition will cause Elite to get a bus error
+when the picture is loaded.
+
+See also PackBits Compression Algorithm.
+
+
+DEGAS (Overscan)    *.PI1 (4 bit-planes)
+
+These are images saved in a modified DEGAS format to accommodate a larger
+bitmap with overscan. There's no easy way to know the resolution of the image.
+The bitmap is always the same plane structure as ST low resolution. Compressed
+files have not been found.
+
+Files that have been found:
+
+File size     Resolution
+------------  ----------
+38434 bytes   320x240
+44834 bytes   320x280
+116514 bytes  416x560
+
+Note: The 320x240 sample found had bit #2 of the first word set. Perhaps this
+indicates overscan? However, it's not consistent across all samples and should
+probably be ignored.
+*/
+
+
 #define DEGAS_SIZE	32034L
 #define ELITE_SIZE	32066L
 #define	M_320x240	38434L				/* overscan modes */
