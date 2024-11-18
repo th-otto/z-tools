@@ -94,6 +94,8 @@ supported features of the formats.
 !hline
  Falcons TC    !! .ftc/.xga         !! Several         !! 16             !! None            !! 
 !hline
+ FULLSHOW      !! .kid/.kil/.kit    !! 460x274         !! 16             !! None            !! 
+!hline
  GDOS fonts    !! .fnt              !! Any             !! 1              !! None            !! 
 !hline
  GEM (X)IMG    !! .img              !! Any             !! 1/2/4/8/24     !! None/RLE        !!

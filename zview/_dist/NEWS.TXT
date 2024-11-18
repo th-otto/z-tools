@@ -59,6 +59,7 @@
  * New plugin for FLUFF64 (*.FLF)
  * New plugin for Font files (*.FNT)
  * New plugin for Falc Truecolor files (*.FTC/*.XGA)
+ * New plugin for FULLSHOW files (*.KID/*.KIL/*.KID)
 
 Since the RECOIL plugin handles so many formats, it is
 assigned to all file extensions. If there is a specialized plugin

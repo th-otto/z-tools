@@ -34,6 +34,7 @@ PLUGINS = \
 	flic \
 	fluff64 \
 	fnt \
+	fullshow \
 	gif \
 	godpaint \
 	img \
