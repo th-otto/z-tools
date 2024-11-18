@@ -88,6 +88,8 @@ supported features of the formats.
 !hline
  EZ-Art        !! .eza              !! 320x200         !! 4              !! RLE             !!
 !hline
+ FLIC          !! .flc/.flh/.fli    !! Any             !! 8/16           !! FLIC            !! Animation
+!hline
  GEM (X)IMG    !! .img              !! Any             !! 1/2/4/8/24     !! None/RLE        !!
 !hline
  GIF           !! .gif              !! Any             !! 1-8            !! LZW             !! Transparency
