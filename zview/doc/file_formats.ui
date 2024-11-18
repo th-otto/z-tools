@@ -90,6 +90,8 @@ supported features of the formats.
 !hline
  FLIC          !! .flc/.flh/.fli    !! Any             !! 8/16           !! FLIC            !! Animation
 !hline
+ FLUFF64       !! .flf              !! 320x200         !! 8              !! None            !! 
+!hline
  GEM (X)IMG    !! .img              !! Any             !! 1/2/4/8/24     !! None/RLE        !!
 !hline
  GIF           !! .gif              !! Any             !! 1-8            !! LZW             !! Transparency

@@ -32,6 +32,7 @@ PLUGINS = \
 	esm \
 	eureka \
 	flic \
+	fluff64 \
 	gif \
 	godpaint \
 	img \
