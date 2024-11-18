@@ -57,6 +57,7 @@
  * New plugin for EZ-Art Professional format (*.EZA)
  * New plugin for FLIC animations (*.FLC/*.FLH/*.FLI)
  * New plugin for FLUFF64 (*.FLF)
+ * New plugin for Font files (*.FNT)
 
 Since the RECOIL plugin handles so many formats, it is
 assigned to all file extensions. If there is a specialized plugin

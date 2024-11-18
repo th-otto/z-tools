@@ -33,6 +33,7 @@ PLUGINS = \
 	eureka \
 	flic \
 	fluff64 \
+	fnt \
 	gif \
 	godpaint \
 	img \
