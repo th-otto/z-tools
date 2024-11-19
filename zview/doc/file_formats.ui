@@ -102,8 +102,12 @@ supported features of the formats.
 !hline
  GEM (X)IMG    !! .img              !! Any             !! 1/2/4/8/24     !! None/RLE        !!
 !hline
- GFA RayTrace  !! .sal              !! 320x200         !! 12             !! RLE             !!
-               !! .sah              !! 640x200         !! 1              !! RLE             !!
+ GFA RayTrace  !! .sal              !! 320x200         !! 12             !! RLE             !! Animation
+               !! .sah              !! 640x200         !! 1              !! RLE             !! Animation
+               !! .sul              !! 320x200         !! 12             !! None            !!
+               !! .scl              !! 320x200         !! 12             !! RLE             !!
+               !! .suh              !! 640x200         !! 1              !! None            !!
+               !! .sch              !! 640x200         !! 1              !! RLE             !!
 !hline
  GIF           !! .gif              !! Any             !! 1-8            !! LZW             !! Transparency
                !!                   !!                 !!                !!                 !! Animation

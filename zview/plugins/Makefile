@@ -37,6 +37,7 @@ PLUGINS = \
 	fullshow \
 	funnypnt \
 	gfartani \
+	gfartimg \
 	gif \
 	godpaint \
 	img \

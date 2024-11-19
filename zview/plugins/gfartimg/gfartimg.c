@@ -1,5 +1,5 @@
-#define	VERSION	     0x201
-#define NAME        "GFA RayTrace (Animation)"
+#define	VERSION	     0x110
+#define NAME        "GFA RayTrace (Image)"
 #define AUTHOR      "Thorsten Otto"
 #define DATE        __DATE__ " " __TIME__
 
@@ -58,6 +58,7 @@ calculate the color of a pixel at a given x/y coordinate is unknown.
 #include "plugin.h"
 #include "zvplugin.h"
 
+
 #ifdef PLUGIN_SLB
 
 long __CDECL get_option(zv_int_t which)
@@ -67,7 +68,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("SAL\0" "SAH\0");
+		return (long) ("SUL\0" "SCL\0" "SUH\0" "SCH\0");
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -84,21 +85,16 @@ long __CDECL get_option(zv_int_t which)
 }
 #endif
 
-#include "gfatable.c"
-#include "gfadepac.c"
-
 #define SCREEN_SIZE 32000L
 
 struct file_header {
-	uint32_t frame_count;
-	uint32_t size_factor;
-	uint32_t frame_sizes[10];
+	char fileid[5];
+	char size_factor;
+	char crlf[2];
 };
+#include "../gfartani/gfatable.c"
+#include "../gfartani/gfadepac.c"
 
-/* FIXME: statics */
-static uint32_t frame_sizes[20];
-static uint32_t frame_positions[20];
-static struct file_header header;
 
 /*==================================================================================*
  * boolean __CDECL reader_init:														*
@@ -115,63 +111,162 @@ static struct file_header header;
 boolean __CDECL reader_init(const char *name, IMGINFO info)
 {
 	int16_t handle;
+	uint32_t file_size;
+	uint32_t data_size;
 	uint8_t *bmap;
-	char fileid[5];
-	int i;
+	uint16_t *colormaps;
+	struct file_header header;
+	uint16_t size_factor;
 
 	if ((handle = (int16_t) Fopen(name, FO_READ)) < 0)
 	{
 		return FALSE;
 	}
-	if (Fread(handle, sizeof(fileid), fileid) != sizeof(fileid) ||
-		Fread(handle, sizeof(header), &header) != sizeof(header) ||
-		header.frame_count > 9)
+	file_size = Fseek(0, handle, SEEK_END);
+	Fseek(0, handle, SEEK_SET);
+	
+	if (Fread(handle, sizeof(header), &header) != sizeof(header))
 	{
 		Fclose(handle);
 		return FALSE;
 	}
-	header.frame_count += 1;
-	for (i = 0; i < 10; i++)
-		frame_sizes[i] = header.frame_sizes[i];
 
-	bmap = malloc(SCREEN_SIZE + SCREEN_SIZE + 20000L);
+	bmap = malloc(SCREEN_SIZE + 20000L);
 	if (bmap == NULL)
 	{
 		Fclose(handle);
 		return FALSE;
 	}
+	colormaps = (uint16_t *)(bmap + SCREEN_SIZE);
 
-	if (fileid[0] == 's' &&
-		fileid[1] == 'a' &&
-		fileid[2] == 'l' &&
-		fileid[3] == 0x0d &&
-		fileid[4] == 0x0a)
+	if (header.fileid[0] == 's' &&
+		header.fileid[1] == 'u' &&
+		header.fileid[2] == 'l' &&
+		header.fileid[3] == 0x0d &&
+		header.fileid[4] == 0x0a)
 	{
+		int j;
+		
+		/*
+		 * Uncompressed, low resolution
+		 */
+		for (j = 0; j < 63; j++)
+			colormaps[j] = 0;
+		size_factor = header.size_factor - '0';
+		
 		info->planes = 12;
 		info->width = 320;
-		info->height = 200 / (uint16_t)header.size_factor;
+		info->height = 200 / size_factor;
 		info->components = 3;
-		for (i = 0; i < (int)header.frame_count; i++)
+
+		if (Fread(handle, SCREEN_SIZE / size_factor, bmap) != SCREEN_SIZE / size_factor ||
+			Fread(handle, 18400 / size_factor, colormaps + 63) != 18400 / size_factor)
 		{
-			frame_positions[i] = Fseek(0, handle, SEEK_CUR);
-			Fseek(18400 / header.size_factor, handle, SEEK_CUR);
-			Fseek(frame_sizes[i], handle, SEEK_CUR);
+			free(bmap);
+			Fclose(handle);
+			return FALSE;
 		}
-	} else if (fileid[0] == 's' &&
-		fileid[1] == 'a' &&
-		fileid[2] == 'h' &&
-		fileid[3] == 0x0d &&
-		fileid[4] == 0x0a)
+		strcpy(info->compression, "None");
+	} else if (
+		header.fileid[0] == 's' &&
+		header.fileid[1] == 'c' &&
+		header.fileid[2] == 'l' &&
+		header.fileid[3] == 0x0d &&
+		header.fileid[4] == 0x0a)
 	{
+		int j;
+		uint16_t *temp;
+
+		/*
+		 * Compressed, low resolution
+		 */
+		for (j = 0; j < 63; j++)
+			colormaps[j] = 0;
+		size_factor = header.size_factor - '0';
+		
+		info->planes = 12;
+		info->width = 320;
+		info->height = 200 / size_factor;
+		info->components = 3;
+
+		data_size = 18400 / size_factor;
+		if ((size_t)Fread(handle, data_size, colormaps + 63) != data_size)
+		{
+			free(bmap);
+			Fclose(handle);
+			return FALSE;
+		}
+		temp = malloc(SCREEN_SIZE);
+		if (temp == NULL)
+		{
+			free(bmap);
+			Fclose(handle);
+			return FALSE;
+		}
+		data_size = file_size - data_size - 8;
+		if (data_size > SCREEN_SIZE || (size_t)Fread(handle, data_size, temp) != data_size)
+		{
+			free(temp);
+			free(bmap);
+			Fclose(handle);
+			return FALSE;
+		}
+		gfa_depac(temp, (uint16_t*)bmap, SCREEN_SIZE / size_factor);
+		free(temp);
+		strcpy(info->compression, "RLE");
+	} else if (
+		header.fileid[0] == 's' &&
+		header.fileid[1] == 'c' &&
+		header.fileid[2] == 'h' &&
+		header.fileid[3] == 0x0d &&
+		header.fileid[4] == 0x0a)
+	{
+		uint16_t *temp;
+		
+		/* Compressed, high resolution */
+		size_factor = header.size_factor - '0';
 		info->planes = 1;
 		info->width = 640;
-		info->height = 400 / (uint16_t)header.size_factor;
+		info->height = 400 / size_factor;
 		info->components = 1;
-		for (i = 0; i < (int)header.frame_count; i++)
+		
+		temp = malloc(SCREEN_SIZE);
+		if (temp == NULL)
 		{
-			frame_positions[i] = Fseek(0, handle, SEEK_CUR);
-			Fseek(frame_sizes[i], handle, SEEK_CUR);
+			free(bmap);
+			Fclose(handle);
+			return FALSE;
 		}
+		data_size = file_size - 8;
+		if (data_size > SCREEN_SIZE || (size_t)Fread(handle, data_size, temp) != data_size)
+		{
+			free(temp);
+			free(bmap);
+			Fclose(handle);
+			return FALSE;
+		}
+		gfa_depac(temp, (uint16_t*)bmap, SCREEN_SIZE / size_factor);
+		free(temp);
+		strcpy(info->compression, "RLE");
+	} else if (
+		header.fileid[0] == 0x00 &&
+		header.fileid[1] == 0x02 &&
+		file_size == SCREEN_SIZE + 34)
+	{
+		/* Uncompressed, high resolution */
+		info->planes = 1;
+		info->width = 640;
+		info->height = 400;
+		info->components = 1;
+		
+		Fseek(34, handle, SEEK_SET);
+		if (Fread(handle, SCREEN_SIZE, bmap) != SCREEN_SIZE)
+		{
+			free(bmap);
+			Fclose(handle);
+			return FALSE;
+		}
+		strcpy(info->compression, "None");
 	} else
 	{
 		free(bmap);
@@ -179,40 +274,21 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		return FALSE;
 	}
 
-	/*
-	 * build reserse frame map
-	 */
-	if (!(Kbshift(-1) & K_ALT))
-	{
-		int j;
-		
-		j = header.frame_count;
-		i = j - 1;
-		while (i >= 0)
-		{
-			++header.frame_count;
-			frame_positions[j] = frame_positions[i];
-			frame_sizes[j] = frame_sizes[i];
-			j++;
-			i--;
-		}
-	}
-
+	Fclose(handle);
+	
 	info->indexed_color = FALSE;
 	info->colors = 1L << info->planes;
 	info->real_width = info->width;
 	info->real_height = info->height;
 	info->memory_alloc = TT_RAM;
-	info->page = header.frame_count;	/* required - more than 1 = animation */
+	info->page = 1;						/* required - more than 1 = animation */
 	info->orientation = UP_TO_DOWN;
 	info->num_comments = 0;				/* required - disable exif tab */
 	info->_priv_var = 0;				/* y position in bmap */
 	info->_priv_var_more = 0;
 	info->_priv_ptr = bmap;
-	info->__priv_ptr_more = (void *)(intptr_t)handle;
 	
-	strcpy(info->info, "GFA RayTrace (Animation)");
-	strcpy(info->compression, "RLE");
+	strcpy(info->info, "GFA RayTrace (Image)");
 	
 	return TRUE;
 }
@@ -242,21 +318,6 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 			uint8_t *end;
 			
 			bmap = info->_priv_ptr;
-			if (info->_priv_var_more == 0)
-			{
-				int handle;
-				uint16_t *temp;
-				
-				handle = (int)(intptr_t)info->__priv_ptr_more;
-				Fseek(frame_positions[info->page_wanted], handle, SEEK_SET);
-				temp = (uint16_t *)(bmap + SCREEN_SIZE);
-				if ((size_t)Fread(handle, frame_sizes[info->page_wanted], temp) != frame_sizes[info->page_wanted])
-				{
-					return FALSE;
-				}
-				gfa_depac(temp, (uint16_t *)bmap, SCREEN_SIZE / (uint16_t)header.size_factor);
-				info->delay = 10;
-			}
 			end = buffer + info->width;
 			do
 			{
@@ -270,13 +331,6 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 				*buffer++ = (byte >> 1) & 1;
 				*buffer++ = (byte >> 0) & 1;
 			} while (buffer < end);
-	
-			++info->_priv_var_more;
-			if (info->_priv_var_more == info->height)
-			{
-				info->_priv_var_more = 0;
-				pos = 0;
-			}
 		}
 		break;
 	
@@ -288,38 +342,22 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 			uint16_t byte;
 			int16_t plane;
 			uint16_t *bmap16;
-			uint16_t *temp;
 			uint16_t *colormaps;
 			uint16_t idx;
 			uint16_t color;
 			
 			bmap16 = (uint16_t *)info->_priv_ptr;
-			temp = bmap16 + SCREEN_SIZE / 2;
-			colormaps = temp + SCREEN_SIZE / 2;
+			colormaps = bmap16 + SCREEN_SIZE / 2;
 
-			if (info->_priv_var_more == 0)
-			{
-				int j;
-				int handle;
-				
-				for (j = 0; j < 63; j++)
-					colormaps[j] = 0;
-				handle = (int)(intptr_t)info->__priv_ptr_more;
-				Fseek(frame_positions[info->page_wanted], handle, SEEK_SET);
-				if ((size_t)Fread(handle, 18400 / header.size_factor, colormaps + 47) != 18400 / header.size_factor ||
-					(size_t)Fread(handle, frame_sizes[info->page_wanted], temp) != frame_sizes[info->page_wanted])
-				{
-					return FALSE;
-				}
-				gfa_depac(temp, bmap16, SCREEN_SIZE / (uint16_t)header.size_factor);
-				info->delay = 10;
-			}
 			x = 0;
 			w = 0;
 			do
 			{
 				for (i = 15; i >= 0; i--)
 				{
+					/*
+					 * FIXME: unroll inner loop
+					 */
 					for (plane = byte = 0; plane < 4; plane++)
 					{
 						if ((bmap16[pos + plane] >> i) & 1)
@@ -336,11 +374,6 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 			} while (x < info->width);
 	
 			++info->_priv_var_more;
-			if (info->_priv_var_more == info->height)
-			{
-				info->_priv_var_more = 0;
-				pos = 0;
-			}
 		}
 		break;
 	}
@@ -364,16 +397,8 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
  *==================================================================================*/
 void __CDECL reader_quit(IMGINFO info)
 {
-	int handle;
-
 	free(info->_priv_ptr);
 	info->_priv_ptr = 0;
-	handle = (int)(intptr_t)info->__priv_ptr_more;
-	if (handle > 0)
-	{
-		Fclose(handle);
-		info->__priv_ptr_more = 0;
-	}
 }
 
 
