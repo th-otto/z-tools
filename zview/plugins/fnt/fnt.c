@@ -284,7 +284,6 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	bmap = malloc(file_size);
 	if (bmap == NULL)
 	{
-		free(bmap);
 		Fclose(handle);
 		return FALSE;
 	}
