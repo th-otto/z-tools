@@ -1,0 +1,5 @@
+BIRD2.FUN is an animation file, more than one frame.
+Note the bird is skewed and the bounding box overwrites part of the mountain.
+Funny Paint has serious issues importing NEOchrome animation files.
+However, a hand drawn animation should be ok.
+This file demonstrates the layout of a multi-frame animation file.
