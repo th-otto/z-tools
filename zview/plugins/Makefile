@@ -38,6 +38,7 @@ PLUGINS = \
 	funnypnt \
 	gfartani \
 	gfartimg \
+	gft \
 	gif \
 	godpaint \
 	img \

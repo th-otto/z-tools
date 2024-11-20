@@ -109,6 +109,8 @@ supported features of the formats.
                !! .suh              !! 640x200         !! 1              !! None            !!
                !! .sch              !! 640x200         !! 1              !! RLE             !!
 !hline
+ GFA Font      !! .gft              !! 512x80          !! 1              !! None            !! 
+!hline
  GIF           !! .gif              !! Any             !! 1-8            !! LZW             !! Transparency
                !!                   !!                 !!                !!                 !! Animation
                !!                   !!                 !!                !!                 !! Textual data
