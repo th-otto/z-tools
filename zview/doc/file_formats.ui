@@ -117,6 +117,8 @@ supported features of the formats.
 !hline
  GodPaint      !! .god              !! Any             !! 16             !! None            !! Encoder
 !hline
+ HighResMode   !! .hrm              !! 640x400         !! 24             !! None            !!
+!hline
  JPEG          !! .jpg              !! Any             !! 8/24           !! JPEG            !! Lossy compression
                !! .jpe              !!                 !!                !!                 !! Thumbnail
                !! .jpeg             !!                 !!                !!                 !! Textual data

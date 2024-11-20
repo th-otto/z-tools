@@ -41,6 +41,7 @@ PLUGINS = \
 	gft \
 	gif \
 	godpaint \
+	hrm \
 	img \
 	jpg \
 	neochrome \

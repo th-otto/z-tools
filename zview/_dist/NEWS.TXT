@@ -64,6 +64,7 @@
  * New plugin for GFA RayTrace Animations (*.SAL/*.SAH)
  * New plugin for GFA RayTrace Images (*.SUL/*.SCL/*.SUH/*.SCH)
  * New plugin for GFA Fonts (*.GFT)
+ * New plugin for HighResMode format (*.HRM)
 
 Since the RECOIL plugin handles so many formats, it is
 assigned to all file extensions. If there is a specialized plugin
