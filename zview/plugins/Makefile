@@ -31,9 +31,11 @@ PLUGINS = \
 	eggpaint \
 	esm \
 	eureka \
+	ezartpro \
 	flic \
 	fluff64 \
 	fnt \
+	ftc \
 	fullshow \
 	funnypnt \
 	gfartani \
@@ -42,6 +44,7 @@ PLUGINS = \
 	gif \
 	godpaint \
 	hrm \
+	iff_dctv \
 	img \
 	jpg \
 	neochrome \

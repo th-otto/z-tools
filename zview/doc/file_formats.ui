@@ -119,6 +119,8 @@ supported features of the formats.
 !hline
  HighResMode   !! .hrm              !! 640x400         !! 24             !! None            !!
 !hline
+ IFF DCTV      !! .dct/.dctv        !! Any             !! 1/2/3/4        !! YUV/PackBits    !!
+!hline
  JPEG          !! .jpg              !! Any             !! 8/24           !! JPEG            !! Lossy compression
                !! .jpe              !!                 !!                !!                 !! Thumbnail
                !! .jpeg             !!                 !!                !!                 !! Textual data

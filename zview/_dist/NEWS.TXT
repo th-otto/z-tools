@@ -22,13 +22,16 @@
  * BMP files can now be saved (uncompressed only)
  * For most codecs, a info box is now available
  * HyperText documentation has been updated.
+ * Update PDF library to 4.04
+ * French resource file (contributed by @marss)
+
+ New formats:
+ ------------
  * New plugin for signum image format (*.ISM)
  * New plugin for WebP image format
- * Update PDF library to 4.04
  * New plugin for NetPbm image format(s) (*.PPM/*.PGM/*.PBM/*.PAM)
  * New plugin for TmS Cranach images (*.ESM)
  * New plugin for PortFolio images (*.PGF/*.PGC/*.PGX)
- * French resource file (contributed by @marss)
  * New plugin for Animaster sprite banks (*.ASB/*.MSK)
  * New plugin from RECOIL with 552 file formats
  * New plugin for Animatic films (*.FLM)
@@ -65,6 +68,7 @@
  * New plugin for GFA RayTrace Images (*.SUL/*.SCL/*.SUH/*.SCH)
  * New plugin for GFA Fonts (*.GFT)
  * New plugin for HighResMode format (*.HRM)
+ * New plugin for IFF DCTV images (*.DCT/*.DCTV)
 
 Since the RECOIL plugin handles so many formats, it is
 assigned to all file extensions. If there is a specialized plugin
@@ -95,7 +99,7 @@ for that format, it is prioritized.
  * TIFF module no longer prints messages to the screen
  * Fix a bug in the TIFF codec that caused it to crash when loading
    images with embedded old jpeg files
- * Lots of codecs have been rewritten from scratch,
+ * Lots of codecs have been rewritten from scratch (see above),
    since Lonny does not support the SLB plugins any longer,
    and some of them had some memory leaks.
 
@@ -139,7 +143,6 @@ First release made by me (Thorsten Otto)
  ----------
  * There are still some animated GIFs that are not displayed correctly
  * Some bugs that were reported on Zorro's site (https://sourceforge.net/p/z-tools/bugs/)
- * The HyperText documentation has not yet been updated.
  * The TIFF library sometimes prints warnings on the console
  * The TIFF library per default only supports up to 16 bits/sample (that is,
    48 bits/pixel for RGB formats). Some images from their test archive
