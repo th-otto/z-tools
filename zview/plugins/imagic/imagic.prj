@@ -1,4 +1,4 @@
-imagelab.ldg
+imagic.ldg
 
 .C[-I.]
 .C[-Ic:\pc\include]
@@ -28,7 +28,8 @@ imagelab.ldg
 =
 pcstart.s
 imgldg.c
-imagelab.c
+imagics.s
+imagic.c
 
 ldglib\ldglib.c
 ldglib\stdpc.s

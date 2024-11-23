@@ -47,6 +47,7 @@ PLUGINS = \
 	iff_dctv \
 	iff_rgbn \
 	imagelab \
+	imagic \
 	img \
 	jpg \
 	neochrome \

@@ -30,10 +30,10 @@ static PROC Func[] =
 
 static LDGLIB plugin =
 {
-	0x201, 	/* Plugin version */
+	0x200, 	/* Plugin version */
 	sizeof(Func) / sizeof(Func[0]),					/* Number of plugin's functions */
 	Func,				/* List of functions */
-	"B_W\0" "B&W\0",	/* File's type Handled */
+	"IC1\0" "IC2\0" "IC3\0",	/* File's type Handled */
 	LDG_NOT_SHARED, 	/* The flags NOT_SHARED is used here.. even if zview plugins are reentrant 
 					   	   and are shareable, we must use this flags because we don't know if the 
 					   	   user has ldg.prg deamon installed on his computer */

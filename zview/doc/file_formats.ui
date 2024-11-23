@@ -124,6 +124,10 @@ supported features of the formats.
 !hline
  ImageLab      !! .b_w/.b&w         !! Any             !! 8              !! None            !! grayscale
 !hline
+ Imagic        !! .ic1              !! 320x200         !! 4              !! None/RLE        !!
+               !! .ic2              !! 640x200         !! 2              !! None/RLE        !!
+               !! .ic3              !! 640x400         !! 1              !! None/RLE        !! 
+!hline
  JPEG          !! .jpg              !! Any             !! 8/24           !! JPEG            !! Lossy compression
                !! .jpe              !!                 !!                !!                 !! Thumbnail
                !! .jpeg             !!                 !!                !!                 !! Textual data

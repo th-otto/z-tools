@@ -1,4 +1,4 @@
-#define	VERSION	    0x200
+#define	VERSION	    0x201
 #define NAME        "ImageLab"
 #define AUTHOR      "Thorsten Otto"
 #define DATE        __DATE__ " " __TIME__
