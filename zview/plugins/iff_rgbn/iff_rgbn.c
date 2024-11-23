@@ -1,14 +1,12 @@
-#define	VERSION	    0x201
-#define NAME        "DCTV - Interchange File Format"
+#define	VERSION	    0x200
+#define NAME        "RGB8/RGBN - Interchange File Format"
 #define AUTHOR      "Thorsten Otto"
 #define DATE        __DATE__ " " __TIME__
-#define MISC_INFO   "Some code by cholok"
 
 #include "plugin.h"
 #include "zvplugin.h"
 #define NF_DEBUG 0
 #include "nfdebug.h"
-#include "cvtdctv.c"
 
 /*
 Interchange File Format    *.IFF
@@ -132,7 +130,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("DCT\0" "DCTV\0");
+		return (long) ("TSI\0");
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -142,8 +140,6 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
-	case INFO_MISC:
-		return (long)MISC_INFO;
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}
@@ -153,30 +149,78 @@ long __CDECL get_option(zv_int_t which)
 
 /* FIXME: statics */
 static char anno[256 + 1];
-static struct BitMap bitmap;
-static char info_txt[] = "DCTVx - Interchange File Format";
-
-#include "../degas/packbits.c"
 
 
 #if NF_DEBUG
 static void bail(const char *msg)
-#else
-static void bail(void)
-#define bail(msg) bail()
-#endif
 {
-	int i;
-	
 	nf_debugprintf(msg);
-	for (i = 0; i < 8; i++)
+}
+#else
+#define bail(msg)
+#endif
+
+
+static long decode_rgbx(unsigned char *src, unsigned char *dst, size_t src_cnt, uint16_t width, uint16_t height, int rgb8)
+{
+	unsigned char red;
+	unsigned char green;
+	unsigned char blue;
+	size_t cnt;
+	uint8_t *end;
+	size_t pixels;
+	
+	end = src + src_cnt;
+	red = 0;
+	green = 0;
+	blue = 0;
+	cnt = 0;
+	for (pixels = (size_t)width * height; pixels > 0; pixels--)
 	{
-		if (bitmap.Planes[i] != NULL)
+		if (cnt == 0)
 		{
-			free(bitmap.Planes[i]);
-			bitmap.Planes[i] = NULL;
+			if (rgb8 != 0)
+			{
+				if (src + 4 > end)
+					return FALSE;
+				red = src[0];
+				green = src[1];
+				blue = src[2];
+				cnt = src[3] & 0x7f;
+				src += 4;
+			} else
+			{
+				if (src + 2 > end)
+					return FALSE;
+				red = src[0];
+				green = (red & 0x0f) * 17;
+				red = (red >> 4) * 17;
+				blue = src[1];
+				cnt = blue & 7;
+				blue = (blue >> 4) * 17;
+				src += 2;
+			}
+			if (cnt == 0)
+			{
+				if (src >= end)
+					return FALSE;
+				cnt = src[0];
+				src += 1;
+				if (cnt == 0)
+				{
+					if (src + 2 > end)
+						return FALSE;
+					cnt = (src[0] << 8) | src[1];
+					src += 2;
+				}
+			}
 		}
+		*dst++ = red;
+		*dst++ = green;
+		*dst++ = blue;
+		cnt--;
 	}
+	return TRUE;
 }
 
 
@@ -201,19 +245,16 @@ static void bail(void)
  *==================================================================================*/
 boolean __CDECL reader_init(const char *name, IMGINFO info)
 {
-	unsigned int i;
 	size_t image_size;
+	size_t line_size;
+	int16_t handle;
+	uint32_t camg;
 	uint8_t dummy;
 	uint32_t chunk_id;
 	uint32_t form_id;
 	uint32_t chunk_size;
-	int handle;
-	struct DCTVCvtHandle *cvt;
-	uint8_t *body;
-	uint32_t src_offset;
-	uint32_t dst_offset;
-	uint16_t y;
-	uint32_t camg;
+	uint8_t *bmap;
+	int rgb8;
 	struct {
 		uint16_t width;
 		uint16_t height;
@@ -229,15 +270,13 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		int16_t page_width;
 		int16_t page_height;
 	} bmhd;
-	uint16_t palette[16];
 	
+	camg = 0;
+	rgb8 = 0;
+
 	nf_debugprintf("reader_init: %s\n", name);
 
 	anno[0] = '\0';
-	for (i = 0; i < 8; i++)
-	{
-		bitmap.Planes[i] = NULL;
-	}
 	handle = (int)Fopen(name, FO_READ);
 	if (handle < 0)
 	{
@@ -261,7 +300,8 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	
 	image_size = 0;
 	camg = 0;
-	body = NULL;
+	bmap = NULL;
+	rgb8 = 0;
 	for (;;)
 	{
 		if (Fread(handle, sizeof(chunk_id), &chunk_id) !=sizeof(chunk_id) ||
@@ -275,10 +315,21 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		{
 			uint32_t form_type;
 
-			if (Fread(handle, sizeof(form_type), &form_type) != sizeof(form_type) ||
-				form_type != MAKE_ID('I', 'L', 'B', 'M'))
+			if (Fread(handle, sizeof(form_type), &form_type) != sizeof(form_type))
 			{
 				bail("fread failed\n");
+				Fclose(handle);
+				return FALSE;
+			}
+			if (form_type == MAKE_ID('R', 'G', 'B', '8'))
+			{
+				rgb8 = 1;
+			} else if (form_type == MAKE_ID('R', 'G', 'B', 'N'))
+			{
+				rgb8 = 0;
+			} else
+			{
+				bail("abort - form type not supported\n");
 				Fclose(handle);
 				return FALSE;
 			}
@@ -291,31 +342,23 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 				Fclose(handle);
 				return FALSE;
 			}
-			if (bmhd.planes > 4)
+			if (bmhd.planes != 13 && bmhd.planes != 25)
 			{
-				bail("abort - too many planes\n");
+				bail("abort - wrong number of planes\n");
 				Fclose(handle);
 				return FALSE;
 			}
-			if (bmhd.mask == 1 || bmhd.mask == 4)
-			{
-				bail("abort - alpha/mask not allowed\n");
-				Fclose(handle);
-				return FALSE;
-			}
-			image_size = (((size_t)bmhd.width + 15) >> 4) * 2 * (size_t)bmhd.planes * bmhd.height;
+			image_size = (size_t)bmhd.width * (size_t)bmhd.height * 3;
 		} else if (chunk_id == MAKE_ID('C', 'A', 'M', 'G'))
 		{
-			uint32_t val;
-
 			nf_debugprintf("load camg\n");
-			if (Fread(handle, sizeof(val), &val) != sizeof(val))
+			if (Fread(handle, sizeof(camg), &camg) != sizeof(camg))
 			{
 				bail("fread failed\n");
 				Fclose(handle);
 				return FALSE;
 			}
-			camg = val & 0x8024L;
+			camg &= 0x8024L;
 		} else if (chunk_id == MAKE_ID('A', 'N', 'N', 'O'))
 		{
 			nf_debugprintf("load anno\n");
@@ -333,31 +376,6 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 				nf_debugprintf("skipped - anno to long\n");
 				Fseek(chunk_size, handle, SEEK_CUR);
 			}
-		} else if (chunk_id == MAKE_ID('C', 'M', 'A', 'P'))
-		{
-			nf_debugprintf("load cmap\n");
-			if (chunk_size <= 16 * 3)
-			{
-				unsigned int colors;
-				uint8_t rgb[3];
-				
-				colors = (uint16_t)chunk_size / 3;
-				for (i = 0; i < colors; i++)
-				{
-					if (Fread(handle, 3, rgb) != 3)
-					{
-						bail("fread failed\n");
-						Fclose(handle);
-						return FALSE;
-					}
-					palette[i] = ((rgb[0] & 0xf0) << 4) | (rgb[1] & 0xf0) | ((rgb[2] & 0xf0u) >> 4);
-				}
-			} else
-			{
-				bail("abort - too many colors\n");
-				Fclose(handle);
-				return FALSE;
-			}
 		} else if (chunk_id == MAKE_ID('B', 'O', 'D', 'Y'))
 		{
 			nf_debugprintf("load body\n");
@@ -367,23 +385,14 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 				Fclose(handle);
 				return FALSE;
 			}
-			body = malloc(image_size);
-			if (body == NULL)
+			bmap = malloc(image_size);
+			if (bmap == NULL)
 			{
 				bail("abort - malloc(bmap) failed\n");
 				Fclose(handle);
 				return FALSE;
 			}
-			if (bmhd.compressed == 0)
-			{
-				if ((size_t) Fread(handle, chunk_size, body) != chunk_size)
-				{
-					bail("fread failed\n");
-					free(body);
-					Fclose(handle);
-					return FALSE;
-				}
-			} else if (bmhd.compressed == 1)
+			if (bmhd.compressed == 4)
 			{
 				uint8_t *temp;
 
@@ -398,12 +407,19 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 				{
 					bail("fread failed\n");
 					free(temp);
-					free(body);
+					free(bmap);
 					Fclose(handle);
 					return FALSE;
 				}
 				nf_debugprintf("decode packbits\n");
-				decode_packbits(body, temp, image_size);
+				if (decode_rgbx(temp, bmap, chunk_size, bmhd.width, bmhd.height, rgb8) == 0)
+				{
+					bail("abort - decode error detected\n");
+					free(temp);
+					free(bmap);
+					Fclose(handle);
+					return FALSE;
+				}
 				free(temp);
 			} else
 			{
@@ -435,10 +451,6 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	nf_debugprintf("fclose iff\n");
 	Fclose(handle);
 	
-	bitmap.BytesPerRow = ((((uint16_t)bmhd.width + 15) >> 4) << 4) / 8;
-	bitmap.Rows = bmhd.height;
-	bitmap.Depth = bmhd.planes;
-	
 	if (camg == 0)
 	{
 		nf_debugprintf("fixed missing camg\n");
@@ -448,55 +460,8 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			camg |= 4;
 	}
 	
-	nf_debugprintf("reorder planes\n");
-	for (i = 0; i < bmhd.planes; i++)
-	{
-		uint8_t *plane;
+	line_size = (size_t)bmhd.width * 3;
 
-		plane = malloc((size_t)bitmap.BytesPerRow * bitmap.Rows);
-		if (plane == NULL)
-		{
-			bail("abort - malloc(addr) failed\n");
-			free(body);
-			return FALSE;
-		}
-		bitmap.Planes[i] = plane;
-	}
-	src_offset = 0;
-	dst_offset = 0;
-	for (y = 0; y < bitmap.Rows; y++)
-	{
-		for (i = 0; i < bmhd.planes; i++)
-		{
-			uint8_t *plane;
-
-			plane = bitmap.Planes[i];
-			memcpy(&plane[dst_offset], &body[src_offset], bitmap.BytesPerRow);
-			src_offset += bitmap.BytesPerRow;
-		}
-		dst_offset += bitmap.BytesPerRow;
-	}
-	free(body);
-
-	nf_debugprintf("check sig\n");
-	if (CheckDCTV(&bitmap) == FALSE)
-	{
-		bail("sig not found\n");
-		return FALSE;
-	}
-	nf_debugprintf("sig ok\n");
-	
-	nf_debugprintf("init cvt structure\n");
-	cvt = AllocDCTV(&bitmap, camg & 4 ? 1 : 0); 
-	if (cvt == NULL)
-	{
-		bail("abort - malloc(cvt) failed\n");
-		return FALSE;
-	}
-	
-	nf_debugprintf("cvt colors\n");
-	SetmapDCTV(cvt, palette);
-	
 	nf_debugprintf("info->structure\n");
 	
 	info->planes = 24;
@@ -511,18 +476,24 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	info->page = 1;						/* required - more than 1 = animation */
 	info->orientation = UP_TO_DOWN;
 	info->num_comments = 0;				/* required - disable exif tab */
-	info->_priv_var = 0;				/* y position in bmap */
-	info->_priv_ptr = cvt;
 	info->max_comments_length = 0;
+	info->_priv_var = 0;				/* y position in bmap */
+	info->_priv_ptr = bmap;
+	info->_priv_var_more = line_size;
 	if (anno[0] != '\0')
 	{
 		info->num_comments = 1;
 		info->max_comments_length = strlen(anno);
 	}
 
-	info_txt[4] = bmhd.planes + '0';
-	strcpy(info->info, info_txt);
-	strcpy(info->compression, "YUV");
+	if (rgb8)
+		strcpy(info->info, "RGB8");
+	else
+		strcpy(info->info, "RGBN");
+	strcat(info->info, " - Interchange File Format");
+	strcpy(info->compression, "RLE");
+	
+	nf_debugprintf("exit reader init ok\n");
 	
 	return TRUE;
 }
@@ -541,27 +512,11 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
  *==================================================================================*/
 boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 {
-	int x;
-	size_t w;
-	uint8_t *rbuf;
-	uint8_t *gbuf;
-	uint8_t *bbuf;
-	struct DCTVCvtHandle *cvt;
-
-	cvt = info->_priv_ptr;
-	ConvertDCTVLine(cvt);
-	rbuf = cvt->Red;
-	gbuf = cvt->Green;
-	bbuf = cvt->Blue;
+	uint8_t *bmap = info->_priv_ptr;
+	size_t line_size = info->_priv_var_more;
 	
-	w = 0;
-	for (x = 0; x < info->width; x++)
-	{
-		buffer[w++] = rbuf[x];
-		buffer[w++] = gbuf[x];
-		buffer[w++] = bbuf[x];
-	}
-	
+	memcpy(buffer, &bmap[info->_priv_var], line_size);
+	info->_priv_var += line_size;
 	return TRUE;
 }
 

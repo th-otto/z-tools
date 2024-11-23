@@ -45,6 +45,7 @@ PLUGINS = \
 	godpaint \
 	hrm \
 	iff_dctv \
+	iff_rgbn \
 	img \
 	jpg \
 	neochrome \
