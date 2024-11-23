@@ -15,7 +15,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long)("RAW\0");
+		return (long)("RAW\0"); /* FIXME: "RAW" also used by ImgScan */
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -87,7 +87,6 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 	info->orientation			= UP_TO_DOWN;
 	info->num_comments			= 0;
 	info->max_comments_length 	= 0;
-	info->_priv_var				= ( uint32_t)handle;
 
 	if( ((int32_t)info->width * (int32_t)info->height) == file_size)
 	{
@@ -154,8 +153,9 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 		free( img_buffer);
 		Fclose( handle);
 		return FALSE;	
-	}		
-	else
+	}
+	Fclose(handle);
+
 	{
 		uint16_t i, j, w = info->width >> 1;
 
@@ -223,6 +223,6 @@ void __CDECL reader_get_txt( IMGINFO info, txt_data *txtdata)
  *==================================================================================*/
 void __CDECL reader_quit( IMGINFO info)
 {
-	free( ( uint8_t*)info->_priv_ptr);
-	Fclose( ( int16_t)info->_priv_var);
+	free(info->_priv_ptr);
+	info->_priv_ptr = NULL;
 }

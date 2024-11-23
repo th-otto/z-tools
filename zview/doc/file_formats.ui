@@ -132,6 +132,8 @@ supported features of the formats.
                !! .rwh              !! 640x400         !! 8              !! None            !! grayscale
                !! .raw              !! 640x200         !! 8              !! None            !! grayscale
 !hline
+ IndyPaint     !! .tru              !! Any             !! 16             !! None            !! Encoder
+!hline
  JPEG          !! .jpg              !! Any             !! 8/24           !! JPEG            !! Lossy compression
                !! .jpe              !!                 !!                !!                 !! Thumbnail
                !! .jpeg             !!                 !!                !!                 !! Textual data

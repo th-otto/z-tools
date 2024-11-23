@@ -50,6 +50,7 @@ PLUGINS = \
 	imagic \
 	img \
 	imgscan \
+	indypnt \
 	jpg \
 	neochrome \
 	png \
