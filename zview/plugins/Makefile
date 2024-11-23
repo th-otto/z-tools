@@ -46,6 +46,7 @@ PLUGINS = \
 	hrm \
 	iff_dctv \
 	iff_rgbn \
+	imagelab \
 	img \
 	jpg \
 	neochrome \

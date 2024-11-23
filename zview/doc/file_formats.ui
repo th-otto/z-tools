@@ -122,6 +122,8 @@ supported features of the formats.
  IFF DCTV      !! .dct/.dctv        !! Any             !! 1/2/3/4        !! YUV/PackBits    !!
  IFF RGB8/RGBN !! .tsi              !! Any             !! 24             !! RLE             !!
 !hline
+ ImageLab      !! .b_w/.b&w         !! Any             !! 8              !! None            !! grayscale
+!hline
  JPEG          !! .jpg              !! Any             !! 8/24           !! JPEG            !! Lossy compression
                !! .jpe              !!                 !!                !!                 !! Thumbnail
                !! .jpeg             !!                 !!                !!                 !! Textual data
