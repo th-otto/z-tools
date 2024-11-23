@@ -128,6 +128,10 @@ supported features of the formats.
                !! .ic2              !! 640x200         !! 2              !! None/RLE        !!
                !! .ic3              !! 640x400         !! 1              !! None/RLE        !! 
 !hline
+ IMG Scan      !! .rwl              !! 320x200         !! 8              !! None            !! grayscale
+               !! .rwh              !! 640x400         !! 8              !! None            !! grayscale
+               !! .raw              !! 640x200         !! 8              !! None            !! grayscale
+!hline
  JPEG          !! .jpg              !! Any             !! 8/24           !! JPEG            !! Lossy compression
                !! .jpe              !!                 !!                !!                 !! Thumbnail
                !! .jpeg             !!                 !!                !!                 !! Textual data

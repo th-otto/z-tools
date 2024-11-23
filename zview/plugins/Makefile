@@ -49,6 +49,7 @@ PLUGINS = \
 	imagelab \
 	imagic \
 	img \
+	imgscan \
 	jpg \
 	neochrome \
 	png \

@@ -72,6 +72,7 @@
  * New plugin for IFF RGB8/RGBN images (*.TSI)
  * New plugin for ImageLab images (*.B&W/*.B_W)
  * New plugin for Imagic images (*.IC1/*.IC2/*.IC3)
+ * New plugin for IMG Scan (*.RWL/*.RWH/*.RAW)
 
 Since the RECOIL plugin handles so many formats, it is
 assigned to all file extensions. If there is a specialized plugin

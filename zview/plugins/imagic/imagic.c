@@ -495,6 +495,33 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 		}
 		break;
 	
+	case 2:
+		{
+			uint16_t *src;
+			int16_t x;
+			int bit;
+			uint16_t plane0;
+			uint16_t plane1;
+
+			src = (uint16_t *)(info->_priv_ptr_more);
+			x = (info->width + 15) >> 4;
+			do
+			{
+				plane0 = *src++;
+				plane1 = *src++;
+				for (bit = 0; bit < 16; bit++)
+				{
+					*buffer++ =
+						((plane0 >> 15) & 1) |
+						((plane1 >> 14) & 2);
+					plane0 <<= 1;
+					plane1 <<= 1;
+				}
+			} while (--x > 0);
+			info->_priv_ptr_more = src;
+		}
+		break;
+
 	case 4:
 		{
 			uint16_t *src;

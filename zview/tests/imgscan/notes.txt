@@ -1,0 +1,6 @@
+Notes regrading files in this folder.
+
+*.rwl was found in an archive related to IMG Scan, should be a genuine sample
+*.rwh was generated based on information found on the web
+*.raw was generated based on the IMG Scan manual
+
