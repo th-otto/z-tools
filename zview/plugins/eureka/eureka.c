@@ -15,7 +15,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long)("RAW\0"); /* FIXME: "RAW" also used by ImgScan */
+		return (long)("RAW\0");
 
 	case INFO_NAME:
 		return (long)NAME;

@@ -72,7 +72,7 @@
  * New plugin for IFF RGB8/RGBN images (*.TSI)
  * New plugin for ImageLab images (*.B&W/*.B_W)
  * New plugin for Imagic images (*.IC1/*.IC2/*.IC3)
- * New plugin for IMG Scan (*.RWL/*.RWH/*.RAW)
+ * New plugin for IMG Scan (*.RWL/*.RWM/*.RWH)
  * New plugin for IndyPaint (*.TRU)
 
 Since the RECOIL plugin handles so many formats, it is

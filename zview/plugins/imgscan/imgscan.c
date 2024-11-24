@@ -1,5 +1,5 @@
 #define	VERSION	    0x209
-#define NAME        "Imagic (Image)"
+#define NAME        "IMG Scan (Seymor-Radix)"
 #define AUTHOR      "Thorsten Otto"
 #define DATE        __DATE__ " " __TIME__
 
@@ -33,7 +33,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("RWL\0" "RWH\0" /* "RAW\0" */); /* FIXME: "RAW" already in use by eureka */
+		return (long) ("RWL\0" "RWM\0" "RWH\0");
 
 	case INFO_NAME:
 		return (long)NAME;
