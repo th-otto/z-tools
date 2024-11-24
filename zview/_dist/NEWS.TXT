@@ -77,6 +77,7 @@
  * New plugin for InShape (*.IIM)
  * New plugin for MacPaint (*.MAC)
  * New plugin for MegaPaint (*.BLD)
+ * New plugin for Multi Palette Picture (*.MPP)
 
 Since the RECOIL plugin handles so many formats, it is
 assigned to all file extensions. If there is a specialized plugin

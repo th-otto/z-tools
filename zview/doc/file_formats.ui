@@ -145,6 +145,9 @@ supported features of the formats.
 !hline
  MegaPaint     !! .bld              !! Any             !! 1              !! RLE             !!
 !hline
+ Multi Palette !! .mpp              !! 320x199         !! 24             !! None            !!
+ Picture       !!                   !! 416x273         !! 24             !! None            !!
+!hline
  NEOchrome     !! .neo              !! 320x200         !! 4              !! None            !! 
                !!                   !! 640x200         !! 2              !!                 !! 
                !!                   !! 640x400         !! 1              !!                 !! 
