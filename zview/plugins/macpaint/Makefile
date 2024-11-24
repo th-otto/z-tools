@@ -6,24 +6,24 @@ LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
 STACKSIZE = 64k
 
 CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvdlt.slb\"
+SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvmacpnt.slb\"
 
-all:: cybrmate.ldg zvdlt.slb
+all:: macpaint.ldg zvmacpnt.slb
 
 include $(top_srcdir)/rules
 
-cybrmate.ldg: cybrldg.o cybrmate.o $(LDGOBJS)
+macpaint.ldg: macldg.o macpaint.o $(LDGOBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) -Wl,--stack,$(STACKSIZE) $(LIB)
 
-zvdlt.slb: header.lo cybrslb.lo cybrmate.lo
+zvmacpnt.slb: header.lo macslb.lo macpaint.lo
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-cybrslb.lo cybrmate.lo: ../common/plugin.h ../common/zview.h
-cybrmate.lo cybrmate.o: cybrmate.c ../degas/packbits.c ../degas/tanglbts.c
+macslb.lo macpaint.lo: ../common/plugin.h ../common/zview.h
+macpaint.lo macpaint.o: macpaint.c ../degas/packbits.c
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb

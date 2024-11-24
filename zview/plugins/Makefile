@@ -53,6 +53,7 @@ PLUGINS = \
 	indypnt \
 	inshape \
 	jpg \
+	macpaint \
 	neochrome \
 	png \
 	pnm \
