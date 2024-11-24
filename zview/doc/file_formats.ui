@@ -134,6 +134,8 @@ supported features of the formats.
 !hline
  IndyPaint     !! .tru              !! Any             !! 16             !! None            !! Encoder
 !hline
+ InShape       !! .iim              !! Any             !! 1/4/8/24/32    !! None            !! 8 planes is grayscale
+!hline
  JPEG          !! .jpg              !! Any             !! 8/24           !! JPEG            !! Lossy compression
                !! .jpe              !!                 !!                !!                 !! Thumbnail
                !! .jpeg             !!                 !!                !!                 !! Textual data

@@ -51,6 +51,7 @@ PLUGINS = \
 	img \
 	imgscan \
 	indypnt \
+	inshape \
 	jpg \
 	neochrome \
 	png \
