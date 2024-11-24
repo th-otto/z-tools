@@ -549,15 +549,15 @@ static int16_t minmax(int16_t pix, int16_t min, int16_t max)
 }
 
 
-static void yvu2rgb(uint8_t *lbuf, int8_t *vbuf, int8_t *ubuf, struct DCTVCvtHandle *cvt)
+static void yvu2rgb(uint8_t *lbuf, int8_t *ch1buf, int8_t *ch2buf, struct DCTVCvtHandle *cvt)
 {
 	int16_t cnt;
 	int16_t luma;
-	int16_t v;
+	int16_t prevchr1;
+	int16_t prevchr2;
 	int16_t u;
-	int16_t o6;
-	int16_t d4;
-	int16_t d7;
+	int16_t chroma1;
+	int16_t chroma2;
 	uint8_t *rbuf;
 	uint8_t *gbuf;
 	uint8_t *bbuf;
@@ -566,40 +566,37 @@ static void yvu2rgb(uint8_t *lbuf, int8_t *vbuf, int8_t *ubuf, struct DCTVCvtHan
 	rbuf = cvt->Red;
 	gbuf = cvt->Green;
 	bbuf = cvt->Blue;
-	v = *vbuf++;
-	o6 = 0;
+	prevchr1 = *ch1buf++;
+	prevchr2 = 0;
 	
 	while (cnt >= 0)
 	{
 		if (cnt & 1)
 		{
-			u = *ubuf++;
-			d7 = v;
-			d4 = (u + o6) >> 1;
-			o6 = u;
-		} else if (cnt != 0)
-		{
-			u = *vbuf++;
-			d4 = o6;
-			d7 = (u + v) >> 1;
-			v = u;
+			u = *ch2buf++;
+			chroma1 = prevchr1;
+			chroma2 = (u + prevchr2) >> 1;
+			prevchr2 = u;
 		} else
 		{
-			u = 0;
-			d4 = o6;
-			d7 = (u + v) >> 1;
-			v = u;
+			if (cnt != 0)
+				u = *ch1buf++;
+			else
+				u = 0;
+			chroma2 = prevchr2;
+			chroma1 = (u + prevchr1) >> 1;
+			prevchr1 = u;
 		}
 
 		luma = tables[*lbuf++];
 
-		u = tables[d7 + 0x180] + luma;
+		u = tables[chroma1 + 0x180] + luma;
 		*rbuf++ = minmax(u >> 4, 0, 255);
 
-		u = tables[d7 + 0x380] + tables[d4 + 0x480] + luma;
+		u = tables[chroma1 + 0x380] + tables[chroma2 + 0x480] + luma;
 		*gbuf++ = minmax(u >> 4, 0, 255);
 
-		u = tables[d4 + 0x280] + luma;
+		u = tables[chroma2 + 0x280] + luma;
 		*bbuf++ = minmax(u >> 4, 0, 255);
 
 		cnt--;
@@ -607,10 +604,9 @@ static void yvu2rgb(uint8_t *lbuf, int8_t *vbuf, int8_t *ubuf, struct DCTVCvtHan
 }
 
 
-static void chroma(uint8_t *buf, uint16_t sw, uint16_t zzflag)
+static void chroma(uint8_t *lbuf, uint16_t sw, uint16_t zzflag)
 {
-	uint8_t *cbuf;
-	uint8_t *lbuf;
+	uint8_t *chrbuf;
 	int16_t cnt;
 	int16_t c1;
 	int16_t c2;
@@ -619,8 +615,8 @@ static void chroma(uint8_t *buf, uint16_t sw, uint16_t zzflag)
 	uint8_t sign;
 	
 	sign = 0;
-	cbuf = buf + sw + 1;
-	lbuf = buf + zzflag + 1;
+	chrbuf = lbuf + sw + 1;
+	lbuf = lbuf + zzflag + 1;
 	
 	/*  $40404040xxxx...zz zzflag=1 */
 	/*  $4040xxxx.......zz zzflag=0 */
@@ -652,19 +648,17 @@ static void chroma(uint8_t *buf, uint16_t sw, uint16_t zzflag)
 		if (sign ^= 1)
 			tmp = -tmp;
 
-		*cbuf++ = minmax(tmp, -127, 127);
+		*chrbuf++ = minmax(tmp, -127, 127);
 
 		cnt--;
 	}
 }
 
 
-static void luma(uint8_t *buf, uint16_t sw, uint16_t zzflag)
+static void luma(uint8_t *lbuf, uint16_t sw, uint16_t zzflag)
 {
-	uint8_t *ptr;
-	int8_t *cptr;
-	int8_t *cbuf;
-	uint8_t *lbuf;
+	int8_t *buf;
+	int8_t *chrbuf;
 	int16_t cnt;
 	int16_t c1;
 	int16_t c2;
@@ -674,34 +668,22 @@ static void luma(uint8_t *buf, uint16_t sw, uint16_t zzflag)
 	int16_t c6;
 	int16_t c7;
 	int16_t d4;
-	int16_t d3;
-	int16_t d7;
+	int16_t d0;
+	int16_t d1;
 	uint8_t sign;
 
-	ptr = buf;
-	cptr = (int8_t *)ptr + sw;
-	cbuf = cptr + 1;
-	lbuf = ptr + zzflag + 1;
-	ptr = lbuf;
+	buf = (int8_t *)lbuf + sw;			/* preserved for later */
+	chrbuf = (int8_t *)lbuf + sw + 1;	/* chromabuf+1 */
+	lbuf = lbuf + zzflag + 1;			/* lumabuf+1+zzflag */
 	
-	/*  $40404040xxxx...zz zzflag=1 */
-	/*  $4040xxxx.......zz zzflag=0 */
-	/*  read composite */
-	/*  $0000xx00yy...zz00 */
-	/*  $00xx00yy.....00zz */
-	/*  write luma */
-	/*  $0000xxxxyy...zz00 */
-	/*  $00xxxxyy.....zz00 */
-	/*  write chroma */
-	/*  $00xxyy...zz00 */
-	/*  $xxyy.....zz00 */
-
-	cnt = (sw >> 1) + zzflag - 3;
+	/* $0054...	cnt=(sw-2-4)/2+2=sw/2-1=sw/2-2+zzflag (-1) */
+	/* $1400...	cnt=(sw-4)/2    =sw/2-2=sw/2-2+zzflag (-1) */
+	cnt = (sw >> 1) - 2 + zzflag - 1;
 	sign = 1;
 	
-	c5 = *cbuf++;
-	c6 = *cbuf++;
-	c7 = *cbuf++;
+	c5 = *chrbuf++;
+	c6 = *chrbuf++;
+	c7 = *chrbuf++;
 	d4 = c5 + c6 + c7 + 4;
 	c1 = c2 = c3 = c4 = 0;
 
@@ -711,28 +693,28 @@ static void luma(uint8_t *buf, uint16_t sw, uint16_t zzflag)
 		c4 = c5;
 		c5 = c6;
 		c6 = c7;
-		c7 = *cbuf++;
+		c7 = *chrbuf++;
 		d4 = d4 + c7 + c4;
-		d3 = *ptr + (d4 >> 3);
-		d3 = d3 + d3 - 64;
-		d7 = minmax(d3, 64, 224);
-		d3 -= d7;
-		if (d3 != 0)
+		d0 = *lbuf + (d4 >> 3);
+		d0 = d0 + d0 - 64;
+		d1 = minmax(d0, 64, 224);
+		d0 -= d1;
+		if (d0 != 0)
 		{
-			d3 <<= 2;
-			d3 += c4;
-			d3 = minmax(d3, -127, 127);
-			d4 = d4 - c4 - c4 + d3 + d3;
-			cbuf[-4] = d3;
-			c4 = d3;
+			d0 <<= 2;
+			d0 += c4;
+			d0 = minmax(d0, -127, 127);
+			d4 = d4 - c4 - c4 + d0 + d0;
+			chrbuf[-4] = d0;
+			c4 = d0;
 		}
-		*ptr++ = 0x40;
-		*ptr++ = d7;
+		*lbuf++ = 0x40;
+		*lbuf++ = d1;
 	}
 	
 	while (cnt > 0)
 	{
-		d3 = d4 - c1 - c4;
+		d0 = d4 - c1 - c4;
 		c1 = c2;
 		c2 = c3;
 		c3 = c4;
@@ -741,63 +723,63 @@ static void luma(uint8_t *buf, uint16_t sw, uint16_t zzflag)
 		c6 = c7;
 		c7 = 0;
 		if (cnt >= zzflag + 3)
-			c7 = *cbuf++;
+			c7 = *chrbuf++;
 		
-		d4 = d3 + c7 + c4;
-		d3 = d4 >> 3;
+		d4 = d0 + c7 + c4;
+		d0 = d4 >> 3;
 
 		if ((sign ^= 1) == 0)
-			d3 = -d3;
+			d0 = -d0;
 
-		d7 = minmax(*ptr - d3, 64, 224);
+		d1 = minmax(*lbuf - d0, 64, 224);
 
-		*ptr++ = d7;
-		*ptr++ = d7;
+		*lbuf++ = d1;
+		*lbuf++ = d1;
 
 		cnt--;
 	}
 
 	if (zzflag)
 	{
-		ptr[0] = 0x40;
-		ptr[1] = 0x40;
+		lbuf[0] = 0x40;
+		lbuf[1] = 0x40;
 	} else
 	{
-		d7 = (d4 - c1 - c4 + c5) >> 3;
+		d1 = (d4 - c1 - c4 + c5) >> 3;
 		if (sign)
-			d7 = -d7;
-		d7 = *ptr - d7;
-		d3 = minmax(d7, 64, 224);
-		d7 -= d3;
-		if (d7 != 0)
+			d1 = -d1;
+		d1 = *lbuf - d1;
+		d0 = minmax(d1, 64, 224);
+		d1 -= d0;
+		if (d1 != 0)
 		{
-			d7 <<= 2;
-			cbuf[-1] = c5 - d7;
+			d1 <<= 2;
+			chrbuf[-1] = c5 - d1;
 		}
-		*ptr++ = d3;
-		*ptr++ = 0x40;
+		*lbuf++ = d0;
+		*lbuf++ = 0x40;
 	}
 	
-	cbuf = cptr;
-	d3 = (int)((uint8_t *)cbuf - ptr);
-	if (d3 > 0)
+	chrbuf = buf;
+	d0 = (int)((uint8_t *)chrbuf - lbuf);
+	if (d0 > 0)
 	{
-		d3--;
-		while (d3 >= 0)
+		d0--;
+		while (d0 >= 0)
 		{
-			*ptr++ = 0x40;
-			--d3;
+			*lbuf++ = 0x40;
+			--d0;
 		}
 	}
-	*cbuf++ = 0;
+	*chrbuf++ = 0;
 	if (zzflag)
-		cbuf[0] = cbuf[1];
-	cbuf = cptr + (sw >> 1) - 1;
-	d3 = *cbuf;
-	if (d3 < 0)
-		d3++;
-	d3 >>= 1;
-	*cbuf = d3;
+		chrbuf[0] = chrbuf[1];
+	chrbuf = buf + (sw >> 1) - 1;
+	d0 = *chrbuf;
+	if (d0 < 0)
+		d0++;
+	d0 >>= 1;
+	*chrbuf = d0;
 }
 
 
