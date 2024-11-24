@@ -143,6 +143,8 @@ supported features of the formats.
 !hline
  MacPaint      !! .mac              !! 576x720         !! 1              !! RLE             !!
 !hline
+ MegaPaint     !! .bld              !! Any             !! 1              !! RLE             !!
+!hline
  NEOchrome     !! .neo              !! 320x200         !! 4              !! None            !! 
                !!                   !! 640x200         !! 2              !!                 !! 
                !!                   !! 640x400         !! 1              !!                 !! 

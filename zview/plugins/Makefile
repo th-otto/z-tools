@@ -54,6 +54,7 @@ PLUGINS = \
 	inshape \
 	jpg \
 	macpaint \
+	megapnt \
 	neochrome \
 	png \
 	pnm \
