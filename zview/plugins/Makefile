@@ -55,6 +55,7 @@ PLUGINS = \
 	jpg \
 	macpaint \
 	megapnt \
+	mspaint \
 	neochrome \
 	png \
 	pnm \

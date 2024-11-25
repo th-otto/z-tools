@@ -145,6 +145,8 @@ supported features of the formats.
 !hline
  MegaPaint     !! .bld              !! Any             !! 1              !! RLE             !!
 !hline
+ Microsoft Paint !! .msp            !! Any             !! 1              !! None/RLE        !!
+!hline
  Multi Palette !! .mpp              !! 320x199         !! 24             !! None            !!
  Picture       !!                   !! 416x273         !! 24             !! None            !!
 !hline
