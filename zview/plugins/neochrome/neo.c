@@ -21,6 +21,52 @@
 #include "plugin.h"
 #include "zvplugin.h"
 
+/*
+NEOchrome       *.NEO
+
+1 word          file ID, always 0
+1 word          resolution [0 = low res, 1 = medium res, 2 = high res]
+16 words        palette
+12 bytes        filename [usually "        .   "]
+1 word          color animation limits. High bit (bit 15) set if color
+                animation data is valid. Low byte contains color animation
+                limits (4 most significant bits are left/lower limit,
+                4 least significant bits are right/upper limit).
+1 word          color animation speed and direction. High bit (bit 15) set if
+                animation is on. Low order byte is # vblanks per step. If
+                negative, scroll is left (decreasing). Number of vblanks
+                between cycles is |x| - 1
+1 word          # of color steps (as defined in previous word) to display
+                picture before going to the next. (For use in slide shows)
+1 word          image X offset [unused, always 0]
+1 word          image Y offset [unused, always 0]
+1 word          image width [unused, always 320]
+1 word          image height [unused, always 200]
+33 words        reserved for future expansion
+16000 words     picture data (screen memory)
+-----------
+32128 bytes     total
+
+Additional information:
+NEOchrome itself cannot run in ST medium or ST high resolution. Therefore such
+images are technically impossible.
+
+_______________________________________________________________________________
+
+NEOchrome virtual canvas:
+These files have the same file extension, but contain an image that is 640x400
+in 16 colors. They are created with a special version of NEOchrome (v0.9h)
+included on the Atari 7800 game console devkit disk. This special version lets
+the user scroll around a much larger virtual canvas.
+
+Differences from standard NEOchrome files:
+file ID: $BABE
+image width: 640
+image height: 400
+picture data: 64000 words
+total file size: 128128 bytes
+*/
+
 #ifdef PLUGIN_SLB
 long __CDECL get_option(zv_int_t which)
 {

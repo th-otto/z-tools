@@ -180,7 +180,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	}
 
 	/*
-	 * build reserse frame map
+	 * build reverse frame map
 	 */
 	if (!(Kbshift(-1) & K_ALT))
 	{

@@ -153,6 +153,7 @@ supported features of the formats.
  NEOchrome     !! .neo              !! 320x200         !! 4              !! None            !! 
                !!                   !! 640x200         !! 2              !!                 !! 
                !!                   !! 640x400         !! 1              !!                 !! 
+               !! .ani              !! Any             !! 4              !! None            !! Animation
 !hline
  STAD          !! .pac              !! 640x400         !! 1              !! RLE             !!
 !hline

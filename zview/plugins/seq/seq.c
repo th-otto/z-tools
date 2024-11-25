@@ -33,8 +33,6 @@ long __CDECL get_option(zv_int_t which)
 #endif
 
 
-#define SCREEN_SIZE 32000
-
 /*
 Cyber Paint Sequence    *.SEQ (ST low resolution only)
 
@@ -658,6 +656,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	info->_priv_var = 0;				/* y position in bmap */
 	info->_priv_var_more = handle;
 	info->_priv_ptr = bmap;
+	cur_y = 0;
 	if (file_header.id == 0xfedc)
 		strcpy(info->info, "Flicker");
 	else if (file_header.id == 0xfedb)
