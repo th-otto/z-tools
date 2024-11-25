@@ -155,7 +155,8 @@ supported features of the formats.
                !!                   !! 640x400         !! 1              !!                 !! 
                !! .ani              !! Any             !! 4              !! None            !! Animation
 !hline
- STAD          !! .pac              !! 640x400         !! 1              !! RLE             !!
+ Pablo Paint   !! .ppp/.pa3/.bib/.scr !! 320x200       !! 4              !! None/RLE        !! 
+               !!                   !! 640x400         !! 1              !! None/RLE        !! 
 !hline
  PDF           !! .pdf              !! Any             !! Any            !! Many            !! Bookmarks
 !hline
@@ -170,6 +171,8 @@ supported features of the formats.
  Signum        !! .imc              !! 640x400         !! 1              !! None
 !hline
  Spectrum      !! .spu/.spc/.sps    !! 320x200         !! 12/15          !! RLE
+!hline
+ STAD          !! .pac              !! 640x400         !! 1              !! RLE             !!
 !hline
  TGA           !! .tga              !! Any             !! 16/24/32       !! None/RLE        !! Alpha Channel
                !!                   !!                 !!                !!                 !! Encoder

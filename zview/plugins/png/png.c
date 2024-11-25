@@ -2,10 +2,8 @@
 #include "zvplugin.h"
 #include <png.h>
 #include <wchar.h>
-#ifdef PLUGIN_SLB
-#define NF_DEBUG 1
+#define NF_DEBUG 0
 #include "nfdebug.h"
-#endif
 
 #define VERSION 0x202
 #define NAME    "Portable Network Graphics"

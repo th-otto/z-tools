@@ -80,6 +80,7 @@
  * New plugin for Multi Palette Picture (*.MPP)
  * New plugin for Microsoft Paint (*.MSP)
  * New plugin for NEOchrome Animations (*.ANI)
+ * New plugin for Pablo Paint (*.PPP/*.PA3/*.BIB/*.SRC)
 
 Since the RECOIL plugin handles so many formats, it is
 assigned to all file extensions. If there is a specialized plugin

@@ -57,6 +57,7 @@ PLUGINS = \
 	megapnt \
 	mspaint \
 	neochrome \
+	pablopnt \
 	png \
 	pnm \
 	pofo \

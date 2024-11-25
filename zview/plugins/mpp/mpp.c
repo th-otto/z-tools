@@ -6,7 +6,7 @@
 
 #include "plugin.h"
 #include "zvplugin.h"
-#define NF_DEBUG 1
+#define NF_DEBUG 0
 #include "nfdebug.h"
 
 /*
