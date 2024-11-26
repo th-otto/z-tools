@@ -158,6 +158,14 @@ supported features of the formats.
  Pablo Paint   !! .ppp/.pa3/.bib/.scr !! 320x200       !! 4              !! None/RLE        !! 
                !!                   !! 640x400         !! 1              !! None/RLE        !! 
 !hline
+ PaintPro      !! .pic              !! 320x200         !! 4              !! None/RLE        !! 
+               !!                   !! 320x400         !! 4              !! None            !! 
+               !!                   !! 640x400         !! 1              !! None            !! 
+               !!                   !! 640x800         !! 1              !! None            !! 
+!hline
+ Public        !! .cmp              !! 640x400         !! 1              !! RLE             !! 
+ Painter       !!                   !! 640x800         !! 1              !! RLE             !! 
+!hline
  PDF           !! .pdf              !! Any             !! Any            !! Many            !! Bookmarks
 !hline
  PNG           !! .png              !! Any             !! 1/2/4/8/       !! Deflate         !! Alpha Channel

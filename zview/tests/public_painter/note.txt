@@ -1,0 +1,1 @@
+File 'loadCMP.c' provided with permission by H.-J. Berndt
