@@ -26,14 +26,12 @@
  * French resource file (contributed by @marss)
 
  New formats:
+ (previously available as extra codecs archive from LP)
  ------------
  * New plugin for signum image format (*.ISM)
- * New plugin for WebP image format
- * New plugin for NetPbm image format(s) (*.PPM/*.PGM/*.PBM/*.PAM)
  * New plugin for TmS Cranach images (*.ESM)
  * New plugin for PortFolio images (*.PGF/*.PGC/*.PGX)
  * New plugin for Animaster sprite banks (*.ASB/*.MSK)
- * New plugin from RECOIL with 552 file formats
  * New plugin for Animatic films (*.FLM)
  * New plugin for Atari Image Manager (*.COL/*.IM)
  * New plugin for Arabesque (*.ABM/*.PUF)
@@ -83,10 +81,18 @@
  * New plugin for Pablo Paint (*.PPP/*.PA3/*.BIB/*.SRC)
  * New plugin for PaintPro ST (*.PIC)
  * New plugin for Public Painter (*.CMP)
+ * New plugin for PhotoChrome (*.PCS)
+
+ New formats:
+ ------------
+ * New plugin for WebP image format (*.WEB/*.WEBP)
+ * New plugin for NetPbm image format(s) (*.PPM/*.PGM/*.PBM/*.PAM)
+ * New plugin from RECOIL with 552 file formats
 
 Since the RECOIL plugin handles so many formats, it is
 assigned to all file extensions. If there is a specialized plugin
 for that format, it is prioritized.
+
 
  Bug Fixes:
  ----------
@@ -118,7 +124,7 @@ for that format, it is prioritized.
    and some of them had some memory leaks.
 
  Known Bugs:
- ----------
+ -----------
  * There are still some animated GIFs that are not displayed correctly
  * Some bugs that were reported on Zorro's site (https://sourceforge.net/p/z-tools/bugs/)
  * The TIFF library per default only supports up to 16 bits/sample (that is,
@@ -154,7 +160,7 @@ First release made by me (Thorsten Otto)
    Supports now also Hi-Color and True-Color images.
 
  Known Bugs:
- ----------
+ -----------
  * There are still some animated GIFs that are not displayed correctly
  * Some bugs that were reported on Zorro's site (https://sourceforge.net/p/z-tools/bugs/)
  * The TIFF library sometimes prints warnings on the console
