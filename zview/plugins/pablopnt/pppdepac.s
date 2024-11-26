@@ -16,39 +16,67 @@ DST	= (14*4)+8
 	.text
 
 depack:
-L2000:
 	movem.l	d0-d7/a0-a5,-(a7)
 	movea.l	SRC(sp),a0
 	moveq	#0,d7
 	move.b	1(a0),d7		/* compression type */
 	cmp.b	#30,d7
-	bls.s	L2032
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	bhi.s	depack_end
 
-L2032:
-L2056:
 	moveq	#0,d2
-	movea.l	SRC(sp),a1
+	movea.l	a0,a1
 	movea.l	DST(sp),a2
 	move.w	2(a1),d2
 	sub.w	#36,d2
 	adda.l	#36,a1			/* skip 4+32 (header) */
-	lea 	X3314(pc),a3
-	lsl.w	#2,d7
-	lea 	L2000(pc),a0
-	move.l	0(a3,d7.w),d1
-	jmp	0(a0,d1.w)
+	lea 	jmptable(pc),a3
+	add.w 	d7,d7
+	add.w	0(a3,d7.w),a3
+	jmp		(a3)
 
-J1:		/* 0 - copy src -> dst, uncompressed */
+jmptable:
+	dc.w	type0-jmptable
+	dc.w	type1-jmptable
+	dc.w	type2-jmptable
+	dc.w	type3-jmptable
+	dc.w	type4-jmptable
+	dc.w	type5-jmptable
+	dc.w	type6-jmptable
+	dc.w	type7-jmptable
+	dc.w	type8-jmptable
+	dc.w	type9-jmptable
+	dc.w	type10-jmptable
+	dc.w	type11-jmptable
+	dc.w	type12-jmptable
+	dc.w	type13-jmptable
+	dc.w	type14-jmptable
+	dc.w	type15-jmptable
+	dc.w	type16-jmptable
+	dc.w	type17-jmptable
+	dc.w	type18-jmptable
+	dc.w	type19-jmptable
+	dc.w	type20-jmptable
+	dc.w	type21-jmptable
+	dc.w	type22-jmptable
+	dc.w	type23-jmptable
+	dc.w	type24-jmptable
+	dc.w	type25-jmptable
+	dc.w	type26-jmptable
+	dc.w	type27-jmptable
+	dc.w	type28-jmptable
+	dc.w	type29-jmptable
+	dc.w	type30-jmptable
+
+type0:		/* 0 - copy src -> dst, uncompressed */
 	move.w	#7999,d0
 L2102:
 	move.l	(a1)+,(a2)+
-	dbf	d0,L2102
+	dbf		d0,L2102
+depack_end:
 	movem.l	(a7)+,d0-d7/a0-a5
 	rts
 
-J2:			/* 1 */
+type1:			/* 1 */
 	lsr.w	#1,d2
 	movea.l	a1,a3
 	adda.l	d2,a3
@@ -58,13 +86,12 @@ L2124:
 	move.b	(a3)+,d3
 L2128:
 	move.b	(a1),(a2)+
-	dbf	d3,L2128
+	dbf		d3,L2128
 	addq.l	#1,a1
-	dbf	d2,L2124
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	dbf		d2,L2124
+	bra		depack_end
 
-J3:			/* 2 */
+type2:			/* 2 */
 	divu	#3,d2
 	lsl.w	#1,d2
 	movea.l	a1,a3
@@ -76,13 +103,12 @@ L2162:
 	move.b	(a3)+,d3
 L2166:
 	move.w	(a1),(a2)+
-	dbf	d3,L2166
+	dbf		d3,L2166
 	addq.l	#2,a1
-	dbf	d2,L2162
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	dbf		d2,L2162
+	bra		depack_end
 
-J4:			/* 3 */
+type3:			/* 3 */
 	divu	#5,d2
 	lsl.w	#2,d2
 	movea.l	a1,a3
@@ -94,13 +120,12 @@ L2200:
 	move.b	(a3)+,d3
 L2204:
 	move.l	(a1),(a2)+
-	dbf	d3,L2204
+	dbf		d3,L2204
 	addq.l	#4,a1
-	dbf	d2,L2200
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	dbf		d2,L2200
+	bra		depack_end
 
-J5:			/* 4 */
+type4:			/* 4 */
 	move.l	#160,d4
 L2230:
 	lsr.w	#1,d2
@@ -119,13 +144,12 @@ L2244:
 	moveq	#0,d1
 	addq.l	#1,a2
 L2260:
-	dbf	d3,L2244
+	dbf		d3,L2244
 	addq.l	#1,a1
-	dbf	d2,L2240
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	dbf		d2,L2240
+	bra		depack_end
 
-J6:			/* 5 */
+type5:			/* 5 */
 	move.l	#160,d4
 L2284:
 	divu	#3,d2
@@ -146,13 +170,12 @@ L2304:
 	moveq	#0,d1
 	addq.l	#2,a2
 L2320:
-	dbf	d3,L2304
+	dbf		d3,L2304
 	addq.l	#2,a1
-	dbf	d2,L2300
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	dbf		d2,L2300
+	bra		depack_end
 
-J7:			/* 6 */
+type6:			/* 6 */
 	move.l	#160,d4
 L2344:
 	divu	#5,d2
@@ -173,25 +196,24 @@ L2364:
 	moveq	#0,d1
 	addq.l	#4,a2
 L2380:
-	dbf	d3,L2364
+	dbf		d3,L2364
 	addq.l	#4,a1
-	dbf	d2,L2360
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	dbf		d2,L2360
+	bra		depack_end
 
-J8:			/* 7 */
+type7:			/* 7 */
 	moveq	#80,d4
-	bra	L2230
+	bra		L2230
 
-J9:			/* 8 */
+type8:			/* 8 */
 	moveq	#80,d4
 	bra.s	L2284
 
-J10:			/* 9 */
+type9:			/* 9 */
 	moveq	#80,d4
 	bra.s	L2344
 
-J11:			/* 10 */
+type10:			/* 10 */
 	lsr.w	#1,d2
 	movea.l	a1,a3
 	adda.l	d2,a3
@@ -212,16 +234,15 @@ L2440:
 	bls.s	L2456
 	move.b	d1,(a2)
 	addq.l	#8,a2
-	dbf	d2,L2440
+	dbf		d2,L2440
 	cmpa.l	a2,a0
 	bhi.s	L2430
 L2456:
 	suba.l	#31999,a2
-	dbf	d0,L2430
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	dbf		d0,L2430
+	bra		depack_end
 
-J12:			/* 11 */
+type11:			/* 11 */
 	divu	#3,d2
 	lsl.w	#1,d2
 	movea.l	a1,a3
@@ -243,16 +264,15 @@ L2506:
 	bls.s	L2522
 	move.w	d1,(a2)
 	addq.l	#8,a2
-	dbf	d2,L2506
+	dbf		d2,L2506
 	cmpa.l	a2,a0
 	bhi.s	L2496
 L2522:
 	suba.l	#31998,a2
-	dbf	d0,L2496
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	dbf		d0,L2496
+	bra		depack_end
 
-J13:			/* 12 */
+type12:			/* 12 */
 	divu	#5,d2
 	lsl.w	#2,d2
 	movea.l	a1,a3
@@ -274,16 +294,15 @@ L2572:
 	bls.s	L2588
 	move.l	d1,(a2)
 	addq.l	#8,a2
-	dbf	d2,L2572
+	dbf		d2,L2572
 	cmpa.l	a2,a0
 	bhi.s	L2562
 L2588:
 	suba.l	#31996,a2
-	dbf	d0,L2562
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	dbf		d0,L2562
+	bra		depack_end
 
-J14:			/* 13 */
+type13:			/* 13 */
 	lsr.w	#1,d2
 	movea.l	a1,a3
 	adda.l	d2,a3
@@ -303,7 +322,7 @@ L2628:
 	bcc.s	L2652
 	move.b	d1,0(a2,d7.w)
 	add.w	#160,d7
-	dbf	d2,L2628
+	dbf		d2,L2628
 	cmp.w	#32000,d7
 	bcs.s	L2618
 L2652:
@@ -311,11 +330,10 @@ L2652:
 	cmp.w	#160,d7
 	bcs.s	L2618
 	sub.w	#159,d7
-	dbf	d0,L2618
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	dbf		d0,L2618
+	bra		depack_end
 
-J15:			/* 14 */
+type14:			/* 14 */
 	divu	#3,d2
 	lsl.l	#1,d2
 	movea.l	a1,a3
@@ -336,7 +354,7 @@ L2704:
 	bcc.s	L2728
 	move.w	d1,0(a2,d7.w)
 	add.w	#160,d7
-	dbf	d2,L2704
+	dbf		d2,L2704
 	cmp.w	#32000,d7
 	bcs.s	L2694
 L2728:
@@ -344,11 +362,10 @@ L2728:
 	cmp.w	#160,d7
 	bcs.s	L2694
 	sub.w	#158,d7
-	dbf	d0,L2694
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	dbf		d0,L2694
+	bra		depack_end
 
-J16:			/* 15 */
+type15:			/* 15 */
 	divu	#5,d2
 	lsl.w	#2,d2
 	movea.l	a1,a3
@@ -369,7 +386,7 @@ L2780:
 	bcc.s	L2804
 	move.l	d1,0(a2,d7.w)
 	add.w	#160,d7
-	dbf	d2,L2780
+	dbf		d2,L2780
 	cmp.w	#32000,d7
 	bcs.s	L2770
 L2804:
@@ -377,34 +394,33 @@ L2804:
 	cmp.w	#160,d7
 	bcs.s	L2770
 	sub.w	#156,d7
-	dbf	d0,L2770
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	dbf		d0,L2770
+	bra		depack_end
 
-J17:		/* 16 */
+type16:		/* 16 */
 	lea 	L2840(pc),a5
 	moveq	#1,d7
-	bra	L3080
+	bra		L3080
 
 L2840:
 	add.w	d7,d0
 	rts
 
-J18:		/* 17 */
+type17:		/* 17 */
 	lea 	L2840(pc),a5
 	moveq	#2,d7
-	bra	L3132
+	bra		L3132
 
-J19:		/* 18 */
+type18:		/* 18 */
 	lea 	L2840(pc),a5
 	moveq	#4,d7
-	bra	L3184
+	bra		L3184
 
-J20:		/* 19 */
+type19:		/* 19 */
 	lea 	L2880(pc),a5
 	move.w	#160,d6
 	move.w	#31999,d7
-	bra	L3080
+	bra		L3080
 
 L2880:
 	add.w	d6,d0
@@ -414,40 +430,40 @@ L2880:
 L2890:
 	rts
 
-J21:		/* 20 */
+type20:		/* 20 */
 	lea 	L2880(pc),a5
 	move.w	#160,d6
 	move.w	#31998,d7
-	bra	L3132
+	bra		L3132
 
-J22:		/* 21 */
+type21:		/* 21 */
 	lea 	L2880(pc),a5
 	move.w	#160,d6
 	move.w	#31996,d7
-	bra	L3184
+	bra		L3184
 
-J23:		/* 22 */
+type22:		/* 22 */
 	lea 	L2880(pc),a5
 	move.w	#80,d6
 	move.w	#31999,d7
-	bra	L3080
+	bra		L3080
 
-J24:		/* 23 */
+type23:		/* 23 */
 	lea 	L2880(pc),a5
 	move.w	#80,d6
 	move.w	#31998,d7
-	bra	L3132
+	bra		L3132
 
-J25:		/* 24 */
+type24:		/* 24 */
 	lea 	L2880(pc),a5
 	move.w	#80,d6
 	move.w	#31996,d7
-	bra	L3184
+	bra		L3184
 
-J26:		/* 25 */
+type25:		/* 25 */
 	lea 	L2984(pc),a5
 	move.w	#31999,d7
-	bra	L3080
+	bra		L3080
 
 L2984:
 	addq.w	#8,d0
@@ -457,20 +473,20 @@ L2984:
 L2994:
 	rts
 
-J27:		/* 26 */
+type26:		/* 26 */
 	lea 	L2984(pc),a5
 	move.w	#31998,d7
-	bra	L3132
+	bra		L3132
 
-J28:		/* 27 */
+type27:		/* 27 */
 	lea 	L2984(pc),a5
 	move.w	#31996,d7
-	bra	L3184
+	bra		L3184
 
-J29:		/* 28 */
+type28:		/* 28 */
 	lea 	L3032(pc),a5
 	move.w	#159,d7
-	bra	L3080
+	bra		L3080
 
 L3032:
 	add.w	#160,d0
@@ -483,20 +499,20 @@ L3032:
 L3054:
 	rts
 
-J30:		/* 29 - depac ppp,pa3 */
+type29:		/* 29 - depac ppp,pa3 */
 	lea 	L3032(pc),a5
 	move.w	#158,d7
-	bra	L3132
+	bra		L3132
 
-J31:		/* 30 */
+type30:		/* 30 */
 	lea 	L3032(pc),a5
 	move.w	#156,d7
-	bra	L3184
+	bra		L3184
 
 L3080:
-	bsr	L3236
+	bsr		L3236
 L3084:
-	bsr	L3260
+	bsr		L3260
 	tst.w	d1
 	bge.s	L3114
 	neg.w	d1
@@ -504,27 +520,26 @@ L3084:
 
 L3096:
 	move.b	(a1)+,0(a2,d0.w)
-	jsr	(a5)
+	jsr		(a5)
 L3102:
-	dbf	d1,L3096
+	dbf		d1,L3096
 	bra.s	L3120
 
 L3108:
 	move.b	(a1),0(a2,d0.w)
-	jsr	(a5)
+	jsr		(a5)
 L3114:
-	dbf	d1,L3108
-	addq.w	#1,a1
+	dbf		d1,L3108
+	addq.l	#1,a1
 L3120:
 	cmp.w	d3,d4
 	bne.s	L3084
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	bra		depack_end
 
 L3132:
-	bsr	L3236
+	bsr		L3236
 L3136:
-	bsr	L3260
+	bsr		L3260
 	tst.w	d1
 	bge.s	L3166
 	neg.w	d1
@@ -532,27 +547,26 @@ L3136:
 
 L3148:
 	move.w	(a1)+,0(a2,d0.w)
-	jsr	(a5)
+	jsr		(a5)
 L3154:
-	dbf	d1,L3148
+	dbf		d1,L3148
 	bra.s	L3172
 
 L3160:
 	move.w	(a1),0(a2,d0.w)
-	jsr	(a5)
+	jsr		(a5)
 L3166:
-	dbf	d1,L3160
-	addq.w	#2,a1
+	dbf		d1,L3160
+	addq.l	#2,a1
 L3172:
 	cmp.w	d3,d4
 	bne.s	L3136
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	bra		depack_end
 
 L3184:
-	bsr	L3236
+	bsr		L3236
 L3188:
-	bsr	L3260
+	bsr		L3260
 	tst.w	d1
 	bge.s	L3218
 	neg.w	d1
@@ -560,22 +574,21 @@ L3188:
 
 L3200:
 	move.l	(a1)+,0(a2,d0.w)
-	jsr	(a5)
+	jsr		(a5)
 L3206:
-	dbf	d1,L3200
+	dbf		d1,L3200
 	bra.s	L3224
 
 L3212:
 	move.l	(a1),0(a2,d0.w)
-	jsr	(a5)
+	jsr		(a5)
 L3218:
-	dbf	d1,L3212
-	addq.w	#4,a1
+	dbf		d1,L3212
+	addq.l	#4,a1
 L3224:
 	cmp.w	d3,d4
 	bne.s	L3188
-	movem.l	(a7)+,d0-d7/a0-a5
-	rts
+	bra		depack_end
 
 L3236:
 	subq.w	#2,d2
@@ -612,36 +625,3 @@ L3286:
 L3310:
 	move.w	d5,d1
 	rts
-
-X3314:
-	dc.l	J1-L2000	/* 98 */
-	dc.l	J2-L2000	/* 116 */
-	dc.l	J3-L2000	/* 148 */
-	dc.l	J4-L2000	/* 186 */
-	dc.l	J5-L2000	/* 224 */
-	dc.l	J6-L2000	/* 278 */
-	dc.l	J7-L2000	/* 338 */
-	dc.l	J8-L2000	/* 398 */
-	dc.l	J9-L2000	/* 404 */
-	dc.l	J10-L2000	/* 408 */
-	dc.l	J11-L2000	/* 412 */
-	dc.l	J12-L2000	/* 474 */
-	dc.l	J13-L2000	/* 540 */
-	dc.l	J14-L2000	/* 606 */
-	dc.l	J15-L2000	/* 678 */
-	dc.l	J16-L2000	/* 754 */
-	dc.l	J17-L2000	/* 830 */
-	dc.l	J18-L2000	/* 844 */
-	dc.l	J19-L2000	/* 854 */
-	dc.l	J20-L2000	/* 864 */
-	dc.l	J21-L2000	/* 892 */
-	dc.l	J22-L2000	/* 908 */
-	dc.l	J23-L2000	/* 924 */
-	dc.l	J24-L2000	/* 940 */
-	dc.l	J25-L2000	/* 956 */
-	dc.l	J26-L2000	/* 972 */
-	dc.l	J27-L2000	/* 996 */
-	dc.l	J28-L2000	/* 1008 */
-	dc.l	J29-L2000	/* 1020 */
-	dc.l	J30-L2000	/* 1056 */
-	dc.l	J31-L2000	/* 1068 */
