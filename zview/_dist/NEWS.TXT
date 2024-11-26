@@ -82,6 +82,7 @@
  * New plugin for PaintPro ST (*.PIC)
  * New plugin for Public Painter (*.CMP)
  * New plugin for PhotoChrome (*.PCS)
+ * New plugin for Overscan Interlaced (*.PCI)
 
  New formats:
  ------------

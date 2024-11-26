@@ -58,6 +58,9 @@ PLUGINS = \
 	mspaint \
 	neochrome \
 	pablopnt \
+	pblcpntr \
+	pchrome \
+	pci \
 	png \
 	pnm \
 	pofo \

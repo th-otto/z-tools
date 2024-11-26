@@ -155,6 +155,9 @@ supported features of the formats.
                !!                   !! 640x400         !! 1              !!                 !! 
                !! .ani              !! Any             !! 4              !! None            !! Animation
 !hline
+ Overscan      !! .pci              !! 352x278         !! 18             !! None            !! 
+ Interlaced    !!                   !!                 !!                !!                 !! 
+!hline
  Pablo Paint   !! .ppp/.pa3/.bib/.scr !! 320x200       !! 4              !! None/RLE        !! 
                !!                   !! 640x400         !! 1              !! None/RLE        !! 
 !hline
