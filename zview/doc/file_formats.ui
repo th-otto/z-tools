@@ -169,6 +169,8 @@ supported features of the formats.
  Public        !! .cmp              !! 640x400         !! 1              !! RLE             !! 
  Painter       !!                   !! 640x800         !! 1              !! RLE             !! 
 !hline
+ PCL           !! .pcl              !! Any             !! 24             !! None            !! Output only
+!hline
  PDF           !! .pdf              !! Any             !! Any            !! Many            !! Bookmarks
 !hline
  PhotoChrome   !! .pcs              !! 320x200         !! 18             !! RLE             !!
