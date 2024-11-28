@@ -166,6 +166,8 @@ supported features of the formats.
                !!                   !! 640x400         !! 1              !! None            !! 
                !!                   !! 640x800         !! 1              !! None            !! 
 !hline
+ PC Paintbrush !! .pcx              !! Any             !! 1/2/3/4/8/24   !! None/RLE        !! 
+!hline
  Public        !! .cmp              !! 640x400         !! 1              !! RLE             !! 
  Painter       !!                   !! 640x800         !! 1              !! RLE             !! 
 !hline

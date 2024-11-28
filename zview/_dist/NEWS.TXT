@@ -84,6 +84,7 @@
  * New plugin for PhotoChrome (*.PCS)
  * New plugin for Overscan Interlaced (*.PCI)
  * New plugin for PCL output (*.PCL)
+ * New plugin for PC Paintbrush (*.PCX)
 
  New formats:
  ------------

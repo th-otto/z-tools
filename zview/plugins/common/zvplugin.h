@@ -46,6 +46,11 @@ void __CDECL plugin_encoder_quit(SLB *slb, IMGINFO info);
 #define INFO_MISC          10	/* other information, can be multiple lines separated by '\n' */
 #define INFO_COMPILER      12   /* compiler used */
 
+/*
+ * one day decoders should return error codes instead of FALSE/TRUE
+ */
+#define RETURN_ERROR(err) return FALSE
+#define RETURN_SUCCESS() return TRUE
 
 /*
  * Flags for get_option(OPTION_CAPABILITIES)

@@ -1,5 +1,5 @@
 /*
- * esm/exports.h - internal header with definitions of all exported functions
+ * exports.h - internal header with definitions of all exported functions
  *
  * Copyright (C) 2019 Thorsten Otto
  *
@@ -22,7 +22,7 @@
 /*   6 */ LIBFUNC(6, encoder_write, 2)
 /*   7 */ LIBFUNC(7, encoder_quit, 1)
 /*   8 */ LIBFUNC(8, get_option, 1)
-/*   9 */ LIBFUNC(9, set_option, 2)
+/*   9 */ NOFUNC
 
 #undef LIBFUNC
 #undef LIBFUNC2
