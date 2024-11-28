@@ -85,6 +85,7 @@
  * New plugin for Overscan Interlaced (*.PCI)
  * New plugin for PCL output (*.PCL)
  * New plugin for PC Paintbrush (*.PCX)
+ * New plugin for STOS Picture Packer (*.PP1/*.PP2/*.PP3)
 
  New formats:
  ------------

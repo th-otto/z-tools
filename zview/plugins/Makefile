@@ -61,6 +61,8 @@ PLUGINS = \
 	pblcpntr \
 	pchrome \
 	pci \
+	pcx \
+	picpackr \
 	png \
 	pnm \
 	pofo \

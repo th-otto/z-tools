@@ -168,6 +168,10 @@ supported features of the formats.
 !hline
  PC Paintbrush !! .pcx              !! Any             !! 1/2/3/4/8/24   !! None/RLE        !! 
 !hline
+ Picture       !! .pp1              !! 320x200         !! 4              !! RLE             !!
+ Packer        !! .pp2              !! 640x200         !! 2              !! RLE             !!
+               !! .pp3              !! 640x400         !! 1              !! RLE             !! 
+!hline
  Public        !! .cmp              !! 640x400         !! 1              !! RLE             !! 
  Painter       !!                   !! 640x800         !! 1              !! RLE             !! 
 !hline
