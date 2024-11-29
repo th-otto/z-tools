@@ -86,6 +86,8 @@
  * New plugin for PCL output (*.PCL)
  * New plugin for PC Paintbrush (*.PCX)
  * New plugin for STOS Picture Packer (*.PP1/*.PP2/*.PP3)
+ * New plugin for Picworks (*.CP3)
+ * New plugin for PixArt (*.PIX)
 
  New formats:
  ------------

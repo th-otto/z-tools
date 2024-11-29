@@ -168,18 +168,20 @@ supported features of the formats.
 !hline
  PC Paintbrush !! .pcx              !! Any             !! 1/2/3/4/8/24   !! None/RLE        !! 
 !hline
- Picture       !! .pp1              !! 320x200         !! 4              !! RLE             !!
- Packer        !! .pp2              !! 640x200         !! 2              !! RLE             !!
-               !! .pp3              !! 640x400         !! 1              !! RLE             !! 
-!hline
- Public        !! .cmp              !! 640x400         !! 1              !! RLE             !! 
- Painter       !!                   !! 640x800         !! 1              !! RLE             !! 
-!hline
  PCL           !! .pcl              !! Any             !! 24             !! None            !! Output only
 !hline
  PDF           !! .pdf              !! Any             !! Any            !! Many            !! Bookmarks
 !hline
  PhotoChrome   !! .pcs              !! 320x200         !! 18             !! RLE             !!
+!hline
+ Picture       !! .pp1              !! 320x200         !! 4              !! RLE             !!
+ Packer        !! .pp2              !! 640x200         !! 2              !! RLE             !!
+               !! .pp3              !! 640x400         !! 1              !! RLE             !! 
+!hline
+ Picworks      !! .cp3              !! 640x400         !! 1              !! RLE             !! 
+!hline
+ PixArt        !! .pix              !! Any             !! 1/2/4/8/       !! None            !! 
+               !!                   !!                 !! 16/24/32       !!                 !!
 !hline
  PNG           !! .png              !! Any             !! 1/2/4/8/       !! Deflate         !! Alpha Channel
                !!                   !!                 !! 16/24/32       !!                 !! Textual data
@@ -188,6 +190,9 @@ supported features of the formats.
                !! .ppm/.pam         !!                 !! 16/24/32       !!                 !!
 !hline
  Portfolio     !! .pgf/.pgc/.pgx    !! 240x64          !! 1              !! None/RLE        !! Animation
+!hline
+ Public        !! .cmp              !! 640x400         !! 1              !! RLE             !! 
+ Painter       !!                   !! 640x800         !! 1              !! RLE             !! 
 !hline
  Signum        !! .imc              !! 640x400         !! 1              !! None
 !hline

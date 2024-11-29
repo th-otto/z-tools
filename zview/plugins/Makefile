@@ -55,14 +55,19 @@ PLUGINS = \
 	jpg \
 	macpaint \
 	megapnt \
+	mpp \
 	mspaint \
+	neoani \
 	neochrome \
 	pablopnt \
+	paintpro \
 	pblcpntr \
 	pchrome \
 	pci \
 	pcx \
 	picpackr \
+	picworks \
+	pixart \
 	png \
 	pnm \
 	pofo \
