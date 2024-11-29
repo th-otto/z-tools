@@ -134,6 +134,10 @@ long __CDECL set_option(zv_int_t which, zv_int_t value);
 # endif
 #endif
 
+#ifdef __PUREC__
+#define inline
+#endif
+
 /*
  * helper function to get the actual basepage start,
  * if executable has some extended header,

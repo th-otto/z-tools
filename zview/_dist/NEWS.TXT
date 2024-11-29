@@ -89,6 +89,7 @@
  * New plugin for Picworks (*.CP3)
  * New plugin for PixArt (*.PIX)
  * New plugin for PL4 (*.PL4)
+ * New plugin for PaintShop (*.PSC/*.DA4)
 
  New formats:
  ------------
