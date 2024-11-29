@@ -88,6 +88,7 @@
  * New plugin for STOS Picture Packer (*.PP1/*.PP2/*.PP3)
  * New plugin for Picworks (*.CP3)
  * New plugin for PixArt (*.PIX)
+ * New plugin for PL4 (*.PL4)
 
  New formats:
  ------------

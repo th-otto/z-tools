@@ -68,6 +68,7 @@ PLUGINS = \
 	picpackr \
 	picworks \
 	pixart \
+	pl4 \
 	png \
 	pnm \
 	pofo \
