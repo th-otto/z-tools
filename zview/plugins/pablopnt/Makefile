@@ -26,4 +26,4 @@ pppslb.lo pablopnt.lo: ../common/plugin.h ../common/zview.h
 pablopnt.lo pablopnt.o: pablopnt.c pppdepac.c
 
 clean:
-	rm -f *.o *.lo *.a *.ldg *.slb
+	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

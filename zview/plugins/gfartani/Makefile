@@ -26,4 +26,4 @@ gfartslb.lo gfartani.lo: ../common/plugin.h ../common/zview.h
 gfartimg.lo gfartimg.o: gfartani.c gfatable.c gfadepac.c
 
 clean:
-	rm -f *.o *.lo *.a *.ldg *.slb
+	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

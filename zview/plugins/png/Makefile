@@ -32,4 +32,4 @@ header.lo: ../common/header.S exports.h
 pngslb.lo png.lo: ../common/plugin.h ../common/zview.h
 
 clean:
-	rm -f *.o *.lo *.a *.ldg *.slb libpng/*.o libpng/*.lo
+	rm -f *.o *.lo *.a *.ldg *.slb libpng/*.o libpng/*.lo *.pdb

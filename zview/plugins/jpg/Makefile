@@ -31,4 +31,4 @@ header.lo: ../common/header.S exports.h
 jpgslb.lo jpg.lo: ../common/plugin.h ../common/zview.h
 
 clean:
-	rm -f *.o *.lo *.a *.ldg *.slb libexif/*.o libexif/*.lo libexif/*/*.o libexif/*/*.lo jpeg-*/*.o jpeg-*/*.lo
+	rm -f *.o *.lo *.a *.ldg *.slb libexif/*.o libexif/*.lo libexif/*/*.o libexif/*/*.lo jpeg-*/*.o jpeg-*/*.lo *.pdb

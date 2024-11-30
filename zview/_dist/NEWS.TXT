@@ -91,6 +91,9 @@
  * New plugin for PL4 (*.PL4)
  * New plugin for PaintShop (*.PSC/*.DA4)
 
+The portfolio plugin combines the two previous separate pofoani & pofoimg
+modules.
+
  New formats:
  ------------
  * New plugin for WebP image format (*.WEB/*.WEBP)
@@ -100,7 +103,6 @@
 Since the RECOIL plugin handles so many formats, it is
 assigned to all file extensions. If there is a specialized plugin
 for that format, it is prioritized.
-
 
  Bug Fixes:
  ----------

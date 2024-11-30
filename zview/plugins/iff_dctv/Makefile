@@ -27,4 +27,4 @@ iffslb.lo iff_dctv.lo: ../common/plugin.h ../common/zview.h
 iff_dctv.lo iff_dctv.o: iff_dctv.c cvtdctv.c dctv.h dctvtabs.h ../degas/packbits.c
 
 clean:
-	rm -f *.o *.lo *.a *.ldg *.slb
+	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

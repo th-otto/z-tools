@@ -26,4 +26,4 @@ delmslb.lo delmpnt.lo: ../common/plugin.h ../common/zview.h
 delmpnt.lo delmpnt.o: delmpnt.c ../crackart/ca_unpac.c
 
 clean:
-	rm -f *.o *.lo *.a *.ldg *.slb
+	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

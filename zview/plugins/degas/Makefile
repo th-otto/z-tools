@@ -26,4 +26,4 @@ degasslb.lo degas.lo: ../common/plugin.h ../common/zview.h
 degas.lo degas.o: degas.c packbits.c tanglbts.c
 
 clean:
-	rm -f *.o *.lo *.a *.ldg *.slb
+	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

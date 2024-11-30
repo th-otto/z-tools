@@ -26,4 +26,4 @@ macslb.lo macpaint.lo: ../common/plugin.h ../common/zview.h
 macpaint.lo macpaint.o: macpaint.c ../degas/packbits.c
 
 clean:
-	rm -f *.o *.lo *.a *.ldg *.slb
+	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

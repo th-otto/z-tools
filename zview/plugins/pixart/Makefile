@@ -25,4 +25,4 @@ header.lo: ../common/header.S exports.h
 pixslb.lo pixart.lo: ../common/plugin.h ../common/zview.h
 
 clean:
-	rm -f *.o *.lo *.a *.ldg *.slb
+	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

@@ -26,4 +26,4 @@ dgrapslb.lo d_graph.lo: ../common/plugin.h ../common/zview.h
 d_graph.lo d_graph.o: d_graph.c ../crackart/ca_unpac.c
 
 clean:
-	rm -f *.o *.lo *.a *.ldg *.slb
+	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

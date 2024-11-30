@@ -26,4 +26,4 @@ cybrslb.lo cybrmate.lo: ../common/plugin.h ../common/zview.h
 cybrmate.lo cybrmate.o: cybrmate.c ../degas/packbits.c ../degas/tanglbts.c
 
 clean:
-	rm -f *.o *.lo *.a *.ldg *.slb
+	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

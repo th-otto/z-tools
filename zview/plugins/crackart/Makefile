@@ -29,4 +29,4 @@ cartslb.lo crackart.lo: ../common/plugin.h ../common/zview.h
 crackart.lo crackart.o: crackart.c ca_unpac.c
 
 clean:
-	rm -f *.o *.lo *.a *.ldg *.slb
+	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

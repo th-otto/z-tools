@@ -26,4 +26,4 @@ mppslb.lo mpp.lo: ../common/plugin.h ../common/zview.h
 mpp.lo mpp.o: mpp.c mpp2bmp.c pixbuf.c pixbuf.h
 
 clean:
-	rm -f *.o *.lo *.a *.ldg *.slb
+	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

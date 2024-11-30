@@ -26,4 +26,4 @@ ezartslb.lo ezartpro.lo: ../common/plugin.h ../common/zview.h
 ezartpro.lo ezartpro.o: ezartpro.c ../degas/packbits.c ../degas/tanglbts.c
 
 clean:
-	rm -f *.o *.lo *.a *.ldg *.slb
+	rm -f *.o *.lo *.a *.ldg *.slb *.pdb
