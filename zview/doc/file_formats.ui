@@ -192,6 +192,8 @@ supported features of the formats.
 !hline
  PL4           !! .pl4              !! 320x200         !! 8              !! LZ4             !!
 !hline
+ Playstation   !! .tim              !! Any             !! 4/8/15/24      !! None            !!
+!hline
  PNG           !! .png              !! Any             !! 1/2/4/8/       !! Deflate         !! Alpha Channel
                !!                   !!                 !! 16/24/32       !!                 !! Textual data
 !hline

@@ -76,6 +76,7 @@ PLUGINS = \
 	pofo \
 	prismpnt \
 	pro89xx \
+	psx \
 	recoil \
 	seq \
 	signum \
