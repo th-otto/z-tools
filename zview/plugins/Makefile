@@ -75,6 +75,7 @@ PLUGINS = \
 	pntworks \
 	pofo \
 	prismpnt \
+	pro89xx \
 	recoil \
 	seq \
 	signum \

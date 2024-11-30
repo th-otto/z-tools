@@ -202,6 +202,8 @@ supported features of the formats.
 !hline
  Prism Paint   !! .pnt/.tpi/.tpa    !! Any             !! 1/2/4/8/16/24  !! None/RLE        !! 
 !hline
+ PRO89xx       !! .hir              !! Any             !! 8              !! None            !! grayscale
+!hline
  Public        !! .cmp              !! 640x400         !! 1              !! RLE             !! 
  Painter       !!                   !! 640x800         !! 1              !! RLE             !! 
 !hline

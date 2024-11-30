@@ -92,6 +92,7 @@
  * New plugin for PaintShop (*.PSC/*.DA4)
  * New plugin for Paintworks (*.SC0/*.PG0/*.CL0/*.SC1/*.PG1/*.CL1/*.SC2/*.PG2/*.CL2)
  * New plugin for PrismPaint/TruePaint (*.PNT/*.TPI/*.TPA)
+ * New plugin for PRO89xx (*.HIR)
 
 The portfolio plugin combines the two previous separate pofoani & pofoimg
 modules.
