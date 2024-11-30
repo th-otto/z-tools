@@ -72,6 +72,7 @@ PLUGINS = \
 	png \
 	pnm \
 	pntshop \
+	pntworks \
 	pofo \
 	recoil \
 	seq \

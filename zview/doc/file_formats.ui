@@ -169,6 +169,10 @@ supported features of the formats.
  PaintShop+    !! .psc              !! 640x400         !! 1              !! RLE             !!
                !! .da4              !! 640x800         !! 1              !! None            !!
 !hline
+ Paintworks    !! .sc0/.pg0/.cl0    !! 320x200/320x400 !! 4              !! None/RLE        !!
+               !! .sc1/.pg1/.cl1    !! 640x200/640x400 !! 2              !! None/RLE        !!
+               !! .sc2/.pg2/.cl2    !! 640x400/640x800 !! 1              !! None/RLE        !!
+!hline
  PC Paintbrush !! .pcx              !! Any             !! 1/2/3/4/8/24   !! None/RLE        !! 
 !hline
  PCL           !! .pcl              !! Any             !! 24             !! None            !! Output only

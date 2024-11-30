@@ -376,7 +376,6 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		}
 	}
 	
-
 	RETURN_SUCCESS();
 }
 
