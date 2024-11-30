@@ -74,6 +74,7 @@ PLUGINS = \
 	pntshop \
 	pntworks \
 	pofo \
+	prismpnt \
 	recoil \
 	seq \
 	signum \
@@ -105,5 +106,5 @@ dist:
 	if test -d purec/$(SLB_SUBDIR); then mkdir ../_dist/oldcodecs/purec; cp -a purec/$(SLB_SUBDIR)/* ../_dist/oldcodecs/purec; fi
 
 clean:
-	rm -f */*.ldg */*.slb */*.o */*.a */*.lo */*.pdb 
+	rm -f */*.ldg */*.slb */*.o */*.lo */*/*.o */*/*.lo */*/*/*.o */*/*/*.lo */*.a */*.pdb 
 	$(MAKE) -C libshare clean

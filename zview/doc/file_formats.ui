@@ -200,6 +200,8 @@ supported features of the formats.
 !hline
  Portfolio     !! .pgf/.pgc/.pgx    !! 240x64          !! 1              !! None/RLE        !! Animation
 !hline
+ Prism Paint   !! .pnt/.tpi/.tpa    !! Any             !! 1/2/4/8/16/24  !! None/RLE        !! 
+!hline
  Public        !! .cmp              !! 640x400         !! 1              !! RLE             !! 
  Painter       !!                   !! 640x800         !! 1              !! RLE             !! 
 !hline
