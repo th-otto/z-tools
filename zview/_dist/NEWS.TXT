@@ -94,6 +94,7 @@
  * New plugin for PrismPaint/TruePaint (*.PNT/*.TPI/*.TPA)
  * New plugin for PRO89xx (*.HIR)
  * New plugin for Playstation (*.TIM)
+ * New plugin for Quantum Paintbox (*.PBX)
 
 The portfolio plugin combines the two previous separate pofoani & pofoimg
 modules.

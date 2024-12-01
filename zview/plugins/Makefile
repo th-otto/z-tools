@@ -77,6 +77,7 @@ PLUGINS = \
 	prismpnt \
 	pro89xx \
 	psx \
+	qpaint \
 	recoil \
 	seq \
 	signum \

@@ -298,7 +298,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 		memcpy(buffer, &bmap[src], bytes_per_row);
 		break;
 	}
-	info->_priv_var = info->_priv_var + bytes_per_row;
+	info->_priv_var += bytes_per_row;
 
 	RETURN_SUCCESS();
 }

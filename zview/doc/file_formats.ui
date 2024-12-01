@@ -209,6 +209,10 @@ supported features of the formats.
  Public        !! .cmp              !! 640x400         !! 1              !! RLE             !! 
  Painter       !!                   !! 640x800         !! 1              !! RLE             !! 
 !hline
+ Quantum       !! .pbx              !! 320x200         !! 7              !! RLE/None        !! 
+ Paintbox      !!                   !! 640x400         !! 5              !!                 !! 
+               !!                   !! 320x200         !! 12             !!                 !! 
+!hline
  Signum        !! .imc              !! 640x400         !! 1              !! None
 !hline
  Spectrum      !! .spu/.spc/.sps    !! 320x200         !! 12/15          !! RLE
