@@ -96,7 +96,8 @@
  * New plugin for Playstation (*.TIM)
  * New plugin for Quantum Paintbox (*.PBX)
  * New plugin for RAG-D (*.RAG)
-
+ * New plugin for Rembrandt True Color Picture (*.TCP)
+ 
 The portfolio plugin combines the two previous separate pofoani & pofoimg
 modules.
 

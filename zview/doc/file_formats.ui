@@ -215,6 +215,8 @@ supported features of the formats.
 !hline
  RAG-D         !! .rag              !! Any             !! 1/2/4/8/16     !! None            !! 
 !hline
+ Rembrandt     !! .tcp              !! Any             !! 16             !! None            !! 
+!hline
  Signum        !! .imc              !! 640x400         !! 1              !! None
 !hline
  Spectrum      !! .spu/.spc/.sps    !! 320x200         !! 12/15          !! RLE

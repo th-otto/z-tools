@@ -35,7 +35,7 @@ OBJ 				= $(CATALOG_OBJ) $(FILE_OBJ) $(EDIT_OBJ) $(VDI_OBJ) \
 
 PROGRAM 			= zview.app
 
-all:: $(STRIPEX) $(PROGRAM)
+all:: $(STRIPEX) $(PROGRAM) ldglib/libldg.a
 	$(MAKE) -C plugins
 
 version_date.h:

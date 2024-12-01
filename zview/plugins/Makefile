@@ -80,6 +80,7 @@ PLUGINS = \
 	qpaint \
 	rag_d \
 	recoil \
+	rembrndt \
 	seq \
 	signum \
 	spectrum \
