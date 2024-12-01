@@ -78,6 +78,7 @@ PLUGINS = \
 	pro89xx \
 	psx \
 	qpaint \
+	rag_d \
 	recoil \
 	seq \
 	signum \

@@ -95,6 +95,7 @@
  * New plugin for PRO89xx (*.HIR)
  * New plugin for Playstation (*.TIM)
  * New plugin for Quantum Paintbox (*.PBX)
+ * New plugin for RAG-D (*.RAG)
 
 The portfolio plugin combines the two previous separate pofoani & pofoimg
 modules.
