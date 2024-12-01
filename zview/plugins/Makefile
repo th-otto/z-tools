@@ -81,6 +81,7 @@ PLUGINS = \
 	rag_d \
 	recoil \
 	rembrndt \
+	rgb \
 	seq \
 	signum \
 	spectrum \
