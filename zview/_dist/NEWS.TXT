@@ -98,6 +98,7 @@
  * New plugin for RAG-D (*.RAG)
  * New plugin for Rembrandt True Color Picture (*.TCP)
  * New plugin for RGB Intermediate (*.RGB)
+ * New plugin for Spectrum Extended (*.SPX)
  
 The portfolio plugin combines the two previous separate pofoani & pofoimg
 modules.

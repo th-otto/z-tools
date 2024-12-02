@@ -6,6 +6,19 @@
 #define AUTHOR   "Lonny Pursell, Thorsten Otto"
 #define DATE     __DATE__ " " __TIME__
 
+/*
+Signum!    *.IMC (st high resolution)
+
+8 bytes    file id, "bimc0002"
+-------
+8 bytes    total for header
+
+?          image data:
+No description of the compression method exists at this time.
+
+Note: 68K decompression code can be found with the samples.
+*/
+
 #define SCREEN_SIZE 32000
 
 struct ImcHeader {

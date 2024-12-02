@@ -6,6 +6,197 @@
 #define AUTHOR      "Lonny Pursell, Thorsten Otto"
 #define NAME        "Spectrum 512"
 #define DATE        __DATE__ " " __TIME__
+#define MISC_INFO   "Some code by Hans Wessels"
+
+/*
+############################################################################
+Spectrum 512    *.SPU
+
+80 words       first scan line of picture (unused) -- should be zeroes
+15920 words    picture data (screen memory) for scan lines 1 through 199
+9552 words     3 palettes for each scan line (the top scan line is not
+               included because Spectrum 512 can't display it)
+-----------
+51104 bytes     total
+
+Note that the Spectrum 512 mode's three palette changes per scan line allow
+more colors on the screen than normally possible, but a tremendous amount of
+CPU time is required to maintain the image.
+
+The Spectrum format specifies a palette of 48 colors for each scan line. To
+decode a Spectrum picture, one must be know which of these 48 colors are in
+effect for a given horizontal pixel position.
+
+############################################################################
+
+Spectrum 512 Enhanced    *.SPU
+
+Spectrum 512 images with a 15-bit RGB palette.
+Created by Sascha Springer: http://blog.anides.de/
+
+These are identical to Spectrum 512 uncompressed images with two exceptions.
+The very first long of the image data will be the file id: '5BIT'
+
+Spectrum 512 can't display the first scan line anyway, so the ID should cause
+no issues.
+
+The upper 3 bits of a palette word are used to provide a 5th bit of RGB. Thus:
+  red:  0xxx1432xxxxxxxx
+  green x0xxxxxx1432xxxx
+  blue: xx0xxxxxxxxx1432
+
+These look like normal Spectrum 512 images by old viewers when the upper 3 bits
+are not used.
+
+As described by the creator:
+The new least significant bit for each channel are now stored in the upper
+nibble of the color word and so the image .SPU format itself is kept completely
+"backwards" compatible.
+
+See also Spectrum 512 file format
+
+############################################################################
+
+Spectrum 512 (Compressed)    *.SPC
+
+1 word            file ID, 'SP' ($5350)
+1 word            reserved for future use [always 0]
+1 long            length of data bit map
+1 long            length of color bit map
+<= 32092 bytes    compressed data bit map
+<= 17910 bytes    compressed color bit map
+--------------
+<= 50014 bytes    total
+
+Data compression:
+
+Compression is via a modified run length encoding (RLE) scheme, similar to
+DEGAS compressed and Tiny. The data map is stored as a sequence of records.
+Each record consists of a header byte followed by one or more data bytes. The
+meaning of the header byte is as follows:
+
+        For a given header byte, x:
+
+           0 <= x <= 127   Use the next x + 1 bytes literally (no repetition)
+        -128 <= x <=  -1   Use the next byte -x + 2 times
+
+The data appears in the following order:
+
+        1. Picture data, bit plane 0, scan lines 1 - 199
+        2. Picture data, bit plane 1, scan lines 1 - 199
+        3. Picture data, bit plane 2, scan lines 1 - 199
+        4. Picture data, bit plane 3, scan lines 1 - 199
+
+Decompression of data ends when 31840 data bytes have been used.
+
+Color map compression:
+
+Each 16-word palette is compressed separately. There are three palettes for
+each scan line (597 total). The color map is stored as a sequence of records.
+Each record starts with a 1-word bit vector which specifies which of the 16
+palette entries are included in the data following the bit vector (1 =
+included, 0 = not included). If a palette entry is not included, it is assumed
+to be zero (black). The least significant bit of the bit vector refers to
+palette entry zero, while the most significant bit refers to palette entry 15.
+Bit 15 must be zero, since Spectrum 512 does not use palette entry 15. Bit 0
+should also be zero, since Spectrum 512 always makes the background color black.
+
+The words specifying the values for the palette entries indicated in the bit
+vector follow the bit vector itself, in order (0 - 15).
+
+NOTE:   Regarding Spectrum pictures, Shamus McBride reports the following:
+
+        "... [The Picture Formats List] says bit 15 of the color map vector
+        must be zero. I've encountered quite a few files where [bit 15] is set
+        (with no associated palette entry)..."
+
+See also Spectrum 512 file format
+
+############################################################################
+
+Spectrum 512 (Smooshed)    *.SPS
+
+This format compresses Spectrum 512 pictures better than the standard method.
+There are at least two programs that support this format, SPSLIDEX and ANISPEC,
+although the two seem to differ slightly in their interpretation of the format.
+
+One point of interest: Shamus McBride deciphered this format without an ST!
+
+1 word            file ID, 'SP' ($5350)
+1 word            0 (reserved for future use)
+1 long            length of data bit map
+1 long            length of color bit map
+<= 32092 bytes    compressed data bit map
+<= 17910 bytes    compressed color bit map
+--------------
+< 50014  bytes    total
+
+Data compression:
+
+Compression is via a modified run length encoding (RLE) scheme, similar to that
+used in Spectrum Compressed (*.SPC) images.
+
+The data map is stored as a sequence of records. Each record consists of a
+header byte followed by one or more data bytes. The meaning of the header byte
+is as follows:
+
+        For a given header byte, x (unsigned):
+
+          0 <= x <= 127    Use the next byte x + 3 times
+        128 <= x <= 255    Use the next x - 128 + 1 bytes literally
+                           (no repetition)
+
+There are two kinds of *.SPS files. The type is defined by the least
+significant bit of the last byte in the color bit map.
+
+If the bit is set the data appears in the same order as *.SPC files:
+
+        1. Picture data, bit plane 0, scan lines 1 - 199
+        2. Picture data, bit plane 1, scan lines 1 - 199
+        3. Picture data, bit plane 2, scan lines 1 - 199
+        4. Picture data, bit plane 3, scan lines 1 - 199
+
+If the bit is not set the data is encoded as byte wide vertical strips:
+
+        Picture data, bit plane 0, scan line   1, MSB.
+        Picture data, bit plane 0, scan line   2, MSB.
+        Picture data, bit plane 0, scan line   3, MSB.
+        . . .
+        Picture data, bit plane 0, scan line 199, MSB.
+        Picture data, bit plane 0, scan line   1, LSB.
+        Picture data, bit plane 0, scan line   2, LSB.
+        . . .
+        Picture data, bit plane 0, scan line 199, LSB.
+        Picture data, bit plane 1, scan line   1, MSB.
+        . . .
+        Picture data, bit plane 3, scan line 198, LSB
+        Picture data, bit plane 3, scan line 199, LSB.
+
+A for loop to process that data would look like
+
+        for (plane = 0; plane < 4; plane++)
+            for (x = 0; x < 320; x += 8)
+                for (y = 1; y < 200; y++)
+                    for (x1 = 0; x1 < 8; x1++)
+                        image[y, x + x1] = ...
+
+Color map compression:
+
+Color map compression is similar to *.SPC color map compression, but the map is
+compressed as a string of bits, rather than words. There are 597 records (one
+for each palette). Each record is composed of a 14-bit header followed by a
+number of 9-bit palette entries. The 14-bit header specifies which palette
+entries follow (1 = included, 0 = not included). The most significant bit of
+the header refers to palette entry 1, while the least significant bit refers to
+palette 14. Palette entries 0 and 15 are forced to black (zero). Each palette
+entry is encoded as "rrrgggbbb".
+
+The format of the palette is described above in the section on uncompressed
+Spectrum pictures (*.SPU).
+
+See also Spectrum 512 file format
+
+*/
 
 #define SP_ID   0x5350
 #define SS_ID   0x5353
@@ -46,6 +237,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+	case INFO_MISC:
+		return (long)MISC_INFO;
+	case INFO_COMPILER:
+		return (long)(COMPILER_VERSION_STRING);
 	}
 	return -ENOSYS;
 }
@@ -54,8 +249,9 @@ long __CDECL get_option(zv_int_t which)
 
 
 /*
- *  Given an x-coordinate and a color index, returns the corresponding Spectrum palette index.
- *  by Steve Belczyk; placed in the public domain December, 1990.
+ * Given an x-coordinate (from 0 to 319) and a color index (from 0 to 15)
+ * returns the corresponding Spectrum palette index (from 0 to 47).
+ * by Steve Belczyk; placed in the public domain December, 1990.
  */
 static int find_index(int x, int c)
 {
@@ -68,7 +264,7 @@ static int find_index(int x, int c)
 	{									/* If c is even */
 		x1 = x1 + 1;
 	}
-	if ((x >= x1) && (x < (x1 + 160)))
+	if (x >= x1 && x < (x1 + 160))
 	{
 		c = c + 16;
 	} else if (x >= (x1 + 160))

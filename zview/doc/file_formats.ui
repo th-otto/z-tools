@@ -219,9 +219,10 @@ supported features of the formats.
 !hline
  RGB Intermed. !! .rgb              !! 320x200         !! 12             !! None            !! 
 !hline
- Signum        !! .imc              !! 640x400         !! 1              !! None
+ Signum        !! .imc              !! 640x400         !! 1              !! None            !!
 !hline
- Spectrum      !! .spu/.spc/.sps    !! 320x200         !! 12/15          !! RLE
+ Spectrum      !! .spu/.spc/.sps    !! 320x200         !! 12/15          !! RLE             !!
+               !! .spx              !! 320xAny         !! 12             !! None/ICE        !!
 !hline
  STAD          !! .pac              !! 640x400         !! 1              !! RLE             !!
 !hline
