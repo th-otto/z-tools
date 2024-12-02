@@ -226,6 +226,8 @@ supported features of the formats.
 !hline
  Spooky Sprites!! .tre              !! Any             !! 16             !! RLE             !!
 !hline
+ Sinbad Slideshow!! .ssb            !! 320x200         !! 4              !! None            !!
+!hline
  STAD          !! .pac              !! 640x400         !! 1              !! RLE             !!
 !hline
  TGA           !! .tga              !! Any             !! 16/24/32       !! None/RLE        !! Alpha Channel

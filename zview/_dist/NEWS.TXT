@@ -100,6 +100,7 @@
  * New plugin for RGB Intermediate (*.RGB)
  * New plugin for Spectrum Extended (*.SPX)
  * New plugin for Spooky Sprites (*.TRE)
+ * New plugin for Sinbad Slideshow (*.SSB)
  
 Since the RECOIL plugin handles so many formats, it is
 assigned to all file extensions. If there is a specialized plugin

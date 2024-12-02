@@ -95,15 +95,6 @@ struct frame_header {
 	char comment[5][35];
 };
 
-#ifdef __PUREC__
-static unsigned long ulmul(unsigned short a, unsigned short b) 0xc0c1; /* mulu.w d1,d0 */
-#else
-static unsigned long ulmul(unsigned short a, unsigned short b)
-{
-	return (unsigned long)a * b;
-}
-#endif
-
 
 
 /*==================================================================================*

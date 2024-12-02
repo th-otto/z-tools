@@ -87,6 +87,7 @@ PLUGINS = \
 	spectrum \
 	specx \
 	spooky \
+	ssb \
 	stad \
 	tga \
 	tiff \
