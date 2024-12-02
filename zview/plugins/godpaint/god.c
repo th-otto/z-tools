@@ -10,12 +10,12 @@ GodPaint     *.GOD
 xres*yres*2 bytes Falcon high color data,  word RRRRRGGGGGGBBBBB
 */
 
-#define VERSION 0x201
+#define VERSION 0x202
 #define NAME    "GodPaint"
 #define AUTHOR  "Zorro"
 #define DATE     __DATE__ " " __TIME__
 
-typedef struct 
+typedef struct
 {
 	int16_t header;
 	int16_t width;
@@ -69,7 +69,7 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 	GODHDR		*god;
 
 	if ( ( handle = ( int16_t)Fopen( name, 0)) < 0)
-		return FALSE;
+		RETURN_ERROR(EC_Fopen);
 
 	file_size = Fseek( 0L, handle, 2);
 
@@ -80,23 +80,23 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 	if ( god == NULL)
 	{
 		Fclose( handle);
-		return FALSE;	
+		RETURN_ERROR(EC_Malloc);
 	}
 
 	if ( Fread( handle, file_size, god) != file_size)
 	{
 		free( god);
 		Fclose( handle);
-		return FALSE;	
+		RETURN_ERROR(EC_Fread);
 	}
 
 	Fclose( handle);
 
 	if( ( god->header != 1024) /* some beta version of godpaint? I don't know but some files have this header */
-	&& ( god->header != 18228   /* G4 */))
+	&& ( god->header != 0x4734   /* G4 */))
 	{
 		free( god);
-		return FALSE;	
+		RETURN_ERROR(EC_FileId);
 	}
 
 	info->planes 					= 16;
@@ -107,18 +107,16 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 	info->colors  					= 1L << info->planes;
 	info->memory_alloc 				= TT_RAM;
 	info->page	 					= 1;
-	info->delay						= 0;
 	info->orientation				= UP_TO_DOWN;
 	info->num_comments				= 0;
 	info->max_comments_length 		= 0;
 	info->_priv_ptr					= ( void*)god;
-	info->_priv_var_more			= 3;		
-	info->_priv_ptr_more			= NULL;
+	info->_priv_var					= sizeof(GODHDR) / sizeof(uint16_t);
 
-	strcpy( info->info, "Reservoir Gods - Godpaint");	
+	strcpy( info->info, "Reservoir Gods - Godpaint");
 	strcpy( info->compression, "None");
 
-	return TRUE;
+	RETURN_SUCCESS();
 }
 
 
@@ -136,20 +134,21 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 boolean __CDECL reader_read( IMGINFO info, uint8_t *buffer)
 {
 	GODHDR		*god	= ( GODHDR*)info->_priv_ptr;
-	uint16_t 		*source = ( uint16_t*)god + info->_priv_var_more;
-	int16_t		i, ii;
+	uint16_t 		*source = ( uint16_t*)god + info->_priv_var;
+	int x;
 
-	for( i = 0, ii = 0; i < info->width; i++)
+	x = info->width;
+	info->_priv_var += x;
+	do
 	{
-		register uint16_t src16 = source[i];
+		uint16_t src16 = *source++;
 
-		buffer[ii++] = (( src16 >> 11) & 0x001F) << 3; 
-        buffer[ii++] = (( src16 >> 5)  & 0x003F) << 2;
-        buffer[ii++] = (( src16)       & 0x001F) << 3;
-	}
+		*buffer++ = (( src16 >> 11) & 0x001F) << 3;
+        *buffer++ = (( src16 >> 5)  & 0x003F) << 2;
+        *buffer++ = (( src16)       & 0x001F) << 3;
+	} while (--x > 0);
 
-	info->_priv_var_more += info->width;
-	return TRUE;
+	RETURN_SUCCESS();
 }
 
 
@@ -187,8 +186,8 @@ void __CDECL reader_quit( IMGINFO info)
 {
 	GODHDR		*god	= ( GODHDR*)info->_priv_ptr;
 
-	free( god);
 	info->_priv_ptr = 0;
+	free( god);
 }
 
 
@@ -205,47 +204,45 @@ void __CDECL reader_quit( IMGINFO info)
  *      TRUE if all ok else FALSE.													*
  *==================================================================================*/
 boolean __CDECL encoder_init( const char *name, IMGINFO info)
-{	
-	uint16_t 		*line_buffer = NULL;		   
-	int8_t		header_id[2] = "G4";
+{
+	uint16_t 		*line_buffer = NULL;
 	int 		file;
-
-	if ( ( file = (int)Fcreate( name, 0)) < 0)
-		return FALSE;
+	GODHDR header;
 
 	line_buffer	= ( uint16_t*) malloc( ( info->width + 1) << 1);
 
-	if ( line_buffer == NULL) 
+	if ( line_buffer == NULL)
 	{
-		Fclose( file);
-		return FALSE;
+		RETURN_ERROR(EC_Malloc);
 	}
 
-	/* we test only the first Fwrite.. if it's ok, the others *should* works also */
-	if( Fwrite( file, 2, header_id) != 2)
+	if ( ( file = (int)Fcreate( name, 0)) < 0)
+	{
+		free(line_buffer);
+		RETURN_ERROR(EC_Fcreate);
+	}
+
+	header.header = 0x4734;
+	header.width = info->width;
+	header.height = info->height;
+
+	if( Fwrite( file, sizeof(header), &header) != sizeof(header))
 	{
 		free( line_buffer);
 		Fclose( file);
-		return FALSE;
-	}	
-
-	Fwrite( file, 2, ( void*)&info->width);
-	Fwrite( file, 2, ( void*)&info->height);	
-
+		RETURN_ERROR(EC_Fwrite);
+	}
 
 	info->planes   			= 24;	/* the wanted input data format.. currently Zview return only 24 bits data, so we make the convertion to 16 bits ourself */
 	info->components 		= 3;
-	info->colors  			= 16777215L;
+	info->colors  			= 1L << 24;
 	info->orientation		= UP_TO_DOWN;
 	info->indexed_color	 	= FALSE;
 	info->page			 	= 1;
-	info->delay 		 	= 0;
 	info->_priv_ptr	 		= line_buffer;
 	info->_priv_var	 		= file;
-	info->_priv_ptr_more	= NULL;				
-	info->__priv_ptr_more	= NULL;	
 
-	return TRUE;
+	RETURN_SUCCESS();
 }
 
 
@@ -262,18 +259,17 @@ boolean __CDECL encoder_init( const char *name, IMGINFO info)
  *==================================================================================*/
 boolean __CDECL encoder_write( IMGINFO info, uint8_t *buffer)
 {
-	uint16_t *source = ( uint16_t*)info->_priv_ptr;
-	int32_t  byte_to_write = info->width << 1;
-	uint16_t  ii, i;
+	uint16_t *line_buffer = ( uint16_t*)info->_priv_ptr;
+	size_t byte_to_write = info->width << 1;
+	uint16_t i;
 
-	for( ii = i = 0; i < info->width; i++, ii += 3)
+	for( i = 0; i < info->width; i++)
 	{
-		register uint8_t *rgb = &buffer[ii];
-
-		source[i] = (((uint16_t)rgb[0] & 0xF8) << 8) | (((uint16_t)rgb[1] & 0xFC) << 3) | ( rgb[2] >> 3);
+		*line_buffer++ = (((uint16_t)buffer[0] & 0xF8) << 8) | (((uint16_t)buffer[1] & 0xFC) << 3) | ( buffer[2] >> 3);
+		buffer += 3;
 	}
 
-	if( Fwrite( (int)info->_priv_var, byte_to_write, ( uint8_t*)source) != byte_to_write)
+	if((size_t)Fwrite( (int)info->_priv_var, byte_to_write, info->_priv_ptr) != byte_to_write)
 		return FALSE;
 
 	return TRUE;
@@ -294,13 +290,14 @@ boolean __CDECL encoder_write( IMGINFO info, uint8_t *buffer)
  *==================================================================================*/
 void __CDECL encoder_quit( IMGINFO info)
 {
-	uint8_t *buffer = ( uint8_t*)info->_priv_ptr;
+	uint8_t *buffer;
 
-	free( buffer);
-	info->_priv_ptr = 0;
 	if (info->_priv_var > 0)
 	{
 		Fclose( (int)info->_priv_var);
 		info->_priv_var = 0;
 	}
+	buffer = ( uint8_t*)info->_priv_ptr;
+	info->_priv_ptr = 0;
+	free( buffer);
 }
