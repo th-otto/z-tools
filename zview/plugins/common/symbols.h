@@ -13,6 +13,8 @@
 #  endif
 #endif
 
+#undef __STRING
+#undef __STRINGIFY
 #define __STRING(x)	#x
 #define __STRINGIFY(x)	__STRING(x)
 

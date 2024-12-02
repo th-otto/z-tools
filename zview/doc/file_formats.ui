@@ -224,6 +224,8 @@ supported features of the formats.
  Spectrum      !! .spu/.spc/.sps    !! 320x200         !! 12/15          !! RLE             !!
                !! .spx              !! 320xAny         !! 12             !! None/ICE        !!
 !hline
+ Spooky Sprites!! .tre              !! Any             !! 16             !! RLE             !!
+!hline
  STAD          !! .pac              !! 640x400         !! 1              !! RLE             !!
 !hline
  TGA           !! .tga              !! Any             !! 16/24/32       !! None/RLE        !! Alpha Channel

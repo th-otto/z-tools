@@ -139,6 +139,20 @@ long __CDECL set_option(zv_int_t which, zv_int_t value);
 #endif
 
 /*
+ * small optimization for Pure-C:
+ * perform 16x16 -> 32bit multiplication
+ */
+#ifdef __PUREC__
+static unsigned long ulmul(unsigned short a, unsigned short b) 0xc0c1; /* mulu.w d1,d0 */
+#else
+static inline unsigned long ulmul(unsigned short a, unsigned short b)
+{
+	return (unsigned long)a * b;
+}
+#endif
+
+
+/*
  * helper function to get the actual basepage start,
  * if executable has some extended header,
  * like MiNT a.out/ELF headers
