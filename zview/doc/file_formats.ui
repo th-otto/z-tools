@@ -230,6 +230,8 @@ supported features of the formats.
 !hline
  STAD          !! .pac              !! 640x400         !! 1              !! RLE             !!
 !hline
+ Sun Raster    !! .sun/.ras         !! Any             !! 1/4/8/24/32    !! None/RLE        !! Encoder
+!hline
  TGA           !! .tga              !! Any             !! 16/24/32       !! None/RLE        !! Alpha Channel
                !!                   !!                 !!                !!                 !! Encoder
 !hline

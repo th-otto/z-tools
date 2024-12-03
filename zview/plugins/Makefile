@@ -89,6 +89,7 @@ PLUGINS = \
 	spooky \
 	ssb \
 	stad \
+	sun \
 	tga \
 	tiff \
 	webp \
