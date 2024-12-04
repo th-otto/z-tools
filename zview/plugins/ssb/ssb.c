@@ -83,6 +83,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		Fclose(handle);
 		RETURN_ERROR(EC_Fread);
 	}
+	Fclose(handle);
 
 	{	
 		int i;

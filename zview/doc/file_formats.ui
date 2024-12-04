@@ -232,6 +232,10 @@ supported features of the formats.
 !hline
  Sun Raster    !! .sun/.ras         !! Any             !! 1/4/8/24/32    !! None/RLE        !! Encoder
 !hline
+ Synthetic Arts!! .srt/.bit         !! 320x200         !! 4              !! None            !!
+               !!                   !! 640x200         !! 2              !! None            !!
+               !!                   !! 640x400         !! 1              !! None            !! 
+!hline
  TGA           !! .tga              !! Any             !! 16/24/32       !! None/RLE        !! Alpha Channel
                !!                   !!                 !!                !!                 !! Encoder
 !hline

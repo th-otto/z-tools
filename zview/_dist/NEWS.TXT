@@ -102,6 +102,7 @@
  * New plugin for Spooky Sprites (*.TRE)
  * New plugin for Sinbad Slideshow (*.SSB)
  * New plugin for Sun Raster (*.SUN/*.RAS)
+ * New plugin for Synthetic Arts (*.SRT/*.BIT)
  
 Since the RECOIL plugin handles so many formats, it is
 assigned to all file extensions. If there is a specialized plugin

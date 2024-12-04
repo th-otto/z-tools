@@ -17,10 +17,10 @@ static PROC DATAFunc[] = {
 };
 
 static LDGLIB data_plugin = {
-	0x202,								/* plugin version */
+	0x203,								/* plugin version */
 	5,									/* number of plugin functions */
 	DATAFunc,							/* list of functions */
-	"SPX\0",							/* file types handled */
+	"SRT\0" "BIT\0",					/* file types handled */
 	LDG_NOT_SHARED,						/* use this flag, don't know if ldg.prg is installed */
 	0,									/* function called when the plugin is unloaded */
 	0									/* Howmany file type are supported by this plugin (0 = double-zero terminated) */

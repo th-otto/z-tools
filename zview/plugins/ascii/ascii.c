@@ -167,7 +167,8 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 
 	info->planes = 8;
 	info->components = 3;
-	info->colors = 1L << info->planes;
+	info->indexed_color = FALSE;
+	info->colors = 1L << 8;
 	info->real_width = info->width;
 	info->real_height = info->height;
 	info->memory_alloc = TT_RAM;
@@ -181,6 +182,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	info->_priv_var = 0;				/* y offset */
 
 	/* FIXME: should be setting */
+	/* FIXME2: palette actually isn't used since indexed_color is FALSE */
 	if (Kbshift(-1) & K_ALT)
 	{
 		for (color = 0; color < 256; color++)
