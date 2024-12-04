@@ -44,8 +44,12 @@ static LDG lib;
  * Diversion of functions to make them compatible "stdcall"
  * ie, only a0-a1-d1 d0 registers are scratch registers.
  * other registers (such as a2 and d2) must be preserved,
- * which is not the case with pure sozobon and c.
- * (add Arnaud Bercegeay November 2001)
+ * which is not the case with sozobon.
+ * (add Arnaud Bercegeay November 2001).
+ *
+ * Note that this not needed for Pure-C, since all exported
+ * functions must be delcared with cdecl, and for those
+ * Pure-C preserves a2/d2, just like GNU-C.
  */
 
 /* Protection contexts (registers), also used by ldg_callback () */
@@ -59,7 +63,7 @@ struct
 } _ldg_adr_regctx[NB_REG_CONTEXT];
 
 
-#ifndef __GNUC__
+#ifdef __SOZOBONX__
 
 /* new destination diverted functions */
 /* See stdcall.s */
@@ -96,10 +100,8 @@ static void trnfm_to_stdcall(void)
 		tab_redirect_proc[i]._r4 = _ldg_begin_stdcall;
 		lib.list[i].func = &tab_redirect_proc[i];
 	}
-
-	lib.flags |= LDG_STDCALL;
 }
-#endif /* __GNUC__ */
+#endif /* __SOZOBONX__ */
 
 /*
  *	Interface LDG des libraries
@@ -135,14 +137,12 @@ int ldg_init(const LDGLIB *liblib)
 		}
 	}
 
-	/* diversion function to preserve the registers */
-	/* a2 and d2 if necessary (sozobon pure and c) */
-
-#ifndef __GNUC__
 	lib.flags &= ~LDG_STDCALL;
-	trnfm_to_stdcall();
-#else
+#ifndef __GNUC__
 	lib.flags |= LDG_STDCALL;
+#ifdef __SOZOBONX__
+	trnfm_to_stdcall();
+#endif
 #endif
 
 	env = getenv("OFFSETLDG");
