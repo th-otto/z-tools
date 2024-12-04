@@ -345,14 +345,57 @@ void infobox( void)
 		case CODEC_LDG:
 			{
 				LDG *ldg;
-
+				const char *codecname;
+				const char *author;
+				const char *date;
+				
 				ldg = img->codec->c.ldg.ldg;
-				objc_multiline(infotext, (long)(ldg->list[0].info != NULL && strncmp(ldg->list[0].info, "Codec: ", 7) == 0 ? ldg->list[0].info + 7 : 0), FILE_CODEC_NAME_FIRST, FILE_CODEC_NAME_LAST);
+				codecname = ldg->list[0].info;
+				if (codecname)
+				{
+					if (strncmp(codecname, "Codec: ", 7) == 0)
+						codecname += 7;
+				} else
+				{
+					codecname = "";
+				}
+				objc_multiline(infotext, (long)codecname, FILE_CODEC_NAME_FIRST, FILE_CODEC_NAME_LAST);
 				sprintf(temp, "%d.%02x", (unsigned short)ldg->vers >> 8, ldg->vers & 0xff);
 				ObjcStrnCpy(infotext, FILE_CODEC_VERSION, temp);
-				ObjcStrnCpy(infotext, FILE_CODEC_DATE, ldg->list[2].info != NULL && strncmp(ldg->list[2].info, "Date: ", 6) == 0 ? ldg->list[2].info + 6 : "");
-				ObjcStrnCpy(infotext, FILE_CODEC_AUTHOR, ldg->list[1].info != NULL && strncmp(ldg->list[1].info, "Author: ", 8) == 0 ? ldg->list[1].info + 8 : "");
-				objc_multiline(infotext, 0, FILE_CODEC_INFO_FIRST, FILE_CODEC_INFO_LAST);
+				/*
+				 * Just a convention from LP codecs:
+				 * - text of function pointer 1 (reader_init) contains the author name, possibly prefixed with "Author: "
+				 * - text of function pointer 2 (reader_read) contains the compilation date, prefixed with "Date: "
+				 * - text of function pointer 3 (reader_quit) contains the compilation time, prefixed with "Time: "
+				 * - In some newer versions, reader_read contains the old version number,
+				 *   and reader_quit contains both date & time
+				 * - text of function pointer 4 (reader_get_txt) may contain misc info
+				 */
+				author = "";
+				if (ldg->num >= 2)
+				{
+					author = ldg->list[1].info;
+					if (author)
+					{
+						if (strncmp(author, "Author: ", 8) == 0)
+							author += 8;
+					}
+				}
+				ObjcStrnCpy(infotext, FILE_CODEC_AUTHOR, author);
+				date = "";
+				if (ldg->num >= 3)
+				{
+					date = ldg->list[2].info;
+					if (date)
+					{
+						if (strncmp(date, "Date: ", 6) == 0)
+							date += 6;
+						else if (ldg->num >= 4 && ldg->list[3].info != NULL && ldg->list[3].info[0] != 'T')
+							date = ldg->list[3].info;
+					}
+				}
+				ObjcStrnCpy(infotext, FILE_CODEC_DATE, date);
+				objc_multiline(infotext, ldg->num >= 5 ? (long)ldg->list[4].info : 0, FILE_CODEC_INFO_FIRST, FILE_CODEC_INFO_LAST);
 				ObjcStrnCpy(infotext, FILE_CODEC_COMPILER, ldg->flags & LDG_STDCALL ? "Pure-C" : "GNU-C");
 			}
 			break;
