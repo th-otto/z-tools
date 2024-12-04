@@ -183,7 +183,7 @@ static int find_pbx_index(int x, int c)
 
 
 /* 320 x 200, 4 bitplanes */
-static void reorder_column_bitplanes(uint8_t *dst, uint8_t *src)
+static void reorder_column_bitplanes(uint8_t *_dst, uint8_t *_src)
 {
 	int i;
 	uint16_t *src = (uint16_t *)_src;

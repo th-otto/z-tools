@@ -23,7 +23,6 @@ static LDGLIB data_plugin = {
 	"SSB\0",							/* file types handled */
 	LDG_NOT_SHARED,						/* use this flag, don't know if ldg.prg is installed */
 	0,									/* function called when the plugin is unloaded */
-	0									/* how many file types are supported by this plugin */
 	0									/* Howmany file type are supported by this plugin (0 = double-zero terminated) */
 };
 
