@@ -90,8 +90,10 @@ PLUGINS = \
 	ssb \
 	stad \
 	sun \
+	synarts \
 	tga \
 	tiff \
+	tiny \
 	webp \
 	$(empty)
 

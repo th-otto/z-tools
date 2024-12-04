@@ -186,22 +186,21 @@ static int find_pbx_index(int x, int c)
 static void reorder_column_bitplanes(uint8_t *dst, uint8_t *src)
 {
 	int i;
+	uint16_t *src = (uint16_t *)_src;
+	uint16_t *dst = (uint16_t *)_dst;
 
-	for (i = 0; i < 200; i++)
+	for (i = 0; i < SCREEN_H; i++)
 	{
 		int j;
 
-		for (j = 0; j < 20; j++)
+		for (j = 0; j < SCREEN_W / 16; j++)
 		{
-			*dst++ = src[i * 2 + j * 400];
-			*dst++ = src[i * 2 + j * 400 + 1];
-			*dst++ = src[i * 2 + j * 400 + 8000];
-			*dst++ = src[i * 2 + j * 400 + 8001];
-			*dst++ = src[i * 2 + j * 400 + 16000];
-			*dst++ = src[i * 2 + j * 400 + 16001];
-			*dst++ = src[i * 2 + j * 400 + 24000];
-			*dst++ = src[i * 2 + j * 400 + 24001];
+			*dst++ = src[j * SCREEN_H + 0 * SCREEN_H * (SCREEN_W / 16)];
+			*dst++ = src[j * SCREEN_H + 1 * SCREEN_H * (SCREEN_W / 16)];
+			*dst++ = src[j * SCREEN_H + 2 * SCREEN_H * (SCREEN_W / 16)];
+			*dst++ = src[j * SCREEN_H + 3 * SCREEN_H * (SCREEN_W / 16)];
 		}
+		src++;
 	}
 }
 

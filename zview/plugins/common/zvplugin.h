@@ -49,8 +49,67 @@ void __CDECL plugin_encoder_quit(SLB *slb, IMGINFO info);
 /*
  * one day decoders should return error codes instead of FALSE/TRUE
  */
-#define RETURN_ERROR(err) return FALSE
+#define RETURN_ERROR(err) return ((err) - (err))
 #define RETURN_SUCCESS() return TRUE
+
+/* standard gemdos error codes, these are just here for my reference	*/
+/* codecs return gemdos error codes where it makes sense				*/
+#define	EC_Fwrite			-10	/* fwrite failed, size in/out didn't match, or negative error code	*/
+#define	EC_Fread			-11	/* fread failed, size in/out didn't match, or negative error code	*/
+#define	EC_Fopen			-33	/* fopen failed, image file not found	*/
+#define	EC_Fcreate			-36	/* fcreate failed						*/
+#define	EC_Fclose			-37	/* fclose failed						*/
+#define EC_Malloc			-39	/* malloc failed						*/
+#define EC_Mfree			-40	/* mfree failed							*/
+#define	EC_Fseek			-64	/* fseek failed, truncated file or eof	*/
+
+#define	EC_Ok				0	/* no error */
+
+/* error codes related to file content									*/
+/* these will be used in multiple plugins and new ones in the future	*/
+#define EC_CompType			10	/* header -> unsupported compression type		*/
+#define	EC_DecompError		11	/* error during decompression phase				*/
+#define EC_ResolutionType	12	/* header -> unsupported mode code neo/degas	*/
+#define EC_ImageType		13  /* header -> unsupported image type				*/
+#define	EC_PixelDepth		14	/* header -> unsupported pixel depth			*/
+#define	EC_ColorMapDepth	15	/* header -> unsupported color map depth		*/
+#define	EC_ColorMapType		16	/* header -> unsupported color map type			*/
+#define	EC_FileLength		17	/* incorrect file length						*/
+#define	EC_FileId			18	/* header -> unknown file identifier			*/
+#define	EC_HeaderLength		19	/* header -> unsupported header length			*/
+#define EC_WidthNegative	20	/* header -> image width < 0					*/
+#define	EC_HeightNegative	21	/* header -> image height < 0					*/
+#define	EC_InternalError	22	/* non-specific, subfunction failure: png/gif	*/
+#define	EC_ColorSpace		23	/* header -> unsupported color space			*/
+#define	EC_ColorMapLength	24	/* header -> unsupported color map length		*/
+#define	EC_MaskType			25	/* header -> unsupported mask type				*/
+#define	EC_ChunkId			26	/* unsupported chunk identifier: iff			*/
+#define	EC_FileType			27	/* received wrong file type						*/
+#define	EC_FrameCount		28	/* frame count exceeds limit					*/
+#define	EC_ColorCount		29	/* header -> unsupported color count			*/
+#define	EC_BitmapLength		30	/* header -> calc'd length doesn't match		*/
+#define	EC_HeaderVersion	31	/* header -> unsupported version				*/
+#define	EC_HeightSmall		32	/* header -> unsupported height, to small: fnt	*/
+#define	EC_CompLength		33	/* header -> incorrect compressed size: spx 	*/
+#define	EC_FrameType		34	/* header -> unsupported frame type: seq 		*/
+#define	EC_RequiresNVDI		35	/* NVDI not installed 							*/
+#define	EC_FuncNotDefined	36	/* function not implemented						*/
+/* new as of 12/18/2021 */
+#define	EC_StructLength		37	/* incorrect structure length			*/
+#define EC_RequiresJPD		38	/* JPEGD DSP decoder not installed		*/
+#define	EC_OpenDriverJPD	39	/* JPEGD OpenDriver() failed			*/
+#define	EC_GetImageInfoJPD	40	/* JPEGD GetImageInfo() failed			*/
+#define	EC_GetImageSizeJPD	41	/* JPEGD GetImageSize() failed			*/
+#define	EC_DecodeImageJPD	42	/* JPEGD DecodeImage() failed			*/
+#define EC_OrientationBad	43	/* orientation unsupported				*/
+#define EC_BadHandleVDI		44  /* Invalid VDI handle					*/
+#define EC_v_open_bmERR		45	/* Failed at v_open_bm()				*/
+#define	EC_WordWidth		46	/* Pixel width not divisible by 16		*/
+#define	EC_BufferOverrun	47	/* data could exceed buffer, aborted	*/
+#define	EC_DecoderOptions	48	/* decoder option out of range			*/
+#define	EC_EncoderOptions	49	/* encoder option out of range			*/
+#define	EC_WidthOver4K		50	/* width exceeds 4096 pixels			*/
+/* new error codes will be added to the end of this list as needed */
 
 /*
  * Flags for get_option(OPTION_CAPABILITIES)
