@@ -103,7 +103,8 @@
  * New plugin for Sinbad Slideshow (*.SSB)
  * New plugin for Sun Raster (*.SUN/*.RAS)
  * New plugin for Synthetic Arts (*.SRT/*.BIT)
- * New plugin for Tiny Stuff (/*.TNY/*.TN1/*.TN2/*.TN3/*.TN4/*.TN5/*.TN6)
+ * New plugin for Tiny Stuff (*.TNY/*.TN1/*.TN2/*.TN3/*.TN4/*.TN5/*.TN6)
+ * New plugin for ZZ_ROUGH (*.RGH)
  
 Since the RECOIL plugin handles so many formats, it is
 assigned to all file extensions. If there is a specialized plugin

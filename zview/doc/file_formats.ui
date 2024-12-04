@@ -254,10 +254,15 @@ supported features of the formats.
 !hline
  WebP          !! .web/.webp        !! Any             !! 24/32          !! VP8             !! Animation
 !hline
+ ZZ_ROUGH      !! .rgh              !! 320x200         !! 4              !! RLE             !!
+!hline
  RECOIL        !! Many              !! Any             !! Depends        !! Depends         !! about 550 obscure formats
 !hline
 
 !end_table
+
+For a list of formats supported by the RECOIL plugin, see
+(!url [] [https://recoil.sourceforge.net/formats.html])
 
 zView is able to save a loaded picture in JPEG, TIFF, BMP or GodPaint 
 format. The next table shows the options for saving.

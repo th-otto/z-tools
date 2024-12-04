@@ -94,6 +94,7 @@ PLUGINS = \
 	tga \
 	tiff \
 	tiny \
+	zz_rough \
 	webp \
 	$(empty)
 
