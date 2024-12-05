@@ -1,12 +1,8 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
-CFLAGS += -Wextra
+include ../pluginvars
 
-LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
-STACKSIZE = 64k
-
-CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvgrani.slb\"
+SFLAGS += -DSHAREDLIB=\"zvgrani.slb\"
 
 all:: gfartani.ldg zvgrani.slb
 
@@ -22,7 +18,7 @@ zvgrani.slb: header.lo gfartslb.lo gfartani.lo
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-gfartslb.lo gfartani.lo: ../common/plugin.h ../common/zview.h
+gfartslb.lo gfartani.lo: ../common/plugin.h ../common/zview.h exports.h
 gfartimg.lo gfartimg.o: gfartani.c gfatable.c gfadepac.c
 
 clean:

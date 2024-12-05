@@ -76,13 +76,13 @@ _slh_names:
  *
  * The C entry point only needs to see the actual arguments.
  */
-#define FETCH_NARGS_2 movem.l 16(%a7),%d0-%d1
-#define MOVE_NARGS_2  movem.l %d0-%d1,4(%a7)
-#define FETCH_NARGS_1 move.l 16(%a7),%d0
-#define MOVE_NARGS_1  move.l %d0,4(%a7)
+#define FETCH_NARGS_2 movem.l 16(a7),d0-d1
+#define MOVE_NARGS_2  movem.l d0-d1,4(a7)
+#define FETCH_NARGS_1 move.l 16(a7),d0
+#define MOVE_NARGS_1  move.l d0,4(a7)
 
 #define LIBFUNC(fn, name, nargs) \
-_wrap_ ## name : \
+_wrap_ ## name: \
 	FETCH_NARGS_ ## nargs;  /* get 1st&2nd argument */ \
 	MOVE_NARGS_ ## nargs;   /* move them down */ \
 	jbra C_SYMBOL_NAME(name)  /* go for it */

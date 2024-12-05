@@ -1,12 +1,8 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
-CFLAGS += -Wextra
+include ../pluginvars
 
-LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
-STACKSIZE = 64k
-
-CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvpcs.slb\"
+SFLAGS += -DSHAREDLIB=\"zvpcs.slb\"
 
 all:: pchrome.ldg zvpcs.slb
 
@@ -22,7 +18,7 @@ zvpcs.slb: header.lo pcsslb.lo pchrome.lo
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-pcsslb.lo pchrome.lo: ../common/plugin.h ../common/zview.h
+pcsslb.lo pchrome.lo: ../common/plugin.h ../common/zview.h exports.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

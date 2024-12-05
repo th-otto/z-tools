@@ -1,12 +1,8 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
-CFLAGS += -Wextra
+include ../pluginvars
 
-LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
-STACKSIZE = 64k
-
-CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvimagic.slb\"
+SFLAGS += -DSHAREDLIB=\"zvimagic.slb\"
 
 all:: imagic.ldg zvimagic.slb
 
@@ -22,7 +18,7 @@ zvimagic.slb: header.lo imgslb.lo imagic.lo
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-imgslb.lo imagic.lo: ../common/plugin.h ../common/zview.h
+imgslb.lo imagic.lo: ../common/plugin.h ../common/zview.h exports.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

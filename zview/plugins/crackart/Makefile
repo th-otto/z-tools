@@ -1,12 +1,8 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
-CFLAGS += -Wextra
+include ../pluginvars
 
-LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
-STACKSIZE = 64k
-
-CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvcart.slb\"
+SFLAGS += -DSHAREDLIB=\"zvcart.slb\"
 
 all:: crackart.ldg zvcart.slb
 
@@ -25,7 +21,7 @@ header.lo: ../common/header.S exports.h
 ca_unpac.o: ca_unpac.s Makefile
 	$(CC) $(ASFLAGS) -c $< -o $@
 
-cartslb.lo crackart.lo: ../common/plugin.h ../common/zview.h
+cartslb.lo crackart.lo: ../common/plugin.h ../common/zview.h exports.h
 crackart.lo crackart.o: crackart.c ca_unpac.c
 
 clean:

@@ -1,12 +1,8 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
-CFLAGS += -Wextra
+include ../pluginvars
 
-LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
-STACKSIZE = 64k
-
-CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvgod.slb\"
+SFLAGS += -DSHAREDLIB=\"zvgod.slb\"
 
 all:: godpaint.ldg zvgod.slb
 
@@ -22,7 +18,7 @@ zvgod.slb: header.lo godslb.lo god.lo
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-godslb.lo god.lo: ../common/plugin.h ../common/zview.h
+godslb.lo god.lo: ../common/plugin.h ../common/zview.h exports.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

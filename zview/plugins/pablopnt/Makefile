@@ -1,12 +1,8 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
-CFLAGS += -Wextra
+include ../pluginvars
 
-LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
-STACKSIZE = 64k
-
-CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvppp.slb\"
+SFLAGS += -DSHAREDLIB=\"zvppp.slb\"
 
 all:: pablopnt.ldg zvppp.slb
 
@@ -22,7 +18,7 @@ zvppp.slb: header.lo pppslb.lo pablopnt.lo
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-pppslb.lo pablopnt.lo: ../common/plugin.h ../common/zview.h
+pppslb.lo pablopnt.lo: ../common/plugin.h ../common/zview.h exports.h
 pablopnt.lo pablopnt.o: pablopnt.c pppdepac.c
 
 clean:

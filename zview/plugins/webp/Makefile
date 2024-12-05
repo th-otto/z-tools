@@ -1,13 +1,10 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
-CFLAGS += -Wextra
+include ../pluginvars
 
-LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
 LIB       = -lwebpdemux -lwebp -lz -lm
-STACKSIZE = 64k
 
-CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvwebp.slb\"
+SFLAGS += -DSHAREDLIB=\"zvwebp.slb\"
 
 # libwebp headers don't have any version info, extract it from pkg-config
 export PKG_CONFIG_PATH := $(shell CROSS_PREFIX=$(CROSS_PREFIX); CROSS_PREFIX=$${CROSS_PREFIX%-}; echo /usr/$${CROSS_PREFIX}/lib/pkgconfig)
@@ -28,7 +25,7 @@ zvwebp.slb: header.lo webpslb.lo webp.lo $(webp_SOBJS)
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-webpslb.lo webp.lo: ../common/plugin.h ../common/zview.h
+webpslb.lo webp.lo: ../common/plugin.h ../common/zview.h exports.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

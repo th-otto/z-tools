@@ -1,12 +1,6 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
-CFLAGS += -Wextra
-
-LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
-STACKSIZE = 64k
-
-CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB
+include ../pluginvars
 
 all:: synarts.ldg zvsrt.slb
 
@@ -22,7 +16,7 @@ zvsrt.slb: header.lo synslb.lo synarts.lo
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-synslb.lo synarts.lo: ../common/plugin.h ../common/zview.h
+synslb.lo synarts.lo: ../common/plugin.h ../common/zview.h exports.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

@@ -1,12 +1,8 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
-CFLAGS += -Wextra
+include ../pluginvars
 
-LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
-STACKSIZE = 64k
-
-CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvmspnt.slb\"
+SFLAGS += -DSHAREDLIB=\"zvmspnt.slb\"
 
 all:: mspaint.ldg zvmspnt.slb
 
@@ -22,7 +18,7 @@ zvmspnt.slb: header.lo mspslb.lo mspaint.lo
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-mspslb.lo mspaint.lo: ../common/plugin.h ../common/zview.h
+mspslb.lo mspaint.lo: ../common/plugin.h ../common/zview.h exports.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

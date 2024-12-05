@@ -1,12 +1,8 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
-CFLAGS += -Wextra
+include ../pluginvars
 
-LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
-STACKSIZE = 64k
-
-CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvcp3.slb\"
+SFLAGS += -DSHAREDLIB=\"zvcp3.slb\"
 
 all:: picworks.ldg zvcp3.slb
 
@@ -22,7 +18,7 @@ zvcp3.slb: header.lo cp3slb.lo picworks.lo
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-cp3slb.lo picworks.lo: ../common/plugin.h ../common/zview.h
+cp3slb.lo picworks.lo: ../common/plugin.h ../common/zview.h exports.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

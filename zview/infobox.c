@@ -371,7 +371,7 @@ void infobox( void)
 				 *   and reader_quit contains both date & time
 				 * - text of function pointer 4 (reader_get_txt) may contain misc info
 				 */
-				author = "";
+				author = NULL;
 				if (ldg->num >= 2)
 				{
 					author = ldg->list[1].info;
@@ -381,8 +381,10 @@ void infobox( void)
 							author += 8;
 					}
 				}
+				if (author == NULL)
+					author = "";
 				ObjcStrnCpy(infotext, FILE_CODEC_AUTHOR, author);
-				date = "";
+				date = NULL;
 				if (ldg->num >= 3)
 				{
 					date = ldg->list[2].info;
@@ -394,6 +396,8 @@ void infobox( void)
 							date = ldg->list[3].info;
 					}
 				}
+				if (date == NULL)
+					date = "";
 				ObjcStrnCpy(infotext, FILE_CODEC_DATE, date);
 				objc_multiline(infotext, ldg->num >= 5 ? (long)ldg->list[4].info : 0, FILE_CODEC_INFO_FIRST, FILE_CODEC_INFO_LAST);
 				ObjcStrnCpy(infotext, FILE_CODEC_COMPILER, ldg->flags & LDG_STDCALL ? "Pure-C" : "GNU-C");

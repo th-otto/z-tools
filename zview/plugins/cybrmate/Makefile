@@ -1,12 +1,8 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
-CFLAGS += -Wextra
+include ../pluginvars
 
-LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
-STACKSIZE = 64k
-
-CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvdlt.slb\"
+SFLAGS += -DSHAREDLIB=\"zvdlt.slb\"
 
 all:: cybrmate.ldg zvdlt.slb
 
@@ -22,7 +18,7 @@ zvdlt.slb: header.lo cybrslb.lo cybrmate.lo
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-cybrslb.lo cybrmate.lo: ../common/plugin.h ../common/zview.h
+cybrslb.lo cybrmate.lo: ../common/plugin.h ../common/zview.h exports.h
 cybrmate.lo cybrmate.o: cybrmate.c ../degas/packbits.c ../degas/tanglbts.c
 
 clean:

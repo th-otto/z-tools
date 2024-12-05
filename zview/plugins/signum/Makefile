@@ -1,12 +1,8 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
-CFLAGS += -Wextra
+include ../pluginvars
 
-LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
-STACKSIZE = 64k
-
-CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvsignum.slb\"
+SFLAGS += -DSHAREDLIB=\"zvsignum.slb\"
 
 all:: signum.ldg zvsignum.slb
 
@@ -22,7 +18,7 @@ zvsignum.slb: header.lo signumslb.lo signum.lo imc.o
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-signumslb.lo signum.lo: ../common/plugin.h ../common/zview.h
+signumslb.lo signum.lo: ../common/plugin.h ../common/zview.h exports.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

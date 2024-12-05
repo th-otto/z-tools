@@ -1,12 +1,8 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
-CFLAGS += -Wextra
+include ../pluginvars
 
-LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
-STACKSIZE = 64k
-
-CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvezap.slb\"
+SFLAGS += -DSHAREDLIB=\"zvezap.slb\"
 
 all:: ezartpro.ldg zvezap.slb
 
@@ -22,7 +18,7 @@ zvezap.slb: header.lo ezartslb.lo ezartpro.lo
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-ezartslb.lo ezartpro.lo: ../common/plugin.h ../common/zview.h
+ezartslb.lo ezartpro.lo: ../common/plugin.h ../common/zview.h exports.h
 ezartpro.lo ezartpro.o: ezartpro.c ../degas/packbits.c ../degas/tanglbts.c
 
 clean:

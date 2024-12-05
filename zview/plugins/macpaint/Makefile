@@ -1,12 +1,8 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
-CFLAGS += -Wextra
+include ../pluginvars
 
-LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
-STACKSIZE = 64k
-
-CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvmacpnt.slb\"
+SFLAGS += -DSHAREDLIB=\"zvmacpnt.slb\"
 
 all:: macpaint.ldg zvmacpnt.slb
 
@@ -22,7 +18,7 @@ zvmacpnt.slb: header.lo macslb.lo macpaint.lo
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-macslb.lo macpaint.lo: ../common/plugin.h ../common/zview.h
+macslb.lo macpaint.lo: ../common/plugin.h ../common/zview.h exports.h
 macpaint.lo macpaint.o: macpaint.c ../degas/packbits.c
 
 clean:

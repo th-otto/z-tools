@@ -1,0 +1,12 @@
+CFLAGS += -Wextra
+LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
+STACKSIZE = 64k
+
+CPPFLAGS += -I../../../common -I../common -I../.. -I.
+SFLAGS += -DPLUGIN_SLB
+
+all::  headerpc.s
+
+headerpc.s: ../common/header.S exports.h Makefile
+	$(CC) $(CFLAGS) $(SFLAGS) -U__USER_LABEL_PREFIX__ -D__USER_LABEL_PREFIX__= -U__REGISTER_PREFIX__ -D__REGISTER_PREFIX__= -Djbra=bra -E -P $< -o - | sed -e 's/;/\n /g' > $@
+	unix2dos $@

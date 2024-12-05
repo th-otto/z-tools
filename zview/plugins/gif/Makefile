@@ -1,14 +1,11 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
-CFLAGS += -Wextra
+include ../pluginvars
 
-LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
 GIFLIB = -lgif
 LIB       = $(GIFLIB)
-STACKSIZE = 64k
 
-CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvgif.slb\"
+SFLAGS += -DSHAREDLIB=\"zvgif.slb\"
 
 all:: gif.ldg zvgif.slb
 
@@ -24,7 +21,7 @@ zvgif.slb: header.lo gifslb.lo gif.lo
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-gifslb.lo gif.lo: ../common/plugin.h ../common/zview.h
+gifslb.lo gif.lo: ../common/plugin.h ../common/zview.h exports.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb *.pdb
