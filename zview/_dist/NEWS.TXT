@@ -105,7 +105,10 @@
  * New plugin for Synthetic Arts (*.SRT/*.BIT)
  * New plugin for Tiny Stuff (*.TNY/*.TN1/*.TN2/*.TN3/*.TN4/*.TN5/*.TN6)
  * New plugin for ZZ_ROUGH (*.RGH)
- 
+ * Add support for Graphics Processor (*.PG1/*.PG2/*.PG3)
+   (handled by Paintworks plugin, because they share some
+   file extensions)
+
 Since the RECOIL plugin handles so many formats, it is
 assigned to all file extensions. If there is a specialized plugin
 for that format, it is prioritized.

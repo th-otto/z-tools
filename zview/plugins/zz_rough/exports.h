@@ -12,6 +12,8 @@
 #define DATE        __DATE__ " " __TIME__
 #define EXTENSIONS  "RGH\0"
 
+#define SHAREDLIB "zvrgh.slb"
+
 #ifndef LIBFUNC
 # error "LIBFUNC must be defined before including this file"
 #endif
@@ -33,5 +35,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvrgh.slb"

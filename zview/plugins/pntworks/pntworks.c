@@ -1,10 +1,9 @@
-#define	VERSION	     0x0201
-#define NAME        "Paintworks"
-#define AUTHOR      "Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
-
 #include "plugin.h"
 #include "zvplugin.h"
+/* only need the meta-information here */
+#define LIBFUNC(a,b,c)
+#define NOFUNC
+#include "exports.h"
 
 /*
 Paintworks    *.SC0 *.CL0 (st low resolution)
@@ -56,6 +55,43 @@ ST medium resolution
     All of plane 0..., all of plane 1...
 ST high resolution:
     No reordering required.
+
+
+Graphics Processor    *.PG1 (ST low resolution)
+                      *.PG2 (ST medium resolution)
+                      *.PG3 (ST high resolution)
+
+1 word       resolution + 10 if compressed [0/10=low, 1/11=medium, 2/12=high]
+16 words     palette 1 (seems to be the main palette)
+16 words     palette 2
+16 words     palette 3
+16 words     palette 4
+16 words     palette 5
+16 words     palette 6
+16 words     palette 7
+16 words     palette 8
+16 words     palette 9
+16 words     palette 10
+1 byte       unknown
+1 word       animation limit?
+1 byte       animation direction?
+1 byte       animation ?
+1 word       animation ?
+1 word       animation speed?
+---------
+331 bytes    total for header
+
+??           image data:
+If uncompressed data is simply screen memory (32000 bytes) as expected.
+
+If compressed a very simple RLE method is used. The unpacked data is standard
+st bitmap.
+1 word       size of compressed data
+do
+  1 byte     repeat count
+  ? data     data to be repeated count times
+loop until 32000 bytes are unpacked
+data size: 1 plane=byte, 2 planes=word, 4 planes=long
 */
 
 #ifdef PLUGIN_SLB
@@ -67,7 +103,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("CL0\0" "CL1\0" "CL2\0" "PG0\0" "PG1\0" "PG2\0" "SC0\0" "SC1\0" "SC2\0");
+		return (long) (EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -77,6 +113,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
+	case INFO_MISC:
+		return (long)MISC_INFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}
@@ -86,7 +126,7 @@ long __CDECL get_option(zv_int_t which)
 
 #define SCREEN_SIZE 32000L
 
-struct file_header {
+struct pntworks_header {
 	uint16_t file_id;
 	uint16_t resolution;
 	uint16_t palette[16];
@@ -99,35 +139,98 @@ struct file_header {
 	char reserved[64];
 };
 
+struct gp_header {
+	uint16_t resolution;
+	uint16_t palette[10][16];
+};
+
 
 /* Written by Lonny Pursell - placed in to Public Domain 1/28/2017 */
 
 static void decode_rle(uint8_t *src, uint8_t *dst, size_t bms)
 {
-	uint8_t cmd;
+	int16_t cmd;
 	uint8_t chr;
-	uint16_t i;
-	size_t srcpos = 0;
-	size_t dstpos = 0;
+	uint8_t *end = dst + bms;
 
 	do
 	{
-		cmd = src[srcpos++];
+		cmd = *src++;
 		if (cmd & 0x80)
 		{								/* literal? */
-			cmd = cmd & 0x7f;
-			memcpy(&dst[dstpos], &src[srcpos], (size_t) cmd);
-			dstpos = dstpos + (size_t) cmd;
-			srcpos = srcpos + (size_t) cmd;
+			cmd &= 0x7f;
+			while (--cmd >= 0)
+				*dst++ = *src++;
 		} else
 		{								/* repeat? */
-			chr = src[srcpos++];
-			for (i = 0; i < cmd; i++)
-			{
-				dst[dstpos++] = chr;
-			}
+			chr = *src++;
+			while (--cmd >= 0)
+				*dst++ = chr;
 		}
-	} while (dstpos < bms);
+	} while (dst < end);
+}
+
+
+static void decode_gp(uint8_t *src, uint8_t *dst, uint16_t datasize)
+{
+	int16_t count;
+	uint8_t *end = dst + SCREEN_SIZE;
+	
+	src += 2; /* skip compressed size field */
+	switch (datasize)
+	{
+	case 1:
+		do
+		{
+			uint8_t data0;
+			
+			count = *src++;
+			data0 = *src++;
+			while (--count >= 0)
+				*dst++ = data0;
+		} while (dst < end);
+		break;
+
+	case 2:
+		do
+		{
+			uint8_t data0;
+			uint8_t data1;
+	
+			count = *src++;
+			data0 = *src++;
+			data1 = *src++;
+			while (--count >= 0)
+			{
+				*dst++ = data0;
+				*dst++ = data1;
+			}
+		} while (dst < end);
+		break;
+
+	case 4:
+		do
+		{
+			uint8_t data0;
+			uint8_t data1;
+			uint8_t data2;
+			uint8_t data3;
+	
+			count = *src++;
+			data0 = *src++;
+			data1 = *src++;
+			data2 = *src++;
+			data3 = *src++;
+			while (--count >= 0)
+			{
+				*dst++ = data0;
+				*dst++ = data1;
+				*dst++ = data2;
+				*dst++ = data3;
+			}
+		} while (dst < end);
+		break;
+	}
 }
 
 
@@ -151,10 +254,9 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	uint8_t *temp;
 	int compressed;
 	int resolution;
-	int type;
-	int inverse;
 	size_t file_size;
-	struct file_header header;
+	struct pntworks_header pntworks_header;
+	struct gp_header gp_header;
 
 	if ((handle = (int16_t) Fopen(name, FO_READ)) < 0)
 	{
@@ -163,207 +265,293 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	file_size = Fseek(0, handle, SEEK_END);
 	Fseek(0, handle, SEEK_SET);
 	
-	if (Fread(handle, sizeof(header), &header) != sizeof(header))
+	if (Fread(handle, sizeof(pntworks_header), &pntworks_header) != sizeof(pntworks_header))
 	{
 		Fclose(handle);
 		RETURN_ERROR(EC_Fread);
 	}
-	if (header.file_id != 0 || memcmp(header.magic, "ANvisionA", 9) != 0)
+	if (pntworks_header.file_id == 0 && memcmp(pntworks_header.magic, "ANvisionA", 9) == 0)
 	{
-		Fclose(handle);
-		RETURN_ERROR(EC_FileId);
-	}
-	
-	compressed = header.flags & 0x80;
-	resolution = (header.flags & 0x30) >> 4;
-	type = header.flags & 0x0f;
-	info->planes = 4 >> resolution;
-	inverse = header.palette[0] & 1;
-	
-	switch (resolution)
-	{
-	case 0:
-		info->planes = 4;
-		info->width = 320;
-		info->height = 200;
-		info->indexed_color = TRUE;
-		break;
-	case 1:
-		info->planes = 2;
-		info->width = 640;
-		info->height = 200;
-		info->indexed_color = TRUE;
-		break;
-	case 2:
-		info->planes = 1;
-		info->width = 640;
-		info->height = 400;
-		info->indexed_color = FALSE;
-		break;
-	default:
-		Fclose(handle);
-		RETURN_ERROR(EC_ResolutionType);
-	}
+		int type;
+		int inverse;
 
-	strcpy(info->info, "Paintworks");
-	
-	switch (type)
-	{
-	case 0:
-		image_size = image_size * 2;
-		info->height = info->height * 2;
-		strcat(info->info, " (Page)");
-		break;
-	case 1:
-		strcat(info->info, " (Screen)");
-		break;
-	case 2:
-		strcat(info->info, " (Clipart)");
-		break;
-	case 4:
-	default:
-		Fclose(handle);
-		RETURN_ERROR(EC_ImageType);
-	}
-	
-	bmap = malloc(image_size + 1024);
-	if (bmap == NULL)
-	{
-		Fclose(handle);
-		RETURN_ERROR(EC_Malloc);
-	}
-	file_size -= sizeof(header);
-	if (compressed)
-	{
-		if (file_size > image_size ||
-			(size_t)Fread(handle, file_size, bmap) != file_size)
+		/*
+		 * Paintworks code
+		 */
+		compressed = pntworks_header.flags & 0x80;
+		resolution = (pntworks_header.flags & 0x30) >> 4;
+		type = pntworks_header.flags & 0x0f;
+		inverse = pntworks_header.palette[0] & 1;
+		
+		switch (resolution)
 		{
-			free(bmap);
+		case 0:
+			info->planes = 4;
+			info->width = 320;
+			info->height = 200;
+			info->indexed_color = TRUE;
+			break;
+		case 1:
+			info->planes = 2;
+			info->width = 640;
+			info->height = 200;
+			info->indexed_color = TRUE;
+			break;
+		case 2:
+			info->planes = 1;
+			info->width = 640;
+			info->height = 400;
+			info->indexed_color = FALSE;
+			break;
+		default:
 			Fclose(handle);
-			RETURN_ERROR(EC_Fread);
+			RETURN_ERROR(EC_ResolutionType);
 		}
-		temp = malloc(image_size + 1024);
-		if (temp == NULL)
+	
+		strcpy(info->info, "Paintworks");
+		
+		switch (type)
 		{
-			free(bmap);
+		case 0:
+			image_size = image_size * 2;
+			info->height = info->height * 2;
+			strcat(info->info, " (Page)");
+			break;
+		case 1:
+			strcat(info->info, " (Screen)");
+			break;
+		case 2:
+			strcat(info->info, " (Clipart)");
+			break;
+		case 4:
+		default:
+			Fclose(handle);
+			RETURN_ERROR(EC_ImageType);
+		}
+		
+		bmap = malloc(image_size);
+		if (bmap == NULL)
+		{
 			Fclose(handle);
 			RETURN_ERROR(EC_Malloc);
 		}
-		decode_rle(bmap, temp, image_size);
-		switch (info->planes)
+		file_size -= sizeof(pntworks_header);
+		if (compressed)
 		{
-		case 1:
-			memcpy(bmap, temp, image_size);
-			break;
-
-		case 2:
+			if (file_size > image_size ||
+				(size_t)Fread(handle, file_size, bmap) != file_size)
 			{
-				size_t plane0;
-				size_t plane1;
-				uint16_t *dst;
-				uint16_t *temp16;
-				uint16_t *end;
-	
-				plane0 = 0;
-				plane1 = image_size / 4;
-				dst = (uint16_t *)bmap;
-				temp16 = (uint16_t *)temp;
-				end = &dst[image_size / 2];
-				do
-				{
-					*dst++ = temp16[plane0++];
-					*dst++ = temp16[plane1++];
-				} while (dst < end);
+				free(bmap);
+				Fclose(handle);
+				RETURN_ERROR(EC_Fread);
 			}
-			break;
-
-		case 4:
-			{
-				size_t plane_size;
-				size_t plane0;
-				size_t plane1;
-				size_t plane2;
-				size_t plane3;
-				uint16_t *dst;
-				uint16_t *temp16;
-				uint16_t *end;
-	
-				plane_size = image_size / 8;
-				plane0 = 0;
-				plane1 = plane_size;
-				plane2 = plane_size * 2;
-				plane3 = plane_size * 3;
-				dst = (uint16_t *)bmap;
-				temp16 = (uint16_t *)temp;
-				end = &dst[image_size / 2];
-				do
-				{
-					*dst++ = temp16[plane0++];
-					*dst++ = temp16[plane1++];
-					*dst++ = temp16[plane2++];
-					*dst++ = temp16[plane3++];
-				} while (dst < end);
-			}
-			break;
-		}
-		
-		free(temp);
-		strcpy(info->compression, "RLE");
-	} else
-	{
-		if ((size_t) Fread(handle, image_size, bmap) != image_size)
-		{
-			Fclose(handle);
-			RETURN_ERROR(EC_Fread);
-		}
-		strcpy(info->compression, "None");
-	}
-	Fclose(handle);
-	
-	switch (info->planes)
-	{
-	case 2:
-		if (Kbshift(-1) & K_CAPSLOCK)
-		{
-			size_t y;
-			
 			temp = malloc(image_size);
 			if (temp == NULL)
 			{
 				free(bmap);
+				Fclose(handle);
 				RETURN_ERROR(EC_Malloc);
 			}
-			memcpy(temp, bmap, image_size);
-			free(bmap);
-			bmap = malloc(image_size * 2);
-			if (bmap == NULL)
+			decode_rle(bmap, temp, image_size);
+			switch (info->planes)
+			{
+			case 1:
+				memcpy(bmap, temp, image_size);
+				break;
+	
+			case 2:
+				{
+					size_t plane0;
+					size_t plane1;
+					uint16_t *dst;
+					uint16_t *temp16;
+					uint16_t *end;
+		
+					plane0 = 0;
+					plane1 = image_size / 4;
+					dst = (uint16_t *)bmap;
+					temp16 = (uint16_t *)temp;
+					end = &dst[image_size / 2];
+					do
+					{
+						*dst++ = temp16[plane0++];
+						*dst++ = temp16[plane1++];
+					} while (dst < end);
+				}
+				break;
+	
+			case 4:
+				{
+					size_t plane_size;
+					size_t plane0;
+					size_t plane1;
+					size_t plane2;
+					size_t plane3;
+					uint16_t *dst;
+					uint16_t *temp16;
+					uint16_t *end;
+		
+					plane_size = image_size / 8;
+					plane0 = 0;
+					plane1 = plane_size;
+					plane2 = plane_size * 2;
+					plane3 = plane_size * 3;
+					dst = (uint16_t *)bmap;
+					temp16 = (uint16_t *)temp;
+					end = &dst[image_size / 2];
+					do
+					{
+						*dst++ = temp16[plane0++];
+						*dst++ = temp16[plane1++];
+						*dst++ = temp16[plane2++];
+						*dst++ = temp16[plane3++];
+					} while (dst < end);
+				}
+				break;
+			}
+			
+			free(temp);
+			strcpy(info->compression, "RLE");
+		} else
+		{
+			if ((size_t) Fread(handle, image_size, bmap) != image_size)
+			{
+				free(bmap);
+				Fclose(handle);
+				RETURN_ERROR(EC_Fread);
+			}
+			strcpy(info->compression, "None");
+		}
+
+		if (info->planes == 1)
+		{
+			if (!inverse)
+			{
+				size_t i;
+				
+				for (i = 0; i < image_size; i++)
+				{
+					bmap[i] = ~bmap[i];
+				}
+			}
+		}
+	
+		if (info->indexed_color)
+		{	
+			int i;
+	
+			for (i = 0; i < 16; i++)
+			{
+				info->palette[i].red = (((pntworks_header.palette[i] >> 7) & 0x0e) + ((pntworks_header.palette[i] >> 11) & 0x01)) * 17;
+				info->palette[i].green = (((pntworks_header.palette[i] >> 3) & 0x0e) + ((pntworks_header.palette[i] >> 7) & 0x01)) * 17;
+				info->palette[i].blue = (((pntworks_header.palette[i] << 1) & 0x0e) + ((pntworks_header.palette[i] >> 3) & 0x01)) * 17;
+			}
+		}
+	} else
+	{
+		uint8_t animation[9];
+
+		/*
+		 * Graphics Processor code
+		 */
+		Fseek(0, handle, SEEK_SET);
+		if (Fread(handle, sizeof(gp_header), &gp_header) != sizeof(gp_header) ||
+			Fread(handle, sizeof(animation), animation) != sizeof(animation))
+		{
+			Fclose(handle);
+			RETURN_ERROR(EC_Fread);
+		}
+
+		if (gp_header.resolution > 2)
+		{
+			compressed = TRUE;
+			resolution = gp_header.resolution - 10;
+		} else
+		{
+			compressed = FALSE;
+			resolution = gp_header.resolution;
+		}
+		switch (resolution)
+		{
+		case 0:
+			info->planes = 4;
+			info->width = 320;
+			info->height = 200;
+			info->indexed_color = TRUE;
+			break;
+		case 1:
+			info->planes = 2;
+			info->width = 640;
+			info->height = 200;
+			info->indexed_color = TRUE;
+			break;
+		case 2:
+			info->planes = 1;
+			info->width = 640;
+			info->height = 400;
+			info->indexed_color = FALSE;
+			break;
+		default:
+			Fclose(handle);
+			RETURN_ERROR(EC_ResolutionType);
+		}
+
+		bmap = malloc(image_size);
+		if (bmap == NULL)
+		{
+			Fclose(handle);
+			RETURN_ERROR(EC_Malloc);
+		}
+
+		file_size -= sizeof(gp_header) + sizeof(animation);
+		if (compressed)
+		{
+			temp = malloc(file_size);
+			if (temp == NULL)
+			{
+				free(bmap);
+				Fclose(handle);
+				RETURN_ERROR(EC_Malloc);
+			}
+			if ((size_t)Fread(handle, file_size, temp) != file_size)
 			{
 				free(temp);
+				free(bmap);
+				Fclose(handle);
 				RETURN_ERROR(EC_Malloc);
 			}
-			for (y = 0; y < info->height; y++)
-			{
-				memcpy(&bmap[y * 2 * 160], &temp[y * 160], 160);
-				memcpy(&bmap[y * 2 * 160 + 160], &temp[y * 160], 160);
-			}
+			decode_gp(temp, bmap, info->planes);
 			free(temp);
-			info->height *= 2;
-		}
-		break;
-	case 1:
-		if (!inverse)
+			strcpy(info->compression, "RLE");
+		} else
 		{
-			size_t i;
-			
-			for (i = 0; i < image_size; i++)
+			if ((size_t)Fread(handle, image_size, bmap) != image_size)
 			{
-				bmap[i] = ~bmap[i];
+				free(bmap);
+				Fclose(handle);
+				RETURN_ERROR(EC_Fread);
+			}
+			strcpy(info->compression, "None");
+		}
+
+		strcpy(info->info, "Graphics Processor");
+
+		if (info->indexed_color)
+		{
+			int i;
+	
+			for (i = 0; i < 16; i++)
+			{
+				info->palette[i].red = (((gp_header.palette[0][i] >> 7) & 0x0e) + ((gp_header.palette[0][i] >> 11) & 0x01)) * 17;
+				info->palette[i].green = (((gp_header.palette[0][i] >> 3) & 0x0e) + ((gp_header.palette[0][i] >> 7) & 0x01)) * 17;
+				info->palette[i].blue = (((gp_header.palette[0][i] << 1) & 0x0e) + ((gp_header.palette[0][i] >> 3) & 0x01)) * 17;
 			}
 		}
-		break;
 	}
 	
-	info->components = info->planes == 1 ? 1 : 3;
+	Fclose(handle);
+	
+	info->components = 1;
 	info->colors = 1L << info->planes;
 	info->real_width = info->width;
 	info->real_height = info->height;
@@ -373,18 +561,6 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	info->num_comments = 0;				/* required - disable exif tab */
 	info->_priv_var = 0;				/* y position in bmap */
 	info->_priv_ptr = bmap;
-
-	if (info->indexed_color)
-	{	
-		int i;
-
-		for (i = 0; i < 16; i++)
-		{
-			info->palette[i].red = (((header.palette[i] >> 7) & 0x0e) + ((header.palette[i] >> 11) & 0x01)) * 17;
-			info->palette[i].green = (((header.palette[i] >> 3) & 0x0e) + ((header.palette[i] >> 7) & 0x01)) * 17;
-			info->palette[i].blue = (((header.palette[i] << 1) & 0x0e) + ((header.palette[i] >> 3) & 0x01)) * 17;
-		}
-	}
 
 	RETURN_SUCCESS();
 }

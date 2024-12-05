@@ -117,6 +117,10 @@ supported features of the formats.
 !hline
  GodPaint      !! .god              !! Any             !! 16             !! None            !! Encoder
 !hline
+ Graphics      !! .pg1              !! 320x200         !! 4              !! None/RLE        !!
+ Processor     !! .pg2              !! 640x200         !! 2              !!                 !!
+               !! .pg3              !! 640x400         !! 1              !!                 !!
+!hline
  HighResMode   !! .hrm              !! 640x400         !! 24             !! None            !!
 !hline
  IFF DCTV      !! .dct/.dctv        !! Any             !! 1/2/3/4        !! YUV/PackBits    !!

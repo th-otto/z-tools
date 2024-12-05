@@ -6,7 +6,7 @@ LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
 STACKSIZE = 64k
 
 CPPFLAGS		+= -I../../../common -I../common -I../.. -I.
-SFLAGS += -DPLUGIN_SLB -DSHAREDLIB=\"zvpwgp.slb\"
+SFLAGS += -DPLUGIN_SLB
 
 all:: pntworks.ldg zvpwgp.slb
 
@@ -22,7 +22,7 @@ zvpwgp.slb: header.lo pwgpslb.lo pntworks.lo
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-pwgpslb.lo pntworks.lo: ../common/plugin.h ../common/zview.h
+pwgpslb.lo pntworks.lo: ../common/plugin.h ../common/zview.h exports.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb *.pdb
