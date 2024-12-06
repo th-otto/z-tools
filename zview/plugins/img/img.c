@@ -26,6 +26,120 @@
 #include "plugin.h"
 #include "zvplugin.h"
 
+/*
+GEM Image   *.IMG
+
+1 word     version number of image file [1]
+1 word     length of header in words [usually 8]
+1 word     number of color planes [1 for monochrome]
+1 word     pattern length in bytes [1-8, usually 2 for screen images]
+1 word     pixel width in microns (1/1000 mm, 25400 microns per inch)
+1 word     pixel height in microns
+1 word     line width in pixels
+1 word     number of lines
+-------
+? words    header length defined in 2nd word of header
+
+? bytes    data
+
+NOTES: If the image is a color image (planes > 1), the planes are stored
+separately starting with plane 0. There is, however, no standard way of storing
+the color palette. Some programs may save the palette in separate files, some
+may extend the header. For this reason, you should never assume the header is 8
+words long, always get the header length from the 2nd word of the header. Also,
+the line width in the 7th word is the number of pixels in a line. Since the
+data is encoded in byte-wide packets, the actual unpacked line width is always
+a multiple of 8, and may be 1-7 pixels longer than the length specified in the
+header.
+
+For each byte x in the data section,
+
+        x = 0           Pattern/scan line run.
+                        Read the next byte, n (unsigned).
+
+                        If n > 0 then:
+                                Read a number of bytes equal to the "pattern
+                                length" word in the header. Repeat this pattern
+                                n times.
+
+                        If n = 0 then:
+                                Scan line run. Data for the next scan line is
+                                to be used multiple times. Read the following
+                                record:
+
+                                1 byte          flag byte [$FF]
+                                1 byte          number of times to use next
+                                                scan line data
+
+                                The data for the next scan line follows,
+                                compressed normally.
+
+        x = 80 (hex)    Uncompressed bit string. The next byte determines the
+                        number of bytes to use literally. The literal data
+                        bytes follow.
+
+        otherwise       Solid run. The value of x determines what to draw. The
+                        high bit specifies whether the pixels are set or
+                        cleared. A 1 indicates a byte-run using $FF, a 0
+                        indicates a byte-run using $00. The low 7 bits, taken
+                        as an unsigned quantity, specify the length of the run
+                        in bytes.
+
+_______________________________________________________________________________
+
+Below are some of the various header extensions one might encounter. These
+extensions usually store the color palette information. If the header size is
+exactly 8 no palette is specified. If no palette is specified the best option
+is probably a gray scale palette.
+
+
+XIMG header extension:
+
+1 long                      extension ID, 'XIMG'
+1 word                      palette type [0 = RGB, 1 = CMY, 2 = Pantone]
+((planes << 1) * 3) words   VDI format palette in hardware order (not VDI order)
+
+
+STTT header extension:
+
+1 long                     extension ID, 'STTT'
+1 word                     number of colors (usually 4 or 16)
+'number of colors' words   palette
+
+
+HyperPaint header extension:
+
+1 word                 extension ID, $0080
+(planes << 1) words    palette
+
+
+TIMG header extension:
+
+1 long    extension ID, 'TIMG'
+1 word    number of components (3=RGB, 1=gray scale)
+1 word    red bit count   (example: 5 -> 0-31)
+1 word    green bit count (only valid if components = 3)
+1 word    blue bit count  (only valid if components = 3)
+Additional information: http://sylvana.net/imgtools/
+
+
+Ventura header extension:
+
+This extension has no ID, however the header size will be exactly 9.
+1 word    color type flag [0 = color, 1 = gray scale, 3 = true color]
+
+The colors are not stored in the file. Preset values as used by a standard EGA
+displays should be assumed. Palette values can be found here:
+http://www.fileformat.info/format/gemraster/egff.htm
+
+
+Unknown header:
+
+If none of the above extensions are detected the decoder has the option of
+ignoring the extension. Files created on the Atari will always have a palette
+unless they are monochrome.
+*/
+
 #define XIMG  0x58494D47
 
 typedef struct
