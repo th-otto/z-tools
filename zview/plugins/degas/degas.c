@@ -177,6 +177,18 @@ For a given control byte 'n':
     0 <= n <= 127   : use the next n + 1 bytes literally (no repetition).
  -127 <= n <= -1    : use the next byte -n + 1 times.
          n = -128   : no operation, not used.
+
+DEGAS Elite (Icon)    *.ICN
+
+This file format is an ASCII file describing the ICON in C-format:
+#define ICON_W 0x????        : Width of the icon in pixels (hexadecimal value)
+#define ICON_H 0x????        : Height of the icon in lines (hexadecimal value)
+#define ICONSIZE 0x????      : Size of the icon in words (hexadecimal value)
+int image[ICONSIZE] = 0x????
+{
+??                       : ICONSIZE words, icon image data (hexadecimal values)
+}
+
 */
 
 

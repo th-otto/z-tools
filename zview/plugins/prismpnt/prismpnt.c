@@ -45,6 +45,7 @@ every time a file is saved with an alert box (yes/no).
 
 See also PackBits Compression Algorithm
 
+--------------------------------------------------------------------------------
 
 TruePaint Animation    *.TPA
 

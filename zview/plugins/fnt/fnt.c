@@ -43,6 +43,7 @@ Character data:
 
 Note: Some files are 2048 bytes because the 'half height flag' is missing.
 
+--------------------------------------------------------------------------------
 
 Warp9 Font    *.FNT
 
@@ -83,6 +84,9 @@ Character data:
 
 Some files are 4096 bytes because the 'half height flag' is missing.
 
+--------------------------------------------------------------------------------
+
+GDOS Font file format
 
 Filenames ending with the extension '.FNT' represent bitmap font files. These
 files may be utilized by loading them through any version of GDOS. FNT files

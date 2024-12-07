@@ -21,6 +21,7 @@ Art Director    *.ART (ST low resolution only)
 ------------
 32512 bytes     total
 
+###############################################################################
 
 GFA Artist    *.ART
 
@@ -55,6 +56,20 @@ calculate the color of a pixel at a given x/y coordinate is unknown.
 From an article titled "AT HOME WITH GFA" (ST World Magazine - Jan 1990 -
 Issue 47): The author Dirk van Asche states in an interview... "To do this I
 changed the color palette every three scan lines."
+
+###############################################################################
+
+Palette Master    *.ART (ST low resolution)
+
+Supports rasters, a palette change occurs every 2 scan lines.
+
+32000 bytes       image data (screen memory)
+768 bytes         unknown [not always 0's]
+16 * 100 words    100 palettes
+1 word            unknown [$FFFF]
+894 bytes         unknown [0]
+--------------
+36864 bytes       total
 */
 
 
@@ -781,7 +796,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	handle = (int16_t) Fopen(name, FO_READ);
 	if (handle < 0)
 	{
-		return FALSE;
+		RETURN_ERROR(EC_Fopen);
 	}
 
 	file_size = filesize(handle);
@@ -793,13 +808,13 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	if (data == NULL)
 	{
 		Fclose(handle);
-		return FALSE;
+		RETURN_ERROR(EC_Malloc);
 	}
 	if ((uint32_t)Fread(handle, file_size, data) != file_size)
 	{
 		Fclose(handle);
 		free(data);
-		return FALSE;
+		RETURN_ERROR(EC_Fread);
 	}
 	Fclose(handle);
 
@@ -897,7 +912,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	} else
 	{
 		free(data);
-		return FALSE;
+		RETURN_ERROR(EC_FileLength);
 	}
 	
 	info->components = info->planes == 1 ? 1 : 3;
@@ -915,7 +930,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	info->__priv_ptr_more = palette;
 	strcpy(info->compression, "None");
 	
-	return TRUE;
+	RETURN_SUCCESS();
 }
 
 
@@ -1064,7 +1079,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 		}
 		break;
 	}
-	return TRUE;
+	RETURN_SUCCESS();
 }
 
 

@@ -20,6 +20,44 @@ to medium resolution for all *.PP? files. The only correct resolution info is
 in the extension. A really brain died format.
 
 See also STOS Memory Bank file format
+
+--------------------------------------------------------------------------------
+
+STOS Memory Bank    *.MBK
+
+9 words         ?
+1 long          $19861987 (magic number?)
+1 long          offset from this long to header for low resolution parameter
+                block (if past end of file, no low res frames)
+1 long          offset from this long to header for med resolution parameter
+                block (if past end of file, no med res frames)
+1 long          offset from this long to header for high resolution parameter
+                block (if past end of file, no high res frames)
+1 word          number of low resolution frames
+1 word          number of medium resolution frames
+1 word          number of high resolution frames
+
+For each frame {
+1 long          offset to data (probably only used internally by STOS)
+1 byte          width in words (multiply by 16 to get width in pixels)
+1 byte          height in pixels
+1 byte          X hotspot location
+1 byte          Y hotspot location
+}
+
+(The format implies other stuff could be here.)
+
+1 long          ["PALT" $50414C54]
+16 words        palette
+
+?               words of data for each frame, in the order mentioned in the
+                header
+                Mono planar mask data follows image data for each frame.
+--------
+? words         total
+
+   The frames often seem to be in semi-random order, not necessarily in the
+order they are to be animated.
 */
 
 #ifdef PLUGIN_SLB

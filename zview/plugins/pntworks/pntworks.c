@@ -56,6 +56,7 @@ ST medium resolution
 ST high resolution:
     No reordering required.
 
+--------------------------------------------------------------------------------
 
 Graphics Processor    *.PG1 (ST low resolution)
                       *.PG2 (ST medium resolution)

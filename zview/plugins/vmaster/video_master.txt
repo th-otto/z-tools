@@ -1,0 +1,70 @@
+               Video Master file format: (VID,FLM & VSQ)
+               -----------------------------------------
+
+
+Header (32 bytes)
+size    name            Description
+-------------------------------------------------------------------------------
+long    header          Contains 'VMAS'
+word    version         Contains '1x' for version 1.x
+word    no_frames       No. of frames of video...
+word    frame_rate      Playback rate of video (see table)
+long    sample_size     Amount of audio in file... (0=no audio - VID )
+word    sample_rate     Sample playback rate (Hz)
+word    seq_length      Size of sequence data...  (0=no seq - FLM )
+word    no_keys         How many keys there are...
+.
+.
+.
+Padded to 32 bytes
+
+
+Video frames
+------------
+16 words of palette, 1 word for each colour 0 to 15 (the palette data is in the
+AMIGA format... xxxxrrrr/ggggbbbb).
+8000 bytes of picture per frame, no. of frames in header.
+
+Audio data
+----------
+8 bit signed samples, size of sample in header.
+
+Sequence data
+-------------
+No. of bytes given in the header. Each byte represents 1/10s interval.
+0 = no event, 128+key = event
+
+Key data
+--------
+No. of keys as given in the header, each key definition contains the following:
+
+word    start_frame     First video frame for this key
+word    last_frame      Last video frame for this key
+word    video_speed     Speed of video for this key (see table)
+long    audio_start     Offset to start of audio for this key
+long    audio_length    Length of audio for this key
+word    audio_rate      Sample speed of this key (Hz) 0=audio off
+byte    video_loop      Flag - loop video
+byte    audio_loop      Flag - loop audio
+
+
+Speed of video playback
+-----------------------
+Value   PAL     NTSC    Units
+-------------------------------------
+0       25      30      frames/second
+1       12      15      frames/second
+2       8       10      frames/second
+3       6       7       frames/second
+4       4       5       frames/second
+5       3       3       frames/second
+6       2       2       frames/second
+7       1       1       frame/second
+8       2       2       seconds/frame
+9       3       3       seconds/frame
+10      4       4       seconds/frame
+11      5       5       seconds/frame
+12      6       6       seconds/frame
+13      7       7       seconds/frame
+14      8       8       seconds/frame
+15      9       9       seconds/frame

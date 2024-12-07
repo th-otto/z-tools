@@ -6,32 +6,6 @@
 #include "plugin.h"
 #include "zvplugin.h"
 
-#ifdef PLUGIN_SLB
-
-long __CDECL get_option(zv_int_t which)
-{
-	switch (which)
-	{
-	case OPTION_CAPABILITIES:
-		return CAN_DECODE;
-	case OPTION_EXTENSIONS:
-		return (long) ("ANI\0");
-
-	case INFO_NAME:
-		return (long)NAME;
-	case INFO_VERSION:
-		return VERSION;
-	case INFO_DATETIME:
-		return (long)DATE;
-	case INFO_AUTHOR:
-		return (long)AUTHOR;
-	case INFO_COMPILER:
-		return (long)(COMPILER_VERSION_STRING);
-	}
-	return -ENOSYS;
-}
-#endif
-
 /*
 NEOchrome Animation    *.ANI (ST low resolution)
 
@@ -87,6 +61,32 @@ exactly the same setting as made in NEOchrome Master.
 
 See also NEOchrome and IFF file formats.
 */
+
+#ifdef PLUGIN_SLB
+
+long __CDECL get_option(zv_int_t which)
+{
+	switch (which)
+	{
+	case OPTION_CAPABILITIES:
+		return CAN_DECODE;
+	case OPTION_EXTENSIONS:
+		return (long) ("ANI\0");
+
+	case INFO_NAME:
+		return (long)NAME;
+	case INFO_VERSION:
+		return VERSION;
+	case INFO_DATETIME:
+		return (long)DATE;
+	case INFO_AUTHOR:
+		return (long)AUTHOR;
+	case INFO_COMPILER:
+		return (long)(COMPILER_VERSION_STRING);
+	}
+	return -ENOSYS;
+}
+#endif
 
 struct file_header {
 	uint32_t magic;

@@ -1,0 +1,119 @@
+(Binary) Object File Format
+
+This is a brief description of the binary ?*.BDY? object files. 
+The information given in this document is only interesting for programmers who
+want to write something like e.g. a converter. All values (in C) are written
+with ?fread? and have to be swapped to the byte order of the target computer if
+necessary. For shorts, you have to swap the high-order byte with the low-order
+byte, while longs and floats need to swap the highest-order byte with the
+lowest-order byte and the middle-bytes against each other. 
+
+If you want to write a converter from a foreign format to ?*.BDY? you can use 
+he ?Byte-oder-detection? flag to take care of the byte order on loading. 
+Clue: ?ushort? means unsigned short, which is appropriate to ?uchar? and ?ulong
+too. Values that contain flags are described as following:
+(0:flag0/1:flag1/2:...);where the ciphers indicate the bit position. 
+Unmentioned bits have to be set to zero. A bit that is set to 1 means always
+active, a zero-bit means off.
+
+Strings are always zero-terminated. ?Reserved? bytes can be skipped on reading
+but they have to be set to zero while writing. ?Reserved? bytes are only used
+for program internal purposes. ?float? is a 4 byte floating point number
+pursuant to IEEE. 
+
+
+Bytes  Type       Description
+-------------------------------------------------------------------------------
+Header:
+-------------------------------------------------------------------------------
+10     String     Header:  "RIP OBJ.:\0"
+1      uchar      Version: 6 (other values lead to errors!)
+1      -          reserved
+2      ushort     Byte-order Detection: Is set to 0x0001 on saving.
+                  If byte-order==0x0100 on loading all values (but 
+                  chars) have to be swapped.
+2      ushort     Number of Points (of all morph-phases if existent)
+2      ushort     Number of Polygons
+2      ushort     Number of Materials (of all morph-phases)
+2      ushort     Number of Morph-phases (0-n)
+2      ushort     Current Morph-phase
+
+
+-------------------------------------------------------------------------------
+The following section is repeated by the number of points:
+-------------------------------------------------------------------------------
+1      uchar      Sel:        (0:Selected)
+1      char       free: Reserved
+4      float      X-Coordinate of Point
+4      float      Y-Coordinate of Point
+4      float      Z-Coordinate of Point
+
+
+-------------------------------------------------------------------------------
+The following section is repeated by the number of polygons:
+-------------------------------------------------------------------------------
+1      uchar      Number of PolygonPoints (3-8)
+1      uchar      Status      (0:FrontVis/1:BackVis/2:Flat)
+1      uchar      Sel:        (0:Selected/1:reserved/2:Hide/)
+1      -          Reserved
+2      ushort     Body: Subbodynumber
+2      short      Matter: Material-index
+4      -          Reserved
+16     8x ushort  Point-index of used Points
+
+
+-------------------------------------------------------------------------------
+The following section is repeated by the number of Materials:
+-------------------------------------------------------------------------------
+22     String     Name
+2      ushort     Flags       (0:Amb/1:Diff/2:Spec/3:Mirr/4:Trans/
+                              5:Texture/6:Structure/7:Pixmap/
+                              8:BlackCut/9:Tex-Offset/10:FCol)
+4      -          Reserved
+12    3x float    Foregroundcolour   (R/G/B von 0-1)
+12    3x float    In-betweencolour 1 (R/G/B von 0-1)
+12    3x float    In-betweencolour 2 (R/G/B von 0-1)
+12    3x float    In-betweencolour 3 (R/G/B von 0-1)
+12    3x float    Backgroundcolour   (R/G/B von 0-1)
+4     float       NVBend      (0-PI)
+4     float       Amb         (0-1)
+4     float       Diff        (0-1)
+4     float       Spec        (0-1)
+4     float       SpecPow     (0-2048)
+4     float       Mirr        (0-1)
+4     float       SpecMirrFilt(0-1)
+4     float       Trans       (0-1)
+4     float       TransFilt   (0-1)
+4     float       TransIdx    (0.001 - X)
+14    String      TextMapName
+10    -           Reserved
+4     float       TexZoom
+2     ushort      TexFunc     (currently: 0-9)
+2     ushort      TexFlags    (0:XMap/1:Binary/2:Floor)
+2     short       TexPar
+14    String      StructMapName
+4     char*       Reserved
+2     ushort      StructFunc  (derzeit: 0-1)
+6     -           Reserved
+4     float       StructZoom  (0-1)
+4     float       StructDepth (0-1)
+2     ushort      StructPar
+14    String      PixmapName
+4     char*       Reserved
+2     ushort      PixType     (0:Front/1:Top/2:Side/3:Best/4:Metal/
+                              5:HFlip/6:VFlip/7:Loop/8:Swap/9:Soft/
+                              10:Rotate/11:Cylnd)
+6     -           Reserved
+4     float       PixmapZoom  (0-1)
+4     float       PixmapFade  (0-1)
+4     float       XOffset     (für Texture/Structure/Pixmap)
+4     float       YOffset     (für Texture/Structure/Pixmap)
+4     float       ZOffset     (für Texture/Structure/Pixmap)
+4     float       TexThreshld (0-1)
+4     float       TexFloor    (0-1)
+1     char        Center      (0:Texture/1:Structure/2:Pixmap)
+1     char        StructStamp (0:Stamp)
+2     -           Reserved
+
+-------------------------------------------------------------------------------
+

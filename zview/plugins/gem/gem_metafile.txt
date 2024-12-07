@@ -1,0 +1,83 @@
+zGEM Meta file    *.GEM
+
+Files ending in '.GEM' are graphic metafiles created by GDOS. They are usually
+used to represent vector graphics but may also be used to store links to bitmap
+images and textual information. Two primary versions of GEM files exist.
+Version 1 files are guaranteed not to contain bezier curves whereas version 3
+files may. Version 3.xx files are also commonly referred to as GEM/3 files.
+
+The Metafile Header (see META_HEADER structure)
+
+GEM metafiles begin with a header as follows:
+
+WORD    Contents
+  0     Magic number (0xFFFF).
+  1     Header length in WORDs.
+  2     Version number (major * 100 + minor).
+  3     NDC Flag as follows: Value Meaning 0 (0, 0) in lower-left corner (NDC)
+                                           2 (0, 0) in upper-left corner (RC)
+  4     Minimum X extent.
+  5     Minimum Y extent.
+  6     Maximum X extent.
+  7     Maximum Y extent.
+  8     Page width in tenths of millimeters.
+  9     Page height in tenths of millimeters.
+ 10     Lower Left X value of coordinate system.
+ 11     Lower Left Y value of coordinate system.
+ 12     Upper Right X value of coordinate system.
+ 13     Upper Right Y value of coordinate system.
+ ...    Other information may appear in the header following which is
+        currently undefined. Use WORD #1 to skip any unknown information.
+
+The definition of WORDs 4-13 is defined by the creator of the file using three
+metafile commands. WORDs 4-7 are set with the v_meta_extents() function. WORDs
+8-9 are defined with the vm_pagesize() function. WORDs 10-13 are defined with
+vm_coords(). If the creator fails to specify defaults for any of these values,
+the appropriate values will be set to 0 in the header. If zeros appear for
+WORDs 10-13, the default NDC coordinate system should be assumed.
+
+Metafile Records:
+
+Following the header will appear a list of records of varying length which,
+when translated, can be 'played back' on the destination VDI device. Each
+record is formatted as follows:
+
+        WORD    Meaning
+        0       Opcode of VDI function.
+        1       Number of PTSIN elements.
+        2       Number of INTIN elements.
+        3       Function sub-ID.
+        4...    PTSIN elements.
+        ...     INTIN elements.
+
+The list of records is terminated with an opcode of 0xFFFF (this record is
+written when a v_clswk() call is made by the creator). When playing back GEM
+files, the application must translate all coordinates from the metafile
+coordinate system to that of the destination device. In addition, text metrics
+should be appropriately converted. If an unknown opcode is discovered it should
+be played after any elements of the PTSIN array are translated (making the
+assumption that they should be).
+
+Metafile Sub-Opcodes:
+
+GEM metafiles support the use of special sub-opcodes for implementing reserved
+and user-defined functions. GEM metafile translators should ignore sub-opcodes
+they don't understand. Each sub-opcode can be identified with the primary
+opcode of 5, function ID of 99 and the first (required) member of INTIN being
+the sub-opcode ID. The currently defined sub-opcodes are as follows:
+
+      INTIN[0]  Meaning
+      10        Start Group.
+      11        End Group.
+      49        Set No Line Style.
+      50        Set Attribute Shadow On.
+      51        Set Attribute Shadow Off.
+      80        Start Draw Area Type Primitive.
+      81        End Draw Area Type Primitive.
+
+None of the pre-defined sub-opcodes use additional INTIN or PTSIN elements
+though user-defined sub-opcodes may.
+
+Opcodes from 0-100 are reserved for use by Atari. Sub-opcodes from 101-65535
+are available for use by developers but should be registered with Atari to
+avoid possible conflicts.

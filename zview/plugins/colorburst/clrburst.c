@@ -59,9 +59,6 @@ void __CDECL bst_decompress(const uint32_t *source, uint32_t *screen, int16_t *m
 
 static void bst_decompress(const uint32_t *source, uint32_t *screen)
 {
-	int k;
-	int m;
-	int j = 0;
 	int16_t off;
 	const int16_t *my_control;
 	int cntrl_max;
@@ -73,20 +70,21 @@ static void bst_decompress(const uint32_t *source, uint32_t *screen)
 	cntrl_max = *(my_control + 1);			/* get number of control words  */
 	cntrl_max -= 2;
 	off = cntrl_max / 2 + 1;
+	source += off;
 	my_control += 2;
-	for (k = 0; k < cntrl_max; k++)
+	while (--cntrl_max >= 0)
 	{
-		count = my_control[k];
+		count = *my_control++;
 		if (count < 0)			/* deal with compressed stuff */
 		{
 			count = -count;
-			for (m = 0; m < count; m++)
-				screen[j++] = source[off];
-			off++;
+			while (--count >= 0)
+				*screen++ = *source;
+			source++;
 		} else							/* deal with raw stuff */
 		{
-			for (m = 0; m < count; m++)
-				screen[j++] = source[off++];
+			while (--count >= 0)
+				*screen++ = *source++;
 		}
 	}
 }

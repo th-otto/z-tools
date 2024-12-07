@@ -1,0 +1,112 @@
+The Scene File Format
+
+Scenes are saved in the binary "*.SCN"-Format. The indications for swapping 
+values of the object file (binary format) apply accordingly, as well as the 
+description of the bit-vectors. Scenes don't contain the point-, polygon- 
+or material-data of individual objects, these are subjoined from the 
+corresponding object files. 
+
+The Labelling of individual parameters is borrowed from its equivalent in 
+the forms of the scenery editor. Values in brackets like (==0) are non 
+compelling default values.
+
+
+Bytes Type
+-------------------------------------------------------------------------------
+Header:
+-------------------------------------------------------------------------------
+10     String     Header:  "RIP SCN.:\0"
+1      uchar      Version: 21 (other values lead to errors!)
+1      -          reserved
+2      ushort     swap: 0x0100, noswap: 0x0001
+2      ushort     Number of Objects
+2      ushort     Number of Timesplines
+
+-------------------------------------------------------------------------------
+Global scene parameters:
+-------------------------------------------------------------------------------
+12     3x float   Focus: Projection parameter
+12     3x float   Background colour (R/G/B)
+12     3x float   Ambience light (R/G/B)
+4      long       Number of frames
+20     String     Name: Background picture
+4      float      DepthFade Begin
+4      float      DepthFade Range
+4      long       Startframe (==0)
+4      long       Endframe (==Anzahl Frames)
+4      long       Offset (==0)
+4      long       Steps (==1)
+2      short      XRes
+2      short      YRes
+2      ushort     Features  (0:ZBuff|Trace/1:antials/2:shadow/3:mirr/
+                            4:trans/5:save/6:display/7:background pic/
+                            8:BatchFile/9:DepthFade)
+44     String     Path + Name: Animation
+20     String     Name: BatchFile
+
+-------------------------------------------------------------------------------
+Repeated for number of objects:
+-------------------------------------------------------------------------------
+1      uchar      Selected (0:Sel)
+1      uchar      Params (0:Box only/1:Not in [A]/2:Hollow)
+14     String     Objekt File Name (only binary Objects!)
+12     3x float   Centre (X/Y/Z)
+36     9x float   Rotationmatrix (X0/Y0/Z0/X1/Y1/Z1/X2/Y2/Z2)
+4      float      Stretch Factor
+12     3x float   Bounding Box (Min, X/Y/Z)
+12     3x float   Bounding Box (Max, X/Y/Z)
+24     -          Reserved
+48     -          Reserved
+2      ushort     Type (0:Normal/1:Empty/2:Spline)
+2      ushort     ObjFlags   (0:Camobj/1:PoiObj/2:LightSrc/3:Giva Shadow/
+                             4:Take Shadow/5:Light: Give Shadow/
+                             6:Light: parallel/7:Light: Spot/
+                             8:Light: Range/9:Spline: B-Spline/
+                             10:Spline: Closed)
+12     3x float   LightCol (R/G/B)
+16     -          Reserved
+4      float      Light: SpotAngle
+4      float      Light: SpotFade
+4      float      Light: Range
+4      float      Light: Fade
+8      -          Reserved
+20     String     Object Name (additional)
+4      float      Constant Move: Start
+4      float      Constant Move: Amount
+4      float      Constant Rot: X
+4      float      Constant Rot: Y
+4      float      Constant Rot: Z
+2      short      ObjIndex: MoveObj
+2      short      ObjIndex: NoseObj
+2      short      ObjIndex: FeetObj
+2      ushort     AnimFlags   (0: Mv fwd/1:Mv on Spln/2:RotCnst/
+                              3:Rot NoseFeet/4:Nose Tang./5:Nose point at/
+                              6:Feet point at/7:Feet fixed/8:Rot abs./
+                              9:Morph Light/10:Morph Body/Morph Matters)
+2      -          Reserved
+2      short      ObjIndex: ParentObj
+4      float      Repeat
+2      short      TSplineIdx: Move
+2      short      TSplineIdx: Rotate
+2      short      TSplineIdx: Repeat
+2      short      TSplineIdx: Light
+2      short      TSplineIdx: Morph
+2      short      Number of Morphphases (vide Objectdescription)
+4      -          Reserved
+
+-------------------------------------------------------------------------------
+Repeated for Number of TimeSplines:
+-------------------------------------------------------------------------------
+20     String     Name
+400    200x short Werte (1.0 == 16384, -1.0 == -16384)
+
+
+-------------------------------------------------------------------------------
+Repeated for Number of Splines:
+-------------------------------------------------------------------------------
+2      short      Number of Splinepoints
+       ------------------------------------------------------------------------
+       Repeated for Number of Splinepoints:
+       ------------------------------------------------------------------------
+       12    3x float    Point Position (X/Y/Z)
+-------------------------------------------------------------------------------

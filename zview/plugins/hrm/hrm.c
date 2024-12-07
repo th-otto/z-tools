@@ -4,6 +4,20 @@
 #define DATE        __DATE__ " " __TIME__
 #define MISC_INFO   "Some code by Hans Wessels"
 
+/*
+HighresMedium    *.HRM
+
+This format is found in only one demo: "HighResMode" by Paradox. The pictures
+are interlaced in medium resolution with 35 colors per line. The files are
+packed with Ice.
+
+The unpacked format is as follows:
+64000 bytes      screen data, 160 bytes per scanline, 400 lines
+28000 bytes      palette data, 70 bytes per line
+-----------
+96000 bytes
+*/
+
 #include "plugin.h"
 #include "zvplugin.h"
 

@@ -8,6 +8,26 @@
 #define DATE        __DATE__ " " __TIME__
 #define AUTHOR      "Thorsten Otto"
 
+/*
+STAD       *.PAC (ST high resolution)
+
+4 bytes    file id, 'pM86' (vertically packed) or 'pM85' (horizontally packed)
+1 byte     id byte
+1 byte     pack byte (most frequently occurring byte in bitmap)
+1 byte     "special" byte
+-------
+7 bytes    total for header
+
+? bytes    compressed data
+
+The data is encoded as follows.  For each byte x in the data section:
+
+    x = id byte             Read one more byte, n. Use pack byte n + 1 times.
+    x = "special" byte      Read two more bytes, d, and n (in order).
+                            Use byte d n + 1 times.
+    otherwise               Use byte x literally.
+*/
+
 #ifdef PLUGIN_SLB
 
 long __CDECL get_option(zv_int_t which)

@@ -196,6 +196,22 @@ Spectrum pictures (*.SPU).
 
 See also Spectrum 512 file format
 
+############################################################################
+
+Unispec Animation    *.SPS
+
+Format for animated Spectrum pictures.
+
+1 word         file ID, 'SS' ($5353)
+1 word         ?
+1 word         frame count?
+1 word         maximum frame height?
+1 word         flag?
+22 bytes       unknown header bytes
+51104 bytes    uncompressed spectrum picture (see SPU format)
+?? bytes       animation data (unknown format)
+
+See also Spectrum 512 file format.
 */
 
 #define SP_ID   0x5350

@@ -68,6 +68,92 @@ X == ESC
 
     If y >= 3, read next byte: d.
         Repeat d (y + 1) times.
+
+###############################################################################
+
+Imagic Film    *.IC1 (st low resolution)
+               *.IC2 (st medium resolution)
+               *.IC3 (st high resolution)
+
+4 bytes         file ID, 'IMDC'
+1 word          resolution (0 = low res, 1 = medium res, 2 = high res)
+16 words        palette
+1 word          date (GEMDOS format)
+1 word          time (GEMDOS format)
+8 bytes         name of base picture file (for delta compression), or zeroes
+1 word          length of data?
+1 long          registration number
+8 bytes         reserved
+1 byte          compressed? (0 = no, 1 = yes)
+
+If compressed {
+1 byte          delta-compressed? (-1 = no, > -1 = yes)
+1 byte          ?
+1 byte          escape byte
+}
+--------
+65 bytes        total for header (68 bytes if compressed)
+
+? bytes         data
+
+Compressed data may be either stand-alone or delta-compressed (relative to the
+base picture named in the header). Delta compression involves storing only how
+the picture differs from the base picture (i.e., only portions of the screen
+that have changed are stored). This is used to to encode animated sequences
+efficiently.
+
+Compressed data, stand-alone:
+
+For each byte x in the data section:
+
+        x = escape byte         Read one more byte, n.  (n is unsigned).
+
+                                If n >= 2, use the next byte n times.
+                                If n = 1, keep reading bytes until a
+                                byte k not equal to 1 is encountered.
+                                Then read the next byte d.
+                                If the number of 1 bytes encountered is o,
+                                use d (256 * o + k) times.  I.e.,
+
+                                if (n == 1) {
+                                        o = 0;
+                                        while (n == 1) {
+                                                o++;
+                                                n = next byte;
+                                        }
+
+                                        k = n;
+                                        d = next byte;
+
+                                        Use d (256 * o + k) times.
+                                }
+                                else {
+                                        d = next byte;
+                                        Use d (n) times.
+                                }
+
+        x != escape byte        Use x literally.
+
+Compressed data, delta compressed:
+
+For each byte x in the data section:
+
+        x = escape byte         Read one more byte, n.  (n is unsigned).
+
+                                If n >= 3, use the next byte n times.
+                                If n = 1, do the same as for n = 1 in
+                                stand-alone compression (above).
+                                If n = 2, then set n = next byte.
+                                        If n = 0, end of picture.
+                                        If n >= 2, take n bytes from base
+                                        picture.
+                                        If n = 1, do the same as for n = 1
+                                        in stand-alone compression (above),
+                                        but take (256 * o + k) bytes from
+                                        base picture.
+
+        x != escape byte        Use x literally.
+
 */
 
 
