@@ -117,6 +117,8 @@ supported features of the formats.
 !hline
  GodPaint      !! .god              !! Any             !! 16             !! None            !! Encoder
 !hline
+ Grafix        !! .grx              !! Any             !! 1/2/4/8        !! None/LZW        !!
+!hline
  Graphics      !! .pg1              !! 320x200         !! 4              !! None/RLE        !!
  Processor     !! .pg2              !! 640x200         !! 2              !!                 !!
                !! .pg3              !! 640x400         !! 1              !!                 !!

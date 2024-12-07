@@ -43,6 +43,7 @@ PLUGINS = \
 	gft \
 	gif \
 	godpaint \
+	grafix \
 	hrm \
 	iff_dctv \
 	iff_rgbn \
