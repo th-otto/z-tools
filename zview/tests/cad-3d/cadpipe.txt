@@ -1,0 +1,5610 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                               Stereo CAD-3D 2.0
+                     Communication Pipeline Specification
+                                 by Tom Hudson
+                                  April, 1987
+                           Copyright 1987 Tom Hudson
+                              All rights reserved
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            Section 1:  Background
+
+
+                                 Introduction
+
+         Stereo CAD-3D 2.0 is a breakthrough product in many respects,
+         but perhaps the most important feature of the program is one
+         which is not readily apparent.  The program has been written
+         with an open-ended communication pipeline directly to desk
+         accessories.  These accessories are able to communicate
+         directly with CAD-3D 2.0 through the GEM communication pipe.
+
+         The ability for desk accessories to communicate with CAD-3D
+         is an extremely powerful one.  Not only can desk accessories
+         request information from CAD-3D in order to find out the
+         memory configuration, data buffers, and so on, but the
+         accessories can actually TAKE OVER full control of CAD-3D,
+         commanding it to generate images, create or delete objects,
+         record animation sequences, manipulate objects' sizes,
+         positions, orientations, and so on -- virtually anything the
+         user can do via the graphics interface, a desk accessory can
+         do via the communication pipeline.
+
+         What does this mean?  Let's look at a few possibilities.
+         Desk accessories could be written:
+
+             * to use CAD-3D 2.0 as a 3D/stereo graphics engine.
+
+             * to provide new "tools" for object creation
+
+             * to give animation scripting control
+
+             * to provide a near-real-time object manipulator
+
+             * to provide more specialized "front-ends" for CAD-3D
+
+         The list is almost endless.  CAD-3D 2.0 provides the
+         computing power and image creation abilities, the desk
+         accessories provide additional flexibility far beyond the
+         original CAD-3D program.  Use your imagination!
+
+         It is important to note that the communication pipe only
+         works with versions of CAD-3D numbered 2.0 or higher.  Beta
+         copies of the version 2.0 will not work properly.  CAD-3D 1.0
+         will not work, either.
+
+
+                           Communication pipe basics
+
+         If you're not familiar with the GEM message pipe, it's a good
+         idea to read "The GEM Communication Pipe" in START Magazine
+         #5 -- it provides a full overview of the communication pipe
+         used by GEM.  The article itself focuses on the use of the
+         communication pipe as used by DEGAS Elite, the first program
+         I wrote using the pipe.  The magazine disk also provides
+
+
+
+                                     - 1 -
+
+
+
+
+
+
+
+         commented source code for a desk accessory which works with
+         DEGAS Elite.  The following section is exerpted from that
+         article.
+
+         Basically, the GEM communication pipe is a simple way for one
+         application to send messages to another application or desk
+         accessory in the system.  It is a very solid way to get
+         programs talking to each other, and allows for a great deal
+         of flexibility in programs.  For example, with careful
+         planning, you can design programs which are implemented in
+         several modules -- one main program and several satellite
+         accessories which perform specific tasks for the primary
+         application.  This is particularly useful for applications
+         which may be upgraded in the future -- a desk accessory can
+         merely be swapped for a new version with enhanced features,
+         without needing to change the primary application.
+
+         This is the theory behind the CYBSMASH.ACC accessory which is
+         shipped with CAD-3D 2.0.  As new methods are developed for
+         the compression of animated image data for the Cybermate
+         animation system, new "smasher" accessories can be released
+         through major telecommunications networks, at very little
+         cost to the user or the company.
+
+         A second example of the usefulness of the communication pipe
+         is the ANTI.ACC antialiaser accessory for DEGAS Elite/CAD-3D
+         2.0.  This accessory does "smoothing" of graphic images when
+         invoked by the user via the menu bar "Desk" option in DEGAS
+         Elite, or through automatic program control in CAD-3D 2.0.
+         It can also be called by other programs which know the
+         accessory's protocol.
+
+                              Let's Get Talking!
+
+         The standard GEM message is a 16-byte chunk of data,
+         organized into eight WORDs, as follows:
+
+         WORD 0: Message number
+         WORD 1: The ap_id of sending application
+         WORD 2: Additional bytes in message (if more than 16 bytes)
+         WORD 3: Message-specific
+         WORD 4: Message-specific
+         WORD 5: Message-specific
+         WORD 6: Message-specific
+         WORD 7: Message-specific
+
+         Word number zero, the message number, must be a unique value
+         ranging from $0000 to $FFFF.  Messages 0-41 are used by GEM,
+         so if you're going to define your own messages, be sure to
+         use a number other than those reserved for GEM, or you might
+         confuse the receiving application!
+
+         Word 1 is the ID of the application (a main program or
+         accessory) which is sending the message.  When sending
+         messages, it is important to place the proper ap_id in this
+
+
+
+                                     - 2 -
+
+
+
+
+
+
+
+         location.  Without a proper ap_id here, the application which
+         receives the message won't know where it came from, and if it
+         tries to respond by sending a message back to the original
+         sender, GEM may get confused.  The moral of the story:
+         Always know your application's ap_id.  Fortunately, you can
+         always find your program's ap_id in the global variable,
+         gl_apid.  In C, you can define this variable as follows:
+
+                              extern int gl_apid;
+
+         When sending a message, just move gl_apid to word 1 of the
+         message.
+
+         Word 2 in the message is the extra number of bytes in the
+         message.  For a standard 16-byte message, this value is set
+         to 0.  For a 20-byte message, the value here would be 4
+         (20-16).  The minimum message size is 16 bytes.  All CAD-3D
+         2.0 messages are standard 16-byte lengths.
+
+         The remaining five words in the standard message are
+         available for data.  When designing messages for your
+         programs' use, you can fit up to five pieces of word-sized
+         data in a standard message.  If you need to pass more data,
+         you can do so by specifying the extra number of bytes in word
+         2, and sending the extra bytes through the pipe with the
+         appl_write() function.  The receiving application can get the
+         extra bytes from the pipe by using the appl_read() function.
+         For extremely large blocks of data, pointers to the data may
+         be passed in the standard message.
+
+         Now that we know what the message format looks like, let's
+         see what is necessary to send it.
+
+         In order to send a message to another application in memory,
+         it is vital that you know the ap_id of that program.  Without
+         the proper ap_id of the receiving application, it's like
+         dropping a letter into a mailbox without the name or address
+         of the person you're sending it to.  It just won't get
+         there.
+
+         The AES function appl_find() will allow you to locate the
+         application you would like to communicate with, and will give
+         you the proper ap_id.  The format of the function is:
+
+                       target_id=appl_find("APPLNAME");
+
+         Where "APPLNAME" is a null-terminated string specifying the
+         filename of the application you want to find and target_id is
+         the variable which holds the target application's ap_id.  The
+         program name string is eight characters in length plus the
+         terminating null character (0), and is simply the main
+         portion of the application's filename.  If you were looking
+         for a program called RATTFINK.PRG, you would use:
+         appl_find("RATTFINK").  Similarly, if you're looking for
+         CLOCKSET.ACC, you would request: appl_find("CLOCKSET").  If
+
+
+
+                                     - 3 -
+
+
+
+
+
+
+
+         the filename is less than eight characters, such as
+         CAD3D2.PRG, you must pad the remainder with spaces:
+
+                       target_id=appl_find("CAD3D2  ");
+
+         The ap_id of the target application will be returned in
+         target_id.  If the specified application name was not found,
+         GEM will return a -1 in target_id.  One word of special
+         caution here:  If the target application is a program and was
+         the last program that was executed, a bug in the current ST
+         ROMs will return a seemingly valid target_id, while the
+         application is not resident at all!  If the application tries
+         to communicate with the target application and expects a
+         reply, it will have a long time to wait, because the
+         application isn't there!  We'll see how to cope with this
+         later.
+
+         Once you know the ap_id of the target application, you're
+         ready to start talking to it.  Simply build a message in an
+         eight-word array, like so:
+
+         message[0]=0x3D00;
+         message[1]=gl_apid;
+         message[2]=0;
+         message[3]=1234;
+         message[4]=0;
+         message[5]=0;
+         message[6]=0;
+         message[7]=0;
+
+         In this example message, we're sending a message number of
+         $3D00 (safe because GEM only uses message numbers 0-41).  We
+         have placed the ap_id of our application (gl_apid) in
+         message[1].  The message is 16 bytes long, the standard
+         length.  Note that message[2] is set to zero, indicating that
+         there are no extra message bytes.  The message in this case
+         is a simple numeric value, 1234, in message[3].
+
+         Ok, we've built our message buffer, now let's send it.  For
+         this function, we'll use the appl_write() function.  This
+         function has three parameters, as shown below:
+
+               success=appl_write(target_id,msg_size,msg_buff);
+
+         The target_id parameter is a word which tells GEM the ap_id
+         of the application we want to send the message to.  The
+         msg_size parameter is a word which tells how many bytes there
+         are in the message, and msg_buff is a pointer to the message
+         buffer array.  The success variable is set to zero if an
+         error occurred, or a positive value if the write was
+         successful.  Let's say we want to send the above message to a
+         program called TESTER.PRG.  The following code would get the
+         job done:
+
+         target_id=appl_find("TESTER  ");
+
+
+
+                                     - 4 -
+
+
+
+
+
+
+
+         if(target_id>=0)
+          success=appl_write(target_id,16,message);
+
+         Simple enough?  Sure.  However, we still don't know how to
+         make the TESTER.PRG program look for and acknowledge this
+         message.
+
+         Normally, a typical GEM application or desk accessory will
+         sit around waiting for a message to come into its message
+         pipe.  This is accomplished by using the evnt_mesag() or
+         evnt_multi() functions.  For simplicity, we'll use the
+         evnt_mesag function, which is the more straightforward of the
+         two.
+
+         Somewhere in our TESTER.PRG program, there will be an
+         evnt_mesag() function call, looking something like this:
+
+                             evnt_mesag(mess_in);
+
+         Normally, a GEM program will be expecting GEM messages for
+         window or menu operation, numbered from 0-41.  We can make it
+         recognize our custom message merely by testing the message
+         number of the incoming message for our special code!  For
+         example, to have the application look for the $3D00 message
+         we sent earlier, this is the code we would need:
+
+
+         int mess_in[8];
+
+               .
+               .
+               .
+
+         evnt_mesag(mess_in);
+         if(mess_in[0]==0x3D00)
+          {
+          (WE GOT THE MESSAGE!)
+          (PRINT OUT mess_in[3])
+          }
+
+
+         It's that simple!  No muss, no fuss.  The 16-byte message
+         buffer (mess_in) will be filled with the 16-byte message that
+         was sent by the other application, and it's ready to be
+         used.
+
+         CAD-3D 2.0 uses a two-way communication protocol.  That is, a
+         desk accessory can send CAD-3D a command and CAD-3D will
+         return a special reply message to the original sender.
+
+         In CAD-3D 2.0, all messages are set up so that message
+         numbers with a low byte of $00-7F are requests, and message
+         numbers with a low byte of $80-FF are replies.  For example,
+         a request for information might be message number $3D00, and
+         the reply for this message is $3D80.  The reply is always the
+
+
+
+                                     - 5 -
+
+
+
+
+
+
+
+         message number with $80 added to it.  This makes for a
+         uniform message system, and prevents a program from being
+         confused by a different message.
+
+         When a desk accessory sends an information request/command to
+         CAD-3D 2.0, which checks the validity of the request, carries
+         out the command, if possible, then sends a reply message that
+         informs the accessory whether or not the command was
+         successful.  After sending the request, the accessory waits
+         for the proper reply from CAD-3D.  Since many operations
+         performed by CAD-3D may take up to several minutes (large
+         object creation, image drawing, and antialiasing, for
+         example), the accessory should normally wait for an
+         indefinite period of time for the proper reply.  CAD-3D will
+         always reply to a request, unless there is a serious system
+         malfunction, in which case there is nothing you can do anyway
+         to recover.
+
+         Let's change our above example so that the application is
+         requesting information.  The first application will send a
+         message to the second application, which will in turn send a
+         reply back to the first application.  The first application,
+         after sending the message, will wait for a reply from the
+         receiving application before proceeding.
+
+         The code might look like:
+
+
+         /* SEND MESSAGE */
+
+         target_id=appl_find("TESTER  ");
+         if(target_id>=0)
+          {
+          message[0]=0x3D00;
+          message[1]=gl_apid;
+          message[2]=0;
+          message[3]=1;
+          message[4]=message[5]=message[6]=message[7]=0;
+
+          appl_write(target_id,16,message);
+
+         /* WAIT FOR REPLY */
+
+          do
+           {
+           evnt_mesag(message);
+           }
+           while message[0] != 0x3D80;
+          }
+
+         /* REPLY RECEIVED, CONTINUE PROCESSING */
+
+
+         As you can see, the application writes the message normally,
+         then goes into a loop which waits for an evnt_mesag with a
+
+
+
+                                     - 6 -
+
+
+
+
+
+
+
+         message number of $3D80, the reply to message number $3D00.
+         As long as the target application is in memory, everything
+         should work perfectly.  If messages other than number $3D80
+         are received by the sending application, it ignores them and
+         continues waiting (NOTE: It may be necessary, in certain rare
+         instances, to process other messages received by this loop,
+         such as redraw messages.  This is usually not the case,
+         however.)
+
+         The code that would process this message on the receiving end
+         is as follows:
+
+
+         int mess_out[8];
+
+               .
+               .
+               .
+
+         /* WAIT FOR MESSAGE FROM THE PIPE */
+
+         msg_wait:
+         evnt_mesag(mess_in);
+         if(mess_in[0]==0x3D00)
+          {
+          mess_out[0]=0x3D80;
+          mess_out[1]=gl_apid;
+          mess_out[2]=0;
+          mess_out[3]=1;
+          mess_out[4]=2;
+          mess_out[5]=3;
+          mess_out[6]=4;
+          mess_out[7]=5;
+          appl_write(mess_in[1],16,mess_out);
+          }
+         goto msg_wait;
+
+
+         When the application receives message number $3D00, it just
+         builds a reply message with the proper reply message number
+         ($3D80), places its ap_id in mess_out[1], and builds the rest
+         of the message accordingly.  It then writes the message to
+         the message pipe using the appl_write() function.  Note that
+         it used the value that it received in mess_in[1] as the ap_id
+         of the application that it is sending to.  This is EXTREMELY
+         important!  If the original sender does not supply the proper
+         ap_id in its message, the receiving application cannot
+         successfully reply.  Don't forget to place the gl_apid into
+         the second word of the message buffer!
+
+         To summarize this sequence of communications operations:
+
+         1) Application #1 gets the ID of the program it wants to
+         communicate with
+         2) Application #1 builds and sends the message
+
+
+
+                                     - 7 -
+
+
+
+
+
+
+
+         3) Application #1 enters evnt_mesag() wait
+         4) Application #2 receives the message
+         5) Application #2 composes reply message, sends to original
+         sender
+         6) Application #2 returns to message wait state
+         7) Application #1 receives reply from application #2,
+         continues processing
+
+         As I mentioned earlier, it is possible for a desk accessory
+         to request the ap_id of an application and get a valid id,
+         even though the application has terminated.  If this happens,
+         the accessory may send a message to the application and sit
+         there forever, awaiting a reply that will never come.  You
+         don't want that to happen (take it from someone who knows
+         from experience).  Here's a good solution to this dilemma.
+
+         Send an information request to the application (one that
+         requests information only and does not command the
+         application to take action) and then call the evnt_multi()
+         function waiting for either a message or a timer event.  Set
+         the timer length to 2000 milliseconds.  If you get the reply
+         from the application before the timer event occurs, the
+         application is really present and you can proceed.  Do this
+         every time the accessory is activated from the desktop DESK
+         dropdown.  It is not necessary if the application has called
+         the accessory.  This evnt_multi may look something like
+         this:
+
+
+         check_it:
+         event=evnt_multi(0x0030,-1,-1,-1,
+                          0,0,0,0,0,
+                          0,0,0,0,0,
+                          mgbuf,
+                          2000,0,
+                          &dum,&dum,&dum,&dum,&dum,&dum);
+         if(event & 0x0020)
+          (APPLICATION NOT PRESENT)
+         else
+          if(mgbuf[0]==REPLY)
+           (APPLICATION PRESENT)
+          else
+           goto check_it;
+
+
+         This is a reliable test to be sure the application is really
+         there.  If the application was previously run but is not
+         currently running, the timer event of 2000 milliseconds (2
+         seconds) will expire before a reply message is received.
+
+                                   Cautions.
+
+         Use ONLY the documented message pipe commands to get
+         information from the program.  Using tricks such as
+         disassembling the program and locating undocumented variables
+
+
+
+                                     - 8 -
+
+
+
+
+
+
+
+         or buffers is a big no-no, and can only lead to disaster in
+         the future when a new version of the program is released.
+         Don't do it.  'Nuff said.
+
+         When an accessory takes over and must display a dialog, it is
+         best for the accessory to open a full-screen window over
+         CAD-3D's control panel.  If this is not done, mouse clicks on
+         the panel will be relayed by GEM to CAD-3D, possibly messing
+         up the display.  Just be sure to close the window when your
+         accessory is done with its work.  When control returns to
+         CAD-3D, it will receive a full-screen redraw message, and
+         will redraw its windows, control panels, and so on.
+
+                                Demonstrations.
+
+         There are four example desk accessories on the CAD-3D 2.0
+         Developer's disk.  These are:
+
+         CADTEST1 -- A desk accessory showing information requests and
+         the setting and use of Camera 1 (the normal CAD-3D camera).
+         Builds two pyramids and generates a super view of them
+         (without showing the super view).  Also prints out the
+         current status of the program's RAM and image buffer
+         addresses (be sure your printer is on when you execute the
+         accessory).  After the accessory terminates (the CAD-3D
+         screen will redraw), you will see the two pyramids in the
+         CAD-3D windows.  Click on the LOOK icon and you will see the
+         image that was generated by the accessory.
+
+         CADTEST2 -- Shows the use of the CAMERA 1 MOVE command, by
+         "flying" the camera around the pyramids in a 360-degree
+         rotation.  Also shows how to use CAD-3D 2.0 as a graphics
+         engine for near-real-time graphics generation by setting up a
+         view buffer in the accessory.
+
+         CADTEST3 -- Shows the use of camera number 2, which can be
+         positioned anywhere in the 3D universe.  The camera is
+         "flown" past the two pyramids while panning.  Another
+         near-real-time demonstration.
+
+         CADTEST4 -- Shows the use of camera number 3.  This demo
+         shows how camera 3 can be panned, tilted or banked by
+         degrees.  Also near-real-time.
+
+         The commented source code for these accessories is included
+         on the disk.  It is a good starting point for your own
+         accessories, as it already has the two-way communication
+         routines and tests for CAD-3D in it.  It shows how to use
+         several of the CAD-3D communication pipe commands.  Try
+         modifying the code to run a wireframe animation to see the
+         speed at which CAD-3D can run near-real-time sequences.
+
+         You should note that all of these accessories follow the
+         correct practice of opening a full-screen window before doing
+         any processing.  The window is not actually used or even
+
+
+
+                                     - 9 -
+
+
+
+
+
+
+
+         redrawn, but it prevents mouse clicks from falling through to
+         CAD-3D.  Better safe than sorry.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                     - 10 -
+
+
+
+
+
+
+
+                           Section 2:  The commands
+
+
+                               Object operations
+
+         RAM STATUS ($3D00)
+
+         This command asks CAD-3D for the current memory status of the
+         program.  It will return the maximum number of vertices
+         available, the number of vertices in use, the maximum number
+         of faces available, the number of faces in use, and the
+         number of 3D objects present in the system.  Absolute maximum
+         values are number of vertices: 15,000; number of faces:
+         30,000; number of 3D objects: 40.
+
+         Note: This command does not return a standard success/failure
+         reply.  It always executes.
+
+
+         Request:
+
+         WORD 0: $3D00
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Unused
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3D80
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Maximum number of vertices in system
+         WORD 4: Number of vertices currently in use
+         WORD 5: Maximum number of faces in system
+         WORD 6: Number of faces currently in use
+         WORD 7: Number of objects currently in system
+
+
+
+         CLEAR MEMORY/NEW ($3D01)
+
+         This command operates the same as the NEW function in the
+         CAD-3D "File" drop-down, except that it does not ask for
+         verification.  If executed, it will delete all objects from
+         memory and return the camera settings to the start-up
+         default.  In monochrome mode, it resets the internal color
+         palette to the power-up default (15 red-orange shades).
+
+         Note: This command does not return a standard success/failure
+         reply.  It always executes.
+
+
+
+                                     - 11 -
+
+
+
+
+
+
+
+
+
+         Request:
+
+         WORD 0: $3D01
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Unused
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3D81
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Unused
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         GET OBJECT NUMBER ($3D02)
+
+         This function asks CAD-3D for the internal object number of a
+         3D object with a given name.  Names in CAD-3D are
+         case-sensitive, and are eight characters maximum plus a null
+         termination ($00).  CAD-3D will return the object's internal
+         number, a value from 0-39, if the named object is present.
+         If CAD-3D cannot find the object, it will return a value <0
+         in the reply.  In order to manipulate an object, you must
+         know its number.  If you delete an object, be sure to request
+         the object numbers before trying to manipulate an object
+         afterward, since object numbers are dynamic.
+
+
+         Request:
+
+         WORD 0: $3D02
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to null-terminated object name
+         string
+         WORD 4: Low word of pointer to null-terminated object name
+         string
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+
+
+                                     - 12 -
+
+
+
+
+
+
+
+         Reply:
+
+         WORD 0: $3D82
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Object number 0-39 (<0 if not found)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         CHANGE OBJECT NAME ($3D03)
+
+         This function allows you to change the name of an object.
+         You supply the number of the object whose name is to be
+         changed and the new name for that object.  CAD-3D will return
+         a standard success/error message.
+
+
+         Request:
+
+         WORD 0: $3D03
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Number of object whose name is to be changed (0-39)
+         WORD 4: High word of pointer to null-terminated new name
+         WORD 5: Low word of pointer to null-terminated new name
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3D83
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/error flag (<0 indicates error, >=0 indicates
+         success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         CHANGE OBJECT COLOR ($3D04)
+
+         This command lets you change the color of any object to any
+         color or shade in the current palette except the background
+         color.  The object will be recolored to one color, regardless
+         of its present coloring, without user warning.  This function
+         will fail if the object is not present or the color number is
+         out of range.
+
+
+
+                                     - 13 -
+
+
+
+
+
+
+
+
+
+         Request:
+
+         WORD 0: $3D04
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Object number (0-39)
+         WORD 4: New color/shade for object (1-15)
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3D84
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates error, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         LOAD OBJECT FROM RAM ($3D05)
+
+         This command allows your accessory to build a 3D object data
+         structure in memory and load it into CAD-3D.  This is useful
+         for special tools or accessories which allow object
+         importation from other file formats.
+
+         To load an object int CAD-3D using this function, you must
+         first create the object in memory.  This requires seven
+         arrays, as follows:
+
+         Vertex storage:
+
+         int vertexX[]
+         int vertexY[]
+         int vertexZ[]
+
+         Vertices are stored in a fixed-point scheme in which an
+         integer value represents a value with two decimal places.
+         For example, the value  23.76 would be stored in the integer
+         form as 2376.  Simply multiply the value by 100 and save the
+         resulting integer.  All X, Y and Z coordinates within CAD-3D
+         range from -45 to 45, which in this storage format would be
+         -4500 to 4500.  This format is used in order to avoid
+         problems with differing floating-point packages from one
+         compiler to another.  It also results in a significant disk
+         space savings.
+
+
+
+                                     - 14 -
+
+
+
+
+
+
+
+
+         Face storage:
+
+         int vertexA[]
+         int vertexB[]
+         int vertexC[]
+         int fcolor[]
+
+         Faces within CAD-3D are all triangular in order to simplify
+         the data structure, programming and the 3D boolean
+         operations.  They have three vertices each (A, B and C) and
+         three line segments (AB, BC and CA).  Vertices aere numbered
+         starting with zero, and the value in the vertexA/B/C arrays
+         tell which vertex to use as that point on the triangle.  The
+         faces are defined such that the points are ordered
+         counterclockwise from the visible side, for simplification of
+         hidden-surface removal.
+
+         Each face has a corresponding color word, defined as
+         follows:
+
+             Bits 0-3:  Color or shade (1-15)
+             Bit 4:     Line segment CA visibility
+             Bit 5:     Line segment BC visibility
+             Bit 6:     Line segment AB visibility
+
+         The line segment visibility bits allow the object to be
+         plotted so that only edges of the object are shown, as
+         opposed to all triangle line segments.  The color/shade
+         information tells which palette entry will be used for that
+         face in the color mode, as well as the brightness for
+         monochrome.
+
+         Once these arrays are created and filled with the proper data
+         for an object, you will need to set up a structure as
+         follows:
+
+           struct obj_str
+             {
+             char os_name[9];
+             int  os_vertices;
+             int  os_faces;
+             int  *os_X;
+             int  *os_Y;
+             int  *os_Z;
+             int  *os_A;
+             int  *os_B;
+             int  *os_C;
+             int  *os_color;
+             };
+
+         The os_name variable is a string which you must set up with
+         the null-terminated name of the object.  This name is
+         case-sensitive, and must be unique.
+
+
+
+
+                                     - 15 -
+
+
+
+
+
+
+
+         The os_vertices variable tells how many vertices are used by
+         the object.
+
+         The os_faces variable tells how many faces are used by the
+         object.
+
+         The os_X, os_Y, os_Z, os_A, os_B, os_C and os_color variables
+         are all pointers which point to the various arrays in memory.
+         Be sure these are all properly defined before trying lo load
+         an object.
+
+         Once the structure is properly set up and the 3D data is
+         loaded into the seven data arrays, CAD-3D can be commanded to
+         load the object into its memory.  It will load the data from
+         your workspace -- the data will not be altered.  It will send
+         a reply with either the number of the loaded object or an
+         error flag.  An error during the load process can happen in
+         several ways:
+
+         1) Bad pointers to the structure or the data arrays
+         2) Too many objects in memory
+         3) Not enough vertices or faces in CAD-3D's workspace
+         4) An out-of-range vertex X/Y/Z value
+         5) An invalid vertex number in the face vertex list
+         6) The name you have given the object is not unique
+
+         Take care to see that your pointers are all properly defined
+         and that the data in the arrays is valid!
+
+
+         Request:
+
+         WORD 0: $3D05
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to object structure
+         WORD 4: Low word of pointer to object structure
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3D85
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Number of loaded object 0-39 (<0 indicates error)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+
+
+
+                                     - 16 -
+
+
+
+
+
+
+
+         UNLOAD OBJECT FROM CAD-3D INTO RAM ($3D06)
+
+         This function is the reverse of the LOAD command -- it takes
+         an object from CAD-3D's internal work area and unloads the
+         data to user-specified RAM.  The object is NOT erased from
+         CAD-3D's workspace.
+
+         It works exactly like the LOAD command, except that CAD-3D
+         will unload the data out of its workspace, placing it in your
+         arrays for you.  It will give you the object name, number of
+         vertices and faces, and all the object data.  One main
+         difference is in the format of the request -- you must tell
+         CAD-3D how large your object data arrays are so that CAD-3D
+         will not send you an object that is too large for your arrays
+         and wipe out important data.
+
+         You supply CAD-3D with the same structure as in the LOAD
+         command, but you only need to set up the seven pointers to
+         the data arrays.  Everything else is set by CAD-3D.
+
+         Only a few of things can go wrong with the UNLOAD command --
+         bad pointers in the request or data structure, an invalid
+         object number, or work arrays in the accessory that are too
+         small to hold the data.  As a good rule of thumb, allow for
+         about twice as many faces as vertices.  For example, a cube
+         will require 8 vertices and 12 faces (remember, all CAD-3D
+         faces are triangular, causing there to be more faces than you
+         might expect).
+
+
+
+         Request:
+
+         WORD 0: $3D06
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Maximum number of vertices in user's vertex arrays
+         WORD 4: Maximum number of faces in user's face arrays
+         WORD 5: High word of pointer to structure
+         WORD 6: Low word of pointer to structure
+         WORD 7: Number of object to unload
+
+
+         Reply:
+
+         WORD 0: $3D86
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates error, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+
+                                     - 17 -
+
+
+
+
+
+
+
+
+
+         DELETE OBJECT(S) ($3D07)
+
+         This command allows you to delete one or more of the objects
+         in CAD-3D's memory.  When the command is received by CAD-3D
+         it will delete the object(s) immediately -- no warning is
+         given.
+
+         The only parameter in the command is a pointer to a 40-word
+         array which contains the deletion flags.  A non-zero entry in
+         an array location will delete the corresponding object from
+         memory.  For example, to delete objects 3 and 7, set ARRAY[3]
+         and ARRAY[7] to 1; set all other entries to zero.
+
+
+         Request:
+
+         WORD 0: $3D07
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to deletion array
+         WORD 4: Low word of pointer to deletion array
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3D87
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         CREATE PRIMITIVE OBJECT ($3D08)
+
+         This command allows you to create one of the basic CAD-3D
+         primitives (sphere 1/2/3, torus, cube, wedge).  You must
+         specify the type of primitive to create, the name of the
+         object and the color of the object.
+
+         The primitive types are numbered as follows:
+
+             0: Sphere 1
+             1: Sphere 2
+             2: Sphere 3
+             3: Torus
+
+
+
+                                     - 18 -
+
+
+
+
+
+
+
+             4: Cube
+             5: Wedge
+
+         The name and color of the object are stored in a structure
+         which is defined as follows:
+
+           struct nm_color
+             {
+             char nc_name[9];
+             int  nc_color;
+             };
+
+         As always, the object name is an alphanumeric string made up
+         of up to eight characters plus a null terminator.  The color
+         is a value from 1-15.
+
+
+         Request:
+
+         WORD 0: $3D08
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Primitive type (0-5)
+         WORD 4: High word of pointer to name & color structure
+         WORD 5: Low word of pointer to name & color structure
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3D88
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Number of created primitive (<0 if error)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         DUPLICATE OBJECT ($3D09)
+
+         This function will create an exact duplicate of any object.
+         It works just like a shift-drag operation within CAD-3D, but
+         creates the new object in the same location as the original.
+         It will only work if there are enough vertices and faces
+         available for the object in the CAD-3D workspace.
+
+         The parameters for this function are the number of the object
+         that you want to duplicate and a null-terminated name for the
+         new object.
+
+         If the duplication of the object is successful, CAD-3D will
+
+
+
+                                     - 19 -
+
+
+
+
+
+
+
+         return the internal number of the new object.  If not, a
+         negative value will be returned to indicate an error has
+         occurred.
+
+
+         Request:
+
+         WORD 0: $3D09
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Number of object to be duplicated
+         WORD 4: High word of pointer to null-terminated name of new
+         object
+         WORD 5: Low word of pointer to null-terminated name of new
+         object
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3D87
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Number of new object (<0 if error)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+                               Color operations
+
+
+         SET BACKGROUND COLOR ($3D10)
+
+         This function sets the color of the background to black or
+         white (the same as the BLACK/WHITE selection in the drop-down
+         menu).  It is mainly useful with the monochrome monitor for
+         changing the background color in full-screen images.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D10
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Color (0 = White, 1 = Black)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+                                     - 20 -
+
+
+
+
+
+
+
+
+
+         Reply:
+
+         WORD 0: $3D90
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         LOAD COLOR PALETTE ($3D11)
+
+         This function loads the color palette used to create 3D
+         images.  In monochrome, this function loads the palette which
+         is saved with the 3D object when it is saved to disk.  This
+         color palette is used when the object is loaded into a system
+         with a color monitor.  The color palette data is the same as
+         the color palette date used by the BIOS Setpallete()
+         function, 16 words ranging from $000-777.
+
+         In order for the palette to be useful, it must be accompanied
+         by a second array which indicates the index of the first
+         color in the group to which that color belongs.  In the
+         following example palette, which contains a background color
+         of black, followed by five reds, five greens and five blues,
+         you can see how the palette base array is used to group the
+         colors together.  The reds start at color index 1, the greens
+         at color index 6, and the blues at color index 11.
+
+         INDEX    COLOR     BASE
+         -----    -----     ----
+            0      000        0
+            1      100        1
+            2      200        1
+            3      300        1
+            4      400        1
+            5      500        1
+            6      010        6
+            7      020        6
+            8      030        6
+            9      040        6
+           10      050        6
+           11      001       11
+           12      002       11
+           13      003       11
+           14      004       11
+           15      005       11
+
+         The base value is used when performing shading operations,
+
+
+
+                                     - 21 -
+
+
+
+
+
+
+
+         and if incorrectly set will result in odd-looking images.
+
+         The parameters to this function are two pointers, one to the
+         color palette array (a 16-word array) and one to the color
+         palette base array (another 16-word array).
+
+         CAD-3D returns a standard success/failure reply.  NOTE:  If
+         the operation is a success and the system is running in
+         color, CAD-3D will automatically switch to the custom palette
+         mode.
+
+
+         Request:
+
+         WORD 0: $3D11
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to color palette array
+         WORD 4: Low word of pointer to color palette array
+         WORD 5: High word of pointer to color base array
+         WORD 6: Low word of pointer to color base array
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3D91
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         UNLOAD PALETTE ($3D12)
+
+         This function is the reverse of the palette load function.
+         That is, it will take the values from the CAD-3D color
+         palette and place them into arrays which you provide.  There
+         are two arrays, one for the 16-word color palette, and one
+         for the 16-word color base array.  The color palette and base
+         array contents are described above.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D12
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+
+
+
+                                     - 22 -
+
+
+
+
+
+
+
+         WORD 3: High word of pointer to color palette array
+         WORD 4: Low word of pointer to color palette array
+         WORD 5: High word of pointer to color base array
+         WORD 6: Low word of pointer to color base array
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3D92
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         LOAD FILL PATTERNS ($3D13)
+
+         This function loads the CAD-3D object shading fill patterns
+         with patterns you provide.  These shading patterns are used
+         to draw the objects on the main CAD-3D work screen as well as
+         the full-screen mode in monochrome mode.  There are 16
+         patterns, all of which are loaded at once.  The patterns are
+         16 groups of 16 words, stored in an array such as
+         filpat[16][16].  The lightest fill pattern is stored in
+         filpat[0][], the darkest in filpat[15][].  The fill patterns
+         are standard word-wide single-plane bit patterns, such as
+         those used by the GEM vsf_udpat() function.
+
+         Note that, when executed, this command replaces the default
+         CAD-3D fill patterns, which cannot be recovered except by
+         another fill pattern load operation.  It is suggested that,
+         before changing the fill patterns, you first use the "Unload
+         Fill Patterns" function (see below) to save the original
+         CAD-3D patterns if you want to go back to the original
+         patterns later.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D13
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to fill pattern array
+         WORD 4: Low word of pointer to fill pattern array
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+                                     - 23 -
+
+
+
+
+
+
+
+
+
+         Reply:
+
+         WORD 0: $3D93
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         UNLOAD FILL PATTERNS ($3D14)
+
+         This function is the reverse of the Load Fill Pattern
+         function.  It copies the current CAD-3D shading fill patterns
+         into a user-specified array.  The array must be a
+         word-aligned array of 512 bytes.  It is normally defined as:
+         int filpat[16][16] so that individual fill patterns can be
+         accessed or modified.  There are 16 fill patterns in the
+         array, with filpat[0] the lightest and filpat[15] the
+         darkest.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D14
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to pattern array
+         WORD 4: Low word of pointer to pattern array
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3D94
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+
+
+                                     - 24 -
+
+
+
+
+
+
+
+
+         GET LINE COLORS ($3D15)
+
+         This function gets the line colors from CAD-3D.  The
+         wireframe color ranges from 1 to 15, the outline color ranges
+         from 0 to 15.
+
+
+         Request:
+
+         WORD 0: $3D15
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Unused
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3D95
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Wireframe color (1-15)
+         WORD 4: Outline color (0-15)
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         SET LINE COLORS ($3D16)
+
+         This function sets the colors of the outline and the
+         wireframe lines drawn in the color mode.  If used in
+         monochrome, no visible change will be noted, but the line
+         colors saved with the file information will be changed.
+
+         The wireframe color can be any color from 1 to 15.  The
+         background color is not allowed because the wireframe would
+         not be visible.  Wireframe color is used in the wireframe and
+         hidden-line modes.
+
+         The outline color can be any color from 0 to 15.  Outline
+         color is used in the shaded outline mode.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D16
+         WORD 1: Sender's ap_id
+
+
+
+                                     - 25 -
+
+
+
+
+
+
+
+         WORD 2: 0
+         WORD 3: Wireframe color (1-15)
+         WORD 4: Outline color (0-15)
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3D96
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+                                View operations
+
+
+         SET ZOOM FACTOR ($3D20)
+
+         This function sets the camera zoom factor to any value from 0
+         to 999.  This value will be used by all subsequent camera
+         operations.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D20
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: New zoom factor (0-999)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DA0
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+
+
+
+                                     - 26 -
+
+
+
+
+
+
+
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         SET PERSPECTIVE FACTOR ($3D21)
+
+         This function sets the perspective factor to any value from 0
+         to 999.  This value is used for all subsequent camera
+         operations.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D21
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: New perspactive factor (0-999)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DA1
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         SET CAMERA 1 (NORMAL CAMERA) ($3D22)
+
+         This function sets the normal CAD-3D camera's viewing angles
+         (horizontal angle, vertical angle, and bank angle).  These
+         values are used for all subsequent camera operations.  All
+         angles are specified in degrees, and range from -180 to 180.
+         In stereo mode with camera 1, the stereo focus point depends
+         on the setting of the STEREO EFFECT control.
+
+         This function returns a standard success/failure reply.  If
+         successful, CAD-3D sets its internal camera type to 1, and
+         subsequent super view or record operations from the
+         communication pipe will use camera 1.
+
+
+
+
+
+                                     - 27 -
+
+
+
+
+
+
+
+         Request:
+
+         WORD 0: $3D22
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Horizontal angle (-180 to 180)
+         WORD 4: Vertical angle (-180 to 180)
+         WORD 5: Bank angle (-180 to 180)
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DA2
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         SET CAMERA 2 (POSITION/LOOKED AT) ($3D23)
+
+         This function sets camera 2.  Camera 2 is a special camera
+         which allows the camera to be placed anywhere in the 3D
+         universe, with the camera looking at any point in the
+         universe, as well.  This is a very flexible camera system
+         allowing the camera to "fly through" the 3D universe,
+         changing the viewpoint dynamically.  The normal CAD-3D camera
+         only allows you to watch the center of the universe.
+
+         To set camera 2, you must set up a data structure which
+         supplies the following information.
+
+         Camera's location (X,Y,Z) -- These values are the fixed-point
+         integer representation of the camera's X, Y and Z
+         coordinates.  They use the same format as the coordinate data
+         in the object load/unload operations described earlier, but
+         can range from -150.00 to 150.00, which is -15000 to 15000 in
+         the fixed-point integer representation.  The objects in the
+         3D universe are positioned from -45.00 to 45.00 (-4500 to
+         4500), so as you can see, the camera can move almost
+         anywhere.
+
+         Point looked at (X,Y,Z) -- These coordinates tell the system
+         where the camera is looking.  For example, the normal CAD-3D
+         camera (Camera 1, or the one used in the mouse-controlled
+         user interface) is always looking at the coordinates 0,0,0,
+         the center of the universe.  These values, like the camera
+         location, range from -150.00 to 150.00, or -15000 to 15000 in
+
+
+
+                                     - 28 -
+
+
+
+
+
+
+
+         the fixed-point representation.  DO NOT set the viewpoint to
+         the same position as the camera, or unpredictable results
+         will occur.  In stereo mode, the point looked at will be the
+         stereo focus.
+
+         Bank angle -- This is the angle which the camera is tilted.
+         It is specified in pseudo-degrees, from 0 to 4095.  This
+         corresponds to 0 to 360 degrees, and provides an extra
+         fineness of control, down to .08789 of a degree.
+
+         The camera settings are supplied to CAD-3D in a simple
+         structure:
+
+           struct cam2
+             {
+             int  camX;
+             int  camY;
+             int  camZ;
+             int  lookX;
+             int  lookY;
+             int  lookZ;
+             int  bank;
+             };
+
+         You simply provide a pointer to this structure in the
+         command.
+
+         This function returns a standard success/failure reply.  If
+         successful, CAD-3D will set its internal camera number to 2,
+         and subsequent camera operations from the communication pipe
+         will use camera 2.
+
+
+         Request:
+
+         WORD 0: $3D23
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to camera 2 parameter structure
+         WORD 4: Low word of pointer to camera 2 parameter structure
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DA3
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+
+
+
+                                     - 29 -
+
+
+
+
+
+
+
+         WORD 7: Unused
+
+
+
+         SET CAMERA 3 (POSITION,HEADING,PITCH,BANK,FOCUS DISTANCE)
+         ($3D24)
+
+         This function sets camera 3, a special camera which works
+         somewhat like an airplane.  You specify the camera's position
+         in space, as well as the heading (horizontal) angle, the
+         pitch (vertical) angle, the bank (tilt) angle, and the
+         distance to the stereo focus point.  The focus point has no
+         effect in non-stereo imaging.
+
+         The values have the following ranges:
+
+         Camera position (X,Y,Z) -- This is exactly like the camera
+         location specified for camera 2.  It ranges from -15000 to
+         15000 in each axis.
+
+         Camera heading -- This value is a pseudo-degree value,
+         ranging from 0 to 4095.  When zero, the camera is looking
+         toward the back of the scene from the front.  When 1024, the
+         camera is looking toward the right from the left.  When 2048,
+         the camera looks toward the front from the back.  When 3072,
+         the camera looks from the right to the left.
+
+         Camera pitch -- This value is a pseudo-degree value, ranging
+         from 0 to 4095.  When zero, the camera is looking toward the
+         back of the scene from the front.  When 1024, the camera is
+         looking toward the top from the bottom.  When 2048, the
+         camera looks toward the front from the back, inverted.  When
+         3072, the camera looks from the top to the bottom.
+
+         Camera bank -- This value is a pseudo-degree value, ranging
+         from 0 to 4095.  The camera tilts counterclockwise (causing
+         the view to seem to tilt clockwise) as the camera tilt angle
+         increases.
+
+         Focus distance -- The distance to the stereo focus point, in
+         a fixed-point representation.  Ranges from 100 to 15000 (1.00
+         to 150.00 units).  Only effective in stereo mode, has no
+         effect in non-stereo mode.
+
+         These values are supplied to CAD-3D in the following
+         structure:
+
+           struct cam3
+             {
+             int  camX;
+             int  camY;
+             int  camZ;
+             int  heading;
+             int  pitch;
+             int  bank;
+
+
+
+                                     - 30 -
+
+
+
+
+
+
+
+             int  focus;
+             };
+
+         A pointer to this structure is passed to CAD-3D.
+
+         This function returns a standard success/failure reply.  If
+         successful, CAD-3D sets its internal camera number to 3, and
+         uses this camera for all subsequent pipeline super view or
+         record operations.
+
+
+         Request:
+
+         WORD 0: $3D24
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to camera 3 parameter structure
+         WORD 4: Low word of pointer to camera 3 parameter structure
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DA4
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         SET VIEW MODE ($3D25)
+
+         This function sets the viewing mode of the super view camera.
+         It can be set to any of five modes, corresponding to the
+         selections in the super view settings dialog:
+
+             0: Wireframe
+             1: Hidden line
+             2: Solid shaded
+             3: Outlined shaded
+             4: Use camera window setting
+
+         This setting may not be changed if the system is currently
+         recording an animation in the sequential mode.  It may be
+         changed for special effects during Cybermate animations.
+
+         This function returns a standard success/failure reply.
+
+
+
+
+                                     - 31 -
+
+
+
+
+
+
+
+
+         Request:
+
+         WORD 0: $3D25
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: View mode
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DA5
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         SET DRAFT/FINAL MODE ($3D26)
+
+         This function sets the draft or final mode, depending on the
+         parameter.  This will set the draft/final buttons in the
+         super view settings dialog box.  The parameters are:
+
+             0: Draft mode
+             1: Final mode
+
+         This function returns a standard success/failure reply.  It
+         will not work if an animation recording is in progress.
+
+
+         Request:
+
+         WORD 0: $3D26
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Draft/final flag (0/1)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DA6
+
+
+
+                                     - 32 -
+
+
+
+
+
+
+
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         SET STEREO SEPARATION PERCENTAGE ($3D27)
+
+         This function sets the stereo separation percentage from 1 to
+         100 percent.  It works just like the slider in the super view
+         control dialog box.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D27
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Stereo separation percentage (1-100)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DA7
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         SET STEREO EFFECT ($3D28)
+
+         This function sets the stereo effect for camera #1.  It sets
+         the effect to either "go into" the screen, be centered on the
+         screen, or "come out of" the screen.  The valid settings for
+         this mode are:
+
+             0: In
+             1: Center
+
+
+
+                                     - 33 -
+
+
+
+
+
+
+
+             2: Out
+
+         The stereo effect flag is not used by cameras 2 or 3, which
+         instead use their stereo focus values to indicate the screen
+         position.
+
+         This function returns a standard success/failure reply.  It
+         will not work if the system is recording an animation.
+
+
+         Request:
+
+         WORD 0: $3D28
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Stereo effect flag (0,1 or 2)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DA8
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         SET STEREO SWITCH ($3D29)
+
+         This function turns the stereo mode on or off.  The settings
+         for the stereo switch are:
+
+             0: Stereo off
+             1: Stereo on
+
+         This function returns a standard success/failure reply.  It
+         will not work if an animation recording is in progress.
+
+
+         Request:
+
+         WORD 0: $3D29
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Stereo flag (0/1)
+         WORD 4: Unused
+
+
+
+                                     - 34 -
+
+
+
+
+
+
+
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DA9
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         ANTIALIAS SUPER VIEW ($3D2A)
+
+         This function will use Tom Hudson's ANTI.ACC desk accessory
+         to antialias the super view screen, or both view buffers if
+         the stereo mode is enabled.  If the antialiaser accessory is
+         not present, the function will not work.  This function only
+         antialiases the current super view buffer, it will not record
+         the image after antialiasing.  See the record operations for
+         antialiasing during recording.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D2A
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Unused
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DAA
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+                                     - 35 -
+
+
+
+
+
+
+
+
+
+
+         SET EDGE MODE ($3D2B)
+
+         This function sets the edges only/all edges flag.  The
+         possible settings are:
+
+             0: Draw edges only
+             1: Draw all lines in object
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D2B
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Edge flag (0/1)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DAB
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         MOVE CAMERA 1 ($3D2C)
+
+         This function moves camera 1 a specified number of degrees in
+         each axis.  This is an easy way to complete a simple
+         flyaround of an object, by adding a certain number of degrees
+         to the various settings.
+
+         The function requires three parameters:
+
+         Delta horizontal angle:  A value from -180 to 180, which is
+         added to the current horizontal angle.  The angle wraps
+         around in either direction (i.e. 179 degrees + 2 degrees
+         results in an angle of 1 degree.
+
+         Delta vertical angle:  A value from -180 to 180, which is
+
+
+
+                                     - 36 -
+
+
+
+
+
+
+
+         added to the current vertical angle.  The angle wraps around
+         in either direction.
+
+         Delta bank angle:  A value from -180 to 180, which is added
+         to the current bank angle.  The bank angle wraps around in
+         either direction.
+
+         In order to use this function, camera 1 must already be in
+         use.  If in doubt, use the "Set Camera 1" function before
+         this function executes.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D2C
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Delta horizontal angle (-180 to 180)
+         WORD 4: Delta vertical angle (-180 to 180)
+         WORD 5: Delta bank angle (-180 to 180)
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DAC
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         MOVE CAMERA 2 ($3D2D)
+
+         This function changes the settings of camera #2 by the values
+         specified.  Seven delta values are required:  camera X,
+         camera Y, camera Z, looked-at X, looked-at Y, looked-at Z,
+         and bank.  The values are supplied as follows:
+
+         Delta camera X/Y/Z: Values all stored in the CAD-3D
+         fixed-point format (4.05 = 405, etc.).  Added to the current
+         camera location variables, moves the camera the specified
+         distance in the specified direction, if possible.  Absolute
+         maximum values are -30000 and 30000.
+
+         Delta looked-at X/Y/Z: Also stored in the CAD-3D fixed-point
+         format.  Moves the point the camera is looking at the
+
+
+
+                                     - 37 -
+
+
+
+
+
+
+
+         specified distance in the specified direction, if possible.
+         Absolute maximum values are -30000 and 30000.
+
+         Delta bank angle: Ranges from -4095 to 4095 (corresponding to
+         -359 to 359 degrees).  This is added to the current bank
+         angle, and the bank angle value itself wraps around at either
+         end.
+
+         The delta values are supplied to CAD-3D in a structure which
+         is defined as follows:
+
+           struct c2_delta
+             {
+             int  d_camX;
+             int  d_camY;
+             int  d_camZ;
+             int  d_lookX;
+             int  d_lookY;
+             int  d_lookZ;
+             int  d_bank;
+             };
+
+         This function returns a standard success/failure reply.  If
+         the operation is not successful, none of the camera settings
+         will be changed.  A failure on this operation usually
+         indicates an error in a parameter value or a parameter which
+         makes the camera position exceed its limits.
+
+
+         Request:
+
+         WORD 0: $3D2D
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to camera delta structure
+         WORD 4: Low word of pointer to camera delta structure
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DAD
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+
+
+
+                                     - 38 -
+
+
+
+
+
+
+
+         MOVE CAMERA 3 ($3D2E)
+
+         This function changes the settings of camera #3 by the values
+         specified.  Seven delta values are required:  camera X,
+         camera Y, camera Z, heading, pitch, bank and stereo focus
+         distance.  The values range as follows:
+
+         Delta camera X/Y/Z: Values all stored in the CAD-3D
+         fixed-point format (4.05 = 405, etc.).  Added to the current
+         camera location variables, moves the camera the specified
+         distance in the specified direction, if possible.  Absolute
+         maximum values are -30000 and 30000.
+
+         Delta heading, pitch, bank:  Ranges from -4095 to 4095
+         (corresponding to -359 to 359 degrees).  These three values
+         are added to the current corresponding angles, and the values
+         themselves wrap around at either end of the range.
+
+         Delta stereo focus:  Uses the standard CAD-3D fixed-point
+         format.  This value is added to the focus distance.  Its
+         practical limit is -14900 to 14900 units.  Care must be taken
+         to insure that this value is always a positive value from 100
+         to 15000.
+
+         The delta values are supplied to CAD-3D in a structure which
+         is defined as follows:
+
+           struct c3_delta
+             {
+             int  d_camX;
+             int  d_camY;
+             int  d_camZ;
+             int  d_heading;
+             int  d_pitch;
+             int  d_bank;
+             int  d_focus;
+             };
+
+         This function returns a standard success/failure reply.  If
+         the operation is not successful, none of the camera settings
+         will be changed.  A failure on this operation usually
+         indicates a bad parameter or a parameter which would force
+         the camera settings out of the allowable range.
+
+
+         Request:
+
+         WORD 0: $3D2D
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to camera delta structure
+         WORD 4: Low word of pointer to camera delta structure
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+                                     - 39 -
+
+
+
+
+
+
+
+
+
+         Reply:
+
+         WORD 0: $3DAD
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         CHANGE ZOOM & PERSPECTIVE ($3D2F)
+
+         This function allows you to change the zoom or perspective
+         values from their current settings by adding a delta value to
+         them.  This is useful in an animation system, where a gradual
+         camera zoom is required.  If the delta value places either
+         zoom or percpective out of range, neither will be changed.
+
+         The function accepts two parameters:
+
+         Delta zoom:  A value from -999 to 999 which is added to the
+         current zoom factor value.
+
+         Delta perspective:  A value from -999 to 999 that is added to
+         the current perspective factor value.
+
+         This function returns a slightly-modified version of the
+         standard success/failure reply.  If the operation was
+         successful, in addition to the success flag, CAD-3D will
+         return the new zoom and perspective settings in the reply
+         message.
+
+
+         Request:
+
+         WORD 0: $3D2F
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Delta zoom value (-999 to 999)
+         WORD 4: Delta perspective value (-999 to 999)
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DAF
+         WORD 1: CAD-3D's ap_id
+
+
+
+                                     - 40 -
+
+
+
+
+
+
+
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: New zoom value (if successful)
+         WORD 5: New perspective value (if successful)
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+                               Buffer operations
+
+
+         SET BACKGROUND SWITCHES ($3D30)
+
+         This function turns the super view background switch in the
+         super view control dialog on or off.  It will only work if a
+         background buffer was allocated at CAD-3D start-up time.  The
+         settings for this switch are:
+
+             0: Background off
+             1: Background on
+
+         In CAD-3D with version numbers of 2.01 or greater, a second
+         switch is supported, one which indicates the background
+         images to use for the background in stereo mode.  The switch
+         is ignored in version 2.0.  It is useful for a "flat"
+         background on a stereo image, which uses only the left
+         background bitmap.  Normal stereo backgrounds use both
+         background bnitmaps.  In normal CAD-3D 2.0 operation, this
+         switch is set automatically, transparent to the user.  The
+         settings for this switch are:
+
+             0: No change in switch
+             1: Use left background bitmap for left & right
+         background
+             2: Use left & right background bitmaps normally
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D30
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Background switch (0/1)
+         WORD 4: Stereo background flag (0-2)
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+
+
+
+                                     - 41 -
+
+
+
+
+
+
+
+         WORD 0: $3DB0
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         ERASE BACKGROUND BUFFER ($3D31)
+
+         This function will clear the CAD-3D background buffer.  If
+         two buffers are present for stereo use, both buffers will be
+         cleared.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D31
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Unused
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DB1
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         COPY SUPER VIEW TO BACKGROUND ($3D32)
+
+         This function copies the current super view buffer to the
+         background buffer.  If the stereo mode is enabled, both the
+         left- and right-eye views are copied.  This is a convenient
+         way to "stack" images during animations.  In CAD-3D with
+         version numbers of 2.01 or greater, the background stereo
+         switch is set according to the type of image copied to the
+
+
+
+                                     - 42 -
+
+
+
+
+
+
+
+         background.  If a stereo image is copied to the background,
+         both background bitmaps will be used in image generation.  If
+         a monoscopic image is copied to the background, only the left
+         background image is used in image generation.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D32
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Unused
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DB2
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         FIND BUFFER ADDRESSES ($3D33)
+
+         This function asks CAD-3D for the addresses of all of its
+         image/work buffers.  These include the super view left and
+         right eye, the background left and right eye, and the
+         cybermate left and right eye buffers.  CAD-3D 2.0 returns a
+         pointer to a structure as follows:
+
+           struct CAD_bufs
+             {
+             long buf_left;
+             long buf_right;
+             long buf_bL;
+             long buf_bR;
+             long buf_cL;
+             long buf_cR;
+             };
+
+         The left and right-eye super view buffers are aligned
+         properly for display use.  That is, you can point the system
+         display at them and generate a proper image.  The other
+
+
+
+                                     - 43 -
+
+
+
+
+
+
+
+         buffers are not guaranteed to be aligned properly, though
+         they will be aligned on word boundaries.  Use care when using
+         these buffers from your accessories.
+
+         This function returns a non-standard reply.
+
+
+         Request:
+
+         WORD 0: $3D33
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Unused
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DB3
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to buffer address structure
+         WORD 4: Low word of pointer to buffer address structure
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+                              Recorder operations
+
+
+         START RECORDING ($3D40)
+
+         This function commands CAD-3D to start a recording.  This
+         works just like clicking on the film-strip icon on the CAD-3D
+         work screen, but there are no prompts for a filename or file
+         type.  This information is passed through the communication
+         pipe.
+
+         There are three parameters necessary to have CAD-3D start an
+         animation.  They are:
+
+         File path:  The drive and folder where the animation data
+         will be placed.  This must contain a drive and a terminating
+         backslash (\) to work properly.  For example, to record a
+         file on drive A:, use a path string of "A:\".  For a
+         recording to a folder ANIMATE within a folder called CAD3D on
+         drive F:, you would use a path string of
+         "F:\CAD3D\ANIMATE\".
+
+         File name:  The name of the animation file (no extender).
+
+
+
+                                     - 44 -
+
+
+
+
+
+
+
+         This is a string from one to eight characters in length.
+         CAD-3D automatically adds the proper extenders to the
+         filename at recording time.
+
+         Recording type:  The type of recording being made.  The valid
+         types are:
+
+             0: Sequential Image
+             1: Cybermate non-stereo
+             2: Cybermate stereo
+
+         Note that, for Cybermate recordings to be made, the CYBSMASH
+         accessory must be present, and the proper number of Cybermate
+         buffers must have been created at CAD-3D start-up time (1 for
+         non-stereo, 2 for stereo).
+
+         The strings are passed to CAD-3D as pointers in the request
+         message, the recording type is a simple integer parameter in
+         the request.
+
+         The reply to this message is non-standard.  CAD-3D will
+         return a LONG value in the reply which tells how much free
+         space is present on the disk where the recording is being
+         made.  If the value returned is a LONG zero, there was an
+         error in creating the file, and the operation failed.
+
+
+         Request:
+
+         WORD 0: $3D40
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to null-terminated file path
+         string
+         WORD 4: Low word of pointer to null-terminated file path
+         string
+         WORD 5: High word of pointer to null-terminated file name
+         string
+         WORD 6: Low word of pointer to null-terminated file name
+         string
+         WORD 7: Animation file type (0-2)
+
+
+         Reply:
+
+         WORD 0: $3DC0
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: High word of LONG value containing disk free space (0
+         if error)
+         WORD 4: Low word of LONG value containing disk free space (0
+         if error)
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+                                     - 45 -
+
+
+
+
+
+
+
+
+
+
+         RECORD ANIMATION FRAME ($3D41)
+
+         This function commands CAD-3D to record a frame of animation
+         onto the disk.  The animation file must already be started
+         with the above command.  If everything is ready, CAD-3D will
+         generate a super view image, antialias it if requested (and
+         the ANTI.ACC accessory is present), and record it to the disk
+         using the CYBSMASH recording accessory).
+
+         The only parameter in this function is the antialias flag,
+         which has these possible values:
+
+             0: No antialias (normal record)
+             1: Antialias image if ANTI.ACC accessory is present
+
+         This function returns a non-standard reply.  It will return a
+         LONG value containing the amount of free space on the
+         animation disk drive, or a LONG zero value if an error
+         occurred.  Note: if an error occurs, CAD-3D will
+         automatically close the animation file for you.
+
+
+         Request:
+
+         WORD 0: $3D41
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Antialias request flag (0/1)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DC1
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: High word of LONG value containing free space on
+         disk
+         WORD 4: Low word of LONG value containing free space on disk
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         STOP RECORDING ($3D42)
+
+         This function closes the animation file.  No parameters are
+         necessary.
+
+
+
+                                     - 46 -
+
+
+
+
+
+
+
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D42
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Unused
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DC2
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+                         Miscellaneous view operations
+
+
+         GENERATE SUPER VIEW, NO RECORD ($3D48)
+
+         This function generates a super view image, but does not
+         switch the image to it as is done on the main CAD-3D user
+         interface.  The image is simply drawn off-screen in the super
+         view buffer.
+
+         IMPORTANT NOTE: Be sure to hide the mouse form with the
+         v_hide_c() function BEFORE calling this function.  CAD-3D 2.0
+         does not perform this operation for you, and it is necessary
+         for proper image generation.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D48
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Unused
+         WORD 4: Unused
+
+
+
+                                     - 47 -
+
+
+
+
+
+
+
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DC8
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         RETURN MISCELLANEOUS CAMERA SETTINGS ($3D49)
+
+         This function returns the current settings of the super view
+         camera.  It does not require any parameters, and returns a
+         non-standard reply which contains the settings of the super
+         view camera.  These parameters are as follows:
+
+         Super view mode flag:  A value from 0 to 4, indicating the
+         mode in use by the super view camera.  These values can be
+         found under the "Set view mode" command, $3D25.
+
+         Draft/final mode flag:  The current drawing mode, either
+         draft (0) or final (1).  See "Set draft/final mode", $3D26,
+         for information on setting this value.
+
+         Stereo/mono mode flag:  The imaging mode currently in effect,
+         either mono (0) or stereo (1).  See "Set stereo switch",
+         $3D29, for information on setting this value.
+
+         Stero effect flag:  The current stereo effect, either "In"
+         (0), "Center" (1) or "Out" (2).  See "Set stereo effect",
+         $3D28, for information on setting this value.
+
+         Stereo separation percentage:  The current stereo separation
+         percentage, from 1 to 100.  See "Set stereo separation
+         percentage", $3D27, for information on setting this value.
+
+         This function always executes, there is no error flag
+         returned.
+
+
+         Request:
+
+         WORD 0: $3D49
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+
+
+
+                                     - 48 -
+
+
+
+
+
+
+
+         WORD 3: Unused
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DC9
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Super view mode (0-4)
+         WORD 4: Draft/final mode (0/1)
+         WORD 5: Stereo switch (0/1)
+         WORD 6: Stereo effect flag (0-2)
+         WORD 7: Stereo separation percentage (1-100)
+
+
+
+                               Group operations
+
+
+         SELECT GROUP ($3D50)
+
+         This function selects one of the four object groups in
+         CAD-3D.  In the normal user interface, these groups are
+         called A, B, C and D.  In the pipeline, they are numbered
+         0-3.  The numbers correspond to the following groups:
+
+             0: Group A
+             1: Group B
+             2: Group C
+             3: Group D
+
+         When you select a particular group, only the objects in that
+         group will be affected by subsequent group operations.
+
+         This function returns a standard success/reply message.
+
+
+         Request:
+
+         WORD 0: $3D50
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Group number to select (0-3)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+
+
+
+                                     - 49 -
+
+
+
+
+
+
+
+         WORD 0: $3DD0
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         HOME GROUP ($3D51)
+
+         This function returns the currently selected group to the
+         "home" position at the center of the universe.  No parameters
+         are required.  This function always succeeds, there is no
+         failure condition in the reply.
+
+
+         Request:
+
+         WORD 0: $3D51
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Unused
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DD1
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Always 1
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         SCALE GROUP ($3D52)
+
+         This function scales the currently selected group of objects
+         in all three axes by the specified percentage.  The
+         percentage value ranges from 50 to 200.
+
+         This function returns a standard success/failure reply.
+         Failures can be caused by an improper percentage or a large
+         percentage which would place the object(s) outside the 3D
+         universe.
+
+
+
+                                     - 50 -
+
+
+
+
+
+
+
+
+
+         Request:
+
+         WORD 0: $3D52
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Scale percentage (50-200)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DD2
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         DEFINE ROTATIONAL CENTER ($3D53)
+
+         This function allows you to select the type of
+         rotational/scaling center you would like to use.  The types
+         of centers are:
+
+             0: Universe (center of universe -- default)
+             1: Group (center of group)
+             2: Arbitrary (Set with the arbitrary center command)
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D53
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: New rotational center flag (0-2)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+
+
+
+                                     - 51 -
+
+
+
+
+
+
+
+         WORD 0: $3DD3
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         SET ARBITRARY CENTER ($3D54)
+
+         This function sets the arbitrary rotation/scaling center to
+         any point in the 3D universe.  It uses three parameters:  The
+         X center, Y center and Z center coordinates, all specified in
+         the standard CAD-3D fixed-point format.  All the coordinate
+         values must be in the range -4500 to 4500 (-45.00 to 45.00).
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D54
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Arbitrary center X coordinate (-4500 to 4500)
+         WORD 4: Arbitrary center Y coordinate (-4500 to 4500)
+         WORD 5: Arbitrary center Z coordinate (-4500 to 4500)
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DD4
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         ROTATE GROUP ($3D55)
+
+         This function rotates the current group of objects around the
+         currently selected center point (Universe, Group or
+         Arbitrary).  All angles in the rotation are specified in
+         degrees, from -180 to 180.  Three parameters are used as
+
+
+
+                                     - 52 -
+
+
+
+
+
+
+
+         input, each specifying rotation around one of the three axes.
+         Note that the first axis is the Z axis (rotating as viewed
+         from the top), the second is the X axis (rotating as viewed
+         from the right side) and the third is the Y axis (rotating as
+         viewed from the front).  These correspond to the three
+         default auxiliary window settings (TOP/RIGHT/FRONT), to make
+         the rotation axes easier to remember.  The rotations are
+         exactly like those caused by the ROTATE icon on the control
+         panel, with its pie-chart dialog.
+
+         This function returns a standard success/failure reply.  Most
+         failures occur when an object is rotated out of the boundary
+         of the 3D universe.
+
+
+         Request:
+
+         WORD 0: $3D55
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Z axis rotation angle (-180 to 180) -- TOP VIEW
+         WORD 4: X axis rotation angle (-180 to 180) -- RIGHT VIEW
+         WORD 5: Y axis rotation angle (-180 to 180) -- FRONT VIEW
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DD5
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         AXIS SCALE ($3D56)
+
+         This function allows the group of objects to be scaled
+         independently in all three axes.  Three percentages must be
+         supplied, an X scale factor, a Y scale factor and a Z scale
+         factor.  All scale factors range from 50 to 200 percent, and
+         scale their related axis by that percentage.
+
+         This function returns a standard success/failure reply.  Most
+         failures in this function are caused when an object is scaled
+         too large for the universe.
+
+
+         Request:
+
+
+
+                                     - 53 -
+
+
+
+
+
+
+
+
+         WORD 0: $3D56
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: X axis scale percentage (50-200)
+         WORD 4: Y axis scale percentage (50-200)
+         WORD 5: Z axis scale percentage (50-200)
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DD6
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         TRANSLATE GROUP ($3D57)
+
+         This function translates (moves) a group of objects the
+         specified number of units in each axis.  This is the
+         communication pipeline equivalent to an object group drag
+         with the mouse.  Each axis has its own translation delta
+         value, which is specified in the CAD-3D fixed-point format
+         and can range from -9000 to 9000 (-90.00 to 90.00).  The
+         delta values supplied are added to the X, Y and Z coordinates
+         of each vertex in the object group.
+
+         This function returns a standard success/failure reply.  Most
+         failures are caused by attempting to move an object outside
+         the 3D universe.
+
+
+         Request:
+
+         WORD 0: $3D57
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: X axis delta value (-9000 to 9000)
+         WORD 4: Y axis delta value (-9000 to 9000)
+         WORD 5: Z axis delta value (-9000 to 9000)
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+
+
+
+                                     - 54 -
+
+
+
+
+
+
+
+         WORD 0: $3DD7
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         SELECT/DESELECT OBJECT IN GROUP ($3D58)
+
+         This function selects or deselects an object in the
+         currently-selected group.  The select flag is set as
+         follows:
+
+             0: Deselect object
+             1: Select object
+
+         The object number being selected must range from 0 to 39, and
+         cannot be larger than the number of objects in CAD-3D's
+         workspace.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D58
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Object number (0-39)
+         WORD 4: Select flag (0/1)
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DD8
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         CLEAR GROUP ($3D59)
+
+
+
+                                     - 55 -
+
+
+
+
+
+
+
+
+         This function deselects all the objects in the currently
+         selected group.  Since it always executes properly, it always
+         returns a success status.
+
+
+         Request:
+
+         WORD 0: $3D59
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Unused
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DD9
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Always 1
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         SELECT ALL OBJECTS ($3D5A)
+
+         This function selects all the objects in memory for the
+         currently selected group.  It cannot fail, and always returns
+         a success status in the reply.
+
+
+         Request:
+
+         WORD 0: $3D5A
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Unused
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DDA
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+
+
+
+                                     - 56 -
+
+
+
+
+
+
+
+         WORD 3: Always 1
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+                             Light source controls
+
+
+         DIRECT LIGHT SOURCE ON/OFF ($3D60)
+
+         This function controls whether or not the direct light
+         sources are turned on or off.  It uses two parameters as
+         input, the light source number and the light switch flag.
+         These have the following values:
+
+         Light source number:
+
+             0: Source A
+             1: Source B
+             2: Source C
+
+         Light switch:
+
+             0: Off
+             1: On
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D60
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Light source number (0-2)
+         WORD 4: Light switch (0/1)
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DE0
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+                                     - 57 -
+
+
+
+
+
+
+
+
+
+
+         DEFINE LIGHT SOURCE ($3D61)
+
+         This function allows you to define the placement and
+         brightness of all light sources, both ambient and direct.
+         Note that the ambient light source has no real "position",
+         and the position values are ignored for it.  There are five
+         parameters for this function, all defined below:
+
+         Light source number:
+
+             0: Direct light source A
+             1: Direct light source B
+             2: Direct light source C
+             3: Ambient light source
+
+         Light source Brightness:
+
+             0: Completely dark
+             1: Dim
+             2: Medium-dim
+             3: Low-average
+             4: Average
+             5: Moderately bright
+             6: Fairly bright
+             7: Very bright
+
+         Light source position (X,Y,Z, ignored for ambient):  An
+         integer value from -50 to 50, with values from -45 to 45
+         placed inside the 3D universe.  Any values greater than 45 or
+         less than -45 are placed at a great distance in that
+         direction to give uniform lighting to the entire scene.  See
+         the CAD-3D manual appendix for information on light source
+         placement & uniform lighting.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D61
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Light source number (0-3)
+         WORD 4: Light source brightness (0-7)
+         WORD 5: Light source X position (-50 to 50)
+         WORD 6: Light source Y position (-50 to 50)
+         WORD 7: Light source Z position (-50 to 50)
+
+
+         Reply:
+
+         WORD 0: $3DE1
+
+
+
+                                     - 58 -
+
+
+
+
+
+
+
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+                                Tool functions
+
+
+         LOAD SPIN TEMPLATE ($3D70)
+
+         This function loads a spin tool template from an array in the
+         accessory's memory.  This template will show up in the spin
+         tool window.
+
+         A spin template is a simple structure made up of up to 99
+         points, provided in X and Y coordinates.  The X coordinates
+         can range from 0 to 300; the Y coordinates from -150 to 150.
+         Also provided with the template is the number of segments the
+         spin tool is to create (1-48), as well as a flag telling
+         whether or not the first point in the template connects to
+         the last (0=no connect, 1=connect).
+
+         The template data is provided in a structure as follows:
+
+           struct tmplt
+             {
+             int  tm_pts;
+             int  tm_segs;
+             int  tm_conn;
+             int  *tm_x;
+             int  *tm_y;
+             }
+
+         The tm_pts variable tells how many points there are in the
+         template.  It can range from 1 to 99.
+
+         The tm_segs variable tells how many segments the spin tool is
+         to create when it builds the spun object.  It can range from
+         1 to 48.
+
+         The tm_conn variable is the flag which tells the spin tool
+         whether or not the first point in the template connects to
+         the last point.  It can be 0 (no connection) or 1 (connect).
+
+         The tm_x variable is a pointer to an integer array which
+         contains the X coordinates of all the points in the template.
+         tm_x[0] contains the X coordinate of the first point in the
+         template, tm_x[tm_pts-1] contains the last X coordinate.  The
+         coordinates can range from 0 (the center of the spin axis) to
+
+
+
+                                     - 59 -
+
+
+
+
+
+
+
+         300 (the farthest right point in the spin tool window).
+
+         The tm_y variable is a pointer to an integer array which
+         contains the Y coordinates of all the points in the template.
+         tm_y[0] contains the Y coordinate of the first point in the
+         template, tm_y[tm_pts-1] contains the last Y coordinate.  The
+         coordinates can range from -150 (the top of the spin tool
+         window) to 150 (the bottom of the spin tool window).
+
+         To load the spin template, a pointer to the template
+         parameter structure is passed to CAD-3D.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D70
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to template structure
+         WORD 4: Low word of pointer to template structure
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DF0
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         UNLOAD SPIN TEMPLATE ($3D71)
+
+         This function performs the reverse of the "Load spin
+         template" function.  Instead of giving CAD-3D the template
+         values, you pass the address of the template structure to
+         CAD-3D, and CAD-3D will load the structure and the X and Y
+         arrays with the current template data.  You provide a pointer
+         to a structure defined as follows:
+
+           struct tmplt
+             {
+             int  tm_pts;
+             int  tm_segs;
+             int  tm_conn;
+
+
+
+                                     - 60 -
+
+
+
+
+
+
+
+             int  *tm_x;
+             int  *tm_y;
+             }
+
+         The only things needed in the template structure before
+         sending the message to CAD-3D are the pointers to the X and Y
+         point arrays, each of which are integer arrays 99 entries in
+         length.  When CAD-3D is called, it will set the following
+         variables:
+
+         The tm_pts variable will be set to the number of points in
+         the template, from 1 to 99.
+
+         The tm_segs variable will be set to the number of segments in
+         the template, a value from 1 to 48.
+
+         The tm_conn variable will be set to 0 if the first and last
+         points in the template are not connected, and set to 1 if
+         they are.
+
+         The tm_x array will be filled with the number of X
+         coordinates specified in the tm_pts variable.  These values
+         will range from 0 (the spin axis center) to 300 (the
+         rightmost point in the spin template window).
+
+         The tm_y array will be filled with the number of Y
+         coordinates specified in the tm_pts variable.  These values
+         will range from -150 (the top of the spin template window) to
+         150 (the bottom of the spin template window).
+
+         This function uses the address of the template structure as
+         an input parameter, and returns a standard success/failure
+         reply.
+
+
+         Request:
+
+         WORD 0: $3D71
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to template structure
+         WORD 4: Low word of pointer to template structure
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DF1
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+
+
+
+                                     - 61 -
+
+
+
+
+
+
+
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         LOAD EXTRUDE TEMPLATE ($3D72)
+
+         This function loads an extrude tool template from an array in
+         the accessory's memory.  This template will show up in the
+         extrude tool window.
+
+         An extrude template is a simple structure made up of up to 99
+         points, provided in X and Y coordinates.  The X coordinates
+         can range from -300 to 300; the Y coordinates from -150 to
+         150.  Also provided with the template is the number of
+         segments the extrude tool is to create (1-50).
+
+         The extrude template data is provided in the same structure
+         as the spin template:
+
+           struct tmplt
+             {
+             int  tm_pts;
+             int  tm_segs;
+             int  tm_conn;
+             int  *tm_x;
+             int  *tm_y;
+             }
+
+         The tm_pts variable tells how many points there are in the
+         template.  It can range from 1 to 99.
+
+         The tm_segs variable tells how many segments the extrude tool
+         is to create when it builds the extruded object.  It can
+         range from 1 to 50.
+
+         The tm_conn variable is ignored for the extrude template,
+         which always connects the first point to the last.
+
+         The tm_x variable is a pointer to an integer array which
+         contains the X coordinates of all the points in the template.
+         tm_x[0] contains the X coordinate of the first point in the
+         template, tm_x[tm_pts-1] contains the last X coordinate.  The
+         coordinates can range from -300 (the farthest left point in
+         the extrude tool window) to 300 (the farthest right point in
+         the extrude tool window).
+
+         The tm_y variable is a pointer to an integer array which
+         contains the Y coordinates of all the points in the template.
+         tm_y[0] contains the Y coordinate of the first point in the
+         template, tm_y[tm_pts-1] contains the last Y coordinate.  The
+         coordinates can range from -150 (the top of the extrude tool
+         window) to 150 (the bottom of the extrude tool window).
+
+
+
+
+                                     - 62 -
+
+
+
+
+
+
+
+         To load the extrude template, a pointer to the template
+         parameter structure is passed to CAD-3D.
+
+         This function returns a standard success/failure reply.
+
+
+         Request:
+
+         WORD 0: $3D72
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to template structure
+         WORD 4: Low word of pointer to template structure
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DF2
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         UNLOAD EXTRUDE TEMPLATE ($3D73)
+
+         This function performs the reverse of the "Load extrude
+         template" function.  Instead of giving CAD-3D the template
+         values, you pass the address of the template structure to
+         CAD-3D, and CAD-3D will load the structure and the X and Y
+         arrays with the current template data.  You provide a pointer
+         to a structure defined as follows:
+
+           struct tmplt
+             {
+             int  tm_pts;
+             int  tm_segs;
+             int  tm_conn;
+             int  *tm_x;
+             int  *tm_y;
+             }
+
+         The only things needed in the template structure before
+         sending the message to CAD-3D are the pointers to the X and Y
+         point arrays, each of which are integer arrays 99 entries in
+         length.  When CAD-3D is called, it will set the following
+         variables:
+
+
+
+                                     - 63 -
+
+
+
+
+
+
+
+
+         The tm_pts variable will be set to the number of points in
+         the template, from 1 to 99.
+
+         The tm_segs variable will be set to the number of segments in
+         the template, a value from 1 to 50.
+
+         The tm_conn variable will be set to 1, indicating that the
+         extrude templates always have the first point connected to
+         the last.
+
+         The tm_x array will be filled with the number of X
+         coordinates specified in the tm_pts variable.  These values
+         will range from -300 (the leftmost point in the extrude
+         template window) to 300 (the rightmost point in the extrude
+         template window).
+
+         The tm_y array will be filled with the number of Y
+         coordinates specified in the tm_pts variable.  These values
+         will range from -150 (the top of the extrude template window)
+         to 150 (the bottom of the extrude template window).
+
+         This function uses the address of the template structure as
+         an input parameter, and returns a standard success/failure
+         reply.
+
+
+         Request:
+
+         WORD 0: $3D73
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to template structure
+         WORD 4: Low word of pointer to template structure
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DF3
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Success/failure flag (<0 indicates failure, >=0
+         indicates success)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         DO SPIN ($3D74)
+
+
+
+
+                                     - 64 -
+
+
+
+
+
+
+
+         This function creates a new spun object based on the
+         information in the spin template.  You can execute a full
+         360-degree spin, or a partial spin, if desired.
+
+         To do a spin operation, you must provide the following
+         information:
+
+         Starting angle/percentage:  The origin of the spin, in either
+         degrees (0-359) or percentage (0-99).
+
+         Ending angle/percentage:  The end of the spin, in either
+         degrees (1-360) or percentage (1-100).  This value must be
+         greater than the starting value.
+
+         Angle/percentage flag:  This is a flag telling CAD-3D which
+         of the two angular units to use, and is either 0 (degrees) or
+         1 (percentages).
+
+         Object name:  The name of the object, a string up to eight
+         characters in length with a terminating null character
+         ($00).
+
+         Object color:  The color of the object, a value from 1-15.
+
+         The name and color of the object are passed to CAD-3D in a
+         structure defined as follows:
+
+           struct nm_color
+             {
+             char nc_name[9];
+             int  nc_color;
+             };
+
+         The rest of the "Do Spin" parameters are passed in the
+         command message.
+
+         This function returns the object number if it was created
+         successfully, or a negative value if unsuccessful.
+
+
+         Request:
+
+         WORD 0: $3D74
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Starting angle/percentage, 0-359 (degrees) or 0-99
+         (percent)
+         WORD 4: Ending angle/percentage, 1-360 (degrees) or 1-100
+         (percent)
+         WORD 5: Angle/percentage flag (0=degrees, 1=percentage)
+         WORD 6: High word of pointer to name/color structure
+         WORD 7: Low word of pointer to name/color structure
+
+
+         Reply:
+
+
+
+                                     - 65 -
+
+
+
+
+
+
+
+
+         WORD 0: $3DF4
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Number of created object (0-39 if successful, <0 if
+         error)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         DO EXTRUDE ($3D75)
+
+         This function creates a new extruded object based on the
+         information in the extrude template.
+
+         To do an extrude operation, you must provide the following
+         information:
+
+         Object name:  The name of the object, a string up to eight
+         characters in length with a terminating null character
+         ($00).
+
+         Object color:  The color of the object, a value from 1-15.
+
+         The name and color of the object are passed to CAD-3D in a
+         structure defined as follows:
+
+           struct nm_color
+             {
+             char nc_name[9];
+             int  nc_color;
+             };
+
+         This function returns the object number if it was created
+         successfully, or a negative value if unsuccessful.
+
+
+         Request:
+
+         WORD 0: $3D75
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to name/color structure
+         WORD 4: Low word of pointer to name/color structure
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $3DF5
+
+
+
+                                     - 66 -
+
+
+
+
+
+
+
+         WORD 1: CAD-3D's ap_id
+         WORD 2: 0
+         WORD 3: Number of created object (0-39 if successful, <0 if
+         error)
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                     - 67 -
+
+
+
+
+
+
+
+             Section 3: Using the Cybermate compression accessory
+
+
+         As mentioned earlier, the CYBSMASH desk accessory is designed
+         to be used by a wide variety of applications which need to
+         record animated images in the Cybermate delta-compression
+         format.
+
+         A Cybermate animation delta file is composed of two or three
+         parts, depending on whether the animation is monoscopic or
+         stereo.
+
+         In a monoscopic animation, there are two files, an
+         uncompressed DEGAS-format .PIn file and a Cybermate .DLT
+         file.  The .PIn file contains the first frame of the
+         animation, and the .DLT file contains the remaining frames in
+         the animation, in a compressed format.
+
+         In a stereo animation, there are three files.  The first, a
+         file with an L_ prefix and a .PIn extender, is the first left
+         eye frame, stored in DEGAS uncompressed format.  The second
+         is another DEGAS .PIn file, but with a R_ prefix.  This is
+         the first right-eye frame.  The third file is a .DLT file
+         containing the remaining frames of the animation in an
+         interlaced, compressed format.
+
+         To record a Cybermate animation, an application must perform
+         the following sequence of operations.
+
+         When the user requests that an animation be started, the
+         application should ask the user for the filenames that the
+         animation will be stored under.  These filenames should be
+         the same, except for the L_ and R_ prefixed on stereo
+         animation starting frames.  For example, a monoscopic
+         animation would use files such as:
+
+                  CUBESPIN.PI1
+                  CUBESPIN.DLT
+
+         A stereo animation would use a six-character filename, with
+         the two-character prefix added to the front of the picture
+         filenames, like so:
+
+                  L_ANIMAT.PI1
+                  R_ANIMAT.PI1
+                  ANIMAT.DLT
+
+         These files are not used until the first frame is recorded.
+
+         When the first frame is recorded, the application should
+         actually create, write and close the first-frame picture
+         files, in the standard uncompressed DEGAS format.  At this
+         time, it should also create the .DLT file and initialize the
+         CYBSMASH accessory, passing it the drive identifier, the file
+         handle of the .DLT file, the address(es) of the 32000-byte
+
+
+
+                                     - 68 -
+
+
+
+
+
+
+
+         image bitmap buffer(s), and the address(es) of the 32000-byte
+         Cybermate work buffer(s).  In monoscopic animations, there is
+         only one image buffer and one Cybermate work buffer.  In
+         stereo animations, there are two of each.
+
+         On subsequent frames (2 through n), the application calls the
+         CYBSMASH accessory with the "record frame" command, which
+         causes the accessory to examine the frame, compress it, and
+         write the compressed data to the .DLT file.
+
+         When the animation recording is complete, the application
+         calls the CYBSMASH accessory with the "close file" command.
+         The accessory will write any remaining animation data to the
+         disk and close the file.
+
+         In all cases, CYBSMASH will return a status longword to the
+         calling application which gives the amount of free space left
+         on the disk.  If an error condition occurs, the longword will
+         be set to -1L.
+
+
+
+                           CYBSMASH command messages
+
+
+         INITIALIZE SMASHER ($CC00)
+
+         This function provides the Cybermate compression accessory
+         with the information necessary for the accessory to find the
+         image bitmaps in memory and compression work areas, as well
+         as the disk file where the animation data will be stored.
+
+         For this function to operate, the program must give the
+         accessory the following information:
+
+         Drive:  The disk drive where the Cybermate data will be
+         stored.  This is a number from 1 to 16, indicating drive A:
+         to P:.
+
+         File handle:  The handle of the Cybermate "delta" animation
+         file (.DLT), which must already be opened for writing by the
+         application.
+
+         Screen addresses:  The LONG addresses of the 32000-byte left-
+         and right-eye image buffers where the bitmaps to be
+         compressed are located.  The right-eye buffer address is set
+         to zero if the animation is not in stereo.
+
+         Buffer addresses:  The LONG addresses of the 32000-byte left-
+         and right-eye Cybermate work buffers.  Cybermate uses these
+         buffers for temporary storage of the previous frame, in order
+         to calculate the differences from one frame to the next.  The
+         right-eye buffer address is set to zero if the animation is
+         not in stereo.
+
+
+
+
+                                     - 69 -
+
+
+
+
+
+
+
+         This data is sent to the CYBSMASH accessory in a structure
+         defined as follows:
+
+           struct cybvars
+             {
+             int  drive;
+             int  handle;
+             long screenL;
+             long screenR;
+             long bufferL;
+             long bufferR;
+             };
+
+         CYBSMASH will return a message telling the amount of free
+         space on the specified drive.  If the returned value is less
+         than zero, an error has occurred, and the animation file
+         should be closed.
+
+
+         Request:
+
+         WORD 0: $CC00
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: High word of pointer to Cybermate data structure
+         WORD 4: Low word of pointer to Cybermate data structure
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $CC80
+         WORD 1: CYBSMASH's ap_id
+         WORD 2: 0
+         WORD 3: High word of LONG specifying remaining free space on
+         drive
+         WORD 4: Low word of LONG specifying remaining free space on
+         drive
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         SMASH & RECORD FRAME ($CC01)
+
+         This function asks the Cybermate compression accessory to
+         compress the current image in the screen buffer.  CYBSMASH
+         will compress the frame (both left- and right-eye views if
+         operating in stereo) and write it to the file specified in
+         the initialization command.
+
+         CYBSMASH will return a message telling the amount of free
+
+
+
+                                     - 70 -
+
+
+
+
+
+
+
+         space on the specified drive.  If the returned value is less
+         than zero, an error has occurred, and the animation file
+         should be closed.
+
+
+         Request:
+
+         WORD 0: $CC01
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Unused
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+         Reply:
+
+         WORD 0: $CC81
+         WORD 1: CYBSMASH's ap_id
+         WORD 2: 0
+         WORD 3: High word of LONG specifying remaining free space on
+         drive
+         WORD 4: Low word of LONG specifying remaining free space on
+         drive
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+         CLOSE ANIMATION FILE ($CC02)
+
+         This function asks the Cybermate compression accessory to
+         close the current animation file.  CYBSMASH will write all
+         remaining compressed data from its buffer and close the delta
+         animation file.
+
+         CYBSMASH will return a message telling the amount of free
+         space on the specified drive.  If the returned value is less
+         than zero, an error occurred in closing the file.
+
+
+         Request:
+
+         WORD 0: $CC02
+         WORD 1: Sender's ap_id
+         WORD 2: 0
+         WORD 3: Unused
+         WORD 4: Unused
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+
+                                     - 71 -
+
+
+
+
+
+
+
+
+         Reply:
+
+         WORD 0: $CC82
+         WORD 1: CYBSMASH's ap_id
+         WORD 2: 0
+         WORD 3: High word of LONG specifying remaining free space on
+         drive
+         WORD 4: Low word of LONG specifying remaining free space on
+         drive
+         WORD 5: Unused
+         WORD 6: Unused
+         WORD 7: Unused
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                     - 72 -
+
+
+
+
+
+
+
+                     Section 4:  Desk accessory guidelines
+
+         Writing a desk accessory for use with CAD-3D 2.0 is fairly
+         straightforward, if you follow a few simple rules.
+
+         Rule #1:  If you start up a desk accessory which opens a
+         window, process a dialog box, or uses the file selector
+         dialog, OPEN A WINDOW TO THE FULL SIZE OF THE SCREEN FIRST.
+         This is necessary because mouse clicks may "fall through" to
+         CAD-3D, causing various problems with the system's operation.
+         This is especially important to remember if your program uses
+         the GEM file selector.  Due to a bug in GEM, mouse clicks on
+         the file selector dialog when in a desk accessory pass
+         through to the primary application, which assumes the click
+         was indended for it.  The application will re-start and
+         process the button click, which can send CAD-3D off to one of
+         the tools, the Super View mode, or another place you don't
+         want it to go!
+
+         Even if your accessory is not using a window at all, but
+         merely displaying dialogs, use the safe approach and open a
+         window to the full size of the workscreen.  Just close and
+         delete the window after your accesory is done.  This has a
+         side-benefit of causing CAD-3D to redraw its entire
+         workscreen after the accessory terminates, insuring that the
+         user returns to a correctly redrawn screen.
+
+         Rule #2:  Don't cover the menu bar.  CAD-3D uses the upper
+         right corner of the menu bar to display the disk free space
+         during animations, so don't depend on it being available.
+         This should not usually be a problem, since the desktop size
+         for window use is calculated minus the menu bar.
+
+         Rule #3:  Never, never, NEVER rely on undocumented memory
+         addresses inside CAD-3D 2.0.  If you do, I personally
+         guarantee that your accessory will break at some point in the
+         future!  Undocumented memory locations will change from one
+         version to another, and if you rely on them to always be in
+         the same place, you'll be in for a rude shock at some point
+         in the future.  These locations can also vary depending on
+         memory size, accessories used, bootable software drivers
+         (such as GDOS), the phase of the moon... You get the idea.
+         Rely on the documented CAD-3D communication pipeline commands
+         only!  If there are commands you would like to see
+         implemented, let me know.  There is nothing preventing the
+         addition of more commands in the future if there is a need,
+         but for heaven's sake don't take the risk of writing an
+         accessory that won't work six months down the road!  'Nuff
+         said.
+
+         When CAD-3D is processing commands sent via the communication
+         pipe, it will automatically suppress changes to the screen.
+         For example, if you send a command which changes the line
+         mode to ALL LINES, the icon on the screen will not be
+         affected until CAD-3D receives a screen redraw message (when
+
+
+
+                                     - 73 -
+
+
+
+
+
+
+
+         the accessory terminates and closes its full-screen window).
+         This is so that you can start up accessories with entire new
+         screen displays without CAD-3D doing any changes to the
+         screen which disturb your display.  The only exception to
+         this rule is the upper-right corner of the menu bar, which
+         CAD-3D uses during animations to show the amount of free disk
+         space.
+
+         Due to a bug in the current implementation of GEM, the system
+         may tell the accessory CAD-3D 2.0 is running when it really
+         is not.  This happens when the accessory is invoked from the
+         desktop immediately after CAD-3D has terminated.  Apparently
+         the system thinks the last application is still in memory.
+         In order to check to see if CAD-3D is really there, use the
+         RAM STATUS command ($3D00) with a two-second timeout value.
+         If CAD-3D is actually running, your accessory will receive a
+         reply first; if not, the two-second timeout will expire.
+         This operation is vital -- if the accessory does not check to
+         see if CAD-3D is actually running, it may get stuck waiting
+         for a reply that it will never receive!  This isn't going to
+         happen often, but the code to test for the condition is not
+         that extensive and will save users from having to reboot the
+         system if they accidentally start a desk accessory from the
+         desktop after CAD-3D has terminated.
+
+         When changing certain things in CAD-3D, such as the fill
+         patterns used to draw the objects on the screen, it's a good
+         idea to restore them after your accessory has executed,
+         unless the user wants to keep them.  CAD-3D does not keep an
+         extra copy of the patterns, so once you change them you'll
+         have to reboot to get the old patterns back unless you save
+         them with the UNLOAD FILL PATTERNS command.
+
+         The CAD-3D image buffers, background buffers and Cybermate
+         work buffers are available for your use from an accessory,
+         but you should use care to insure that you're not destroying
+         data in these buffers.  If the user has image data stored in
+         the background or Super View buffers, it would be rude to
+         wipe it out.  Verify the operation with the user.  The same
+         goes for the Cybermate buffers -- if an animation is in
+         progress, you could destroy the recording session by altering
+         data in the buffers!  Also remember that the Cybermate and
+         background buffers are optional -- they may not be there at
+         all!  As a general rule of thumb, it's not a good idea to
+         rely on the background or Cybermate buffers for your
+         accessory's use -- set up your own data buffers, just to be
+         safe.  The two display buffers will always be there, but
+         there's a possibility that the user may want what's in them.
+         Be a courteous programmer and warn them before you blow away
+         their image!
+
+         If you need assistance with an accessory or have questions
+         about programming techniques, just drop a note to Tom Hudson
+         on Compuserve (76703,4224) in the ATARI16 or ATARIDEV forums
+         or via Easyplex electronic mail.  I can also be reached
+
+
+
+                                     - 74 -
+
+
+
+
+
+
+
+         (though less often) on Delphi (THUD), BIX (thudson) or GEnie
+         (T.HUDSON).  I'll do my best to get you rolling.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                     - 75 -
+
+
+
+
+
+
+
+                           Section 5:  File Formats
+
+
+         CAD-3D THREE-DIMENSIONAL OBJECT FILE
+
+         CAD-3D 2.0 stores its 3D objects in a file which can hold up
+         to 40 objects, and contains all the information about the
+         objects, including the lighting and color palette used by the
+         objects.
+
+         The file is similar to the older file format, but no longer
+         relies on the Motorola Fast Floating Point library (LIBF) for
+         the storage of vertex coordinates.  The new version stores
+         each coordinate in a two-byte word instead of a four-byte
+         floating-point value, saving a considerable amount of
+         storage, as well as making the file usable more easily by
+         programs written with different floating-point formats.
+
+         The CAD-3D 2.0 3D object file uses an extension of .3D2, and
+         is composed of two parts.  The first section is a 256-byte
+         header, which tells how many objects are included in the
+         file, the light settings and the color information.  The
+         second section of the file contains a repeating structure of
+         data which defines the 3D objects in the file.
+
+         The header is structured as follows:
+
+
+         WORD -- File ID -- $3D02
+
+         WORD -- Count of objects in file (1-40)
+
+         WORD -- Light source A on/off indicator (0=off, 1=on)
+         WORD -- Light source B on/off indicator (0=off, 1=on)
+         WORD -- Light source C on/off indicator (0=off, 1=on)
+
+         WORD -- Light source A brightness (0-7)
+         WORD -- Light source B brightness (0-7)
+         WORD -- Light source C brightness (0-7)
+         WORD -- Ambient light brightness (0-7)
+
+         WORD -- Light source A Z position (-50 through +50)
+         WORD -- Light source B Z position (-50 through +50)
+         WORD -- Light source C Z position (-50 through +50)
+
+         WORD -- Light source A Y position (-50 through +50)
+         WORD -- Light source B Y position (-50 through +50)
+         WORD -- Light source C Y position (-50 through +50)
+
+         WORD -- Light source A X position (-50 through +50)
+         WORD -- Light source B X position (-50 through +50)
+         WORD -- Light source C X position (-50 through +50)
+
+         32 WORDs -- Object color palette (BIOS format)
+         32 WORDs -- Color group base array
+
+
+
+                                     - 76 -
+
+
+
+
+
+
+
+
+         In order for the palette to be useful, it must be accompanied
+         by the color group base array.  This array indicates the
+         index of the first color in the group to which that color
+         belongs.  In the following example palette, which contains a
+         background color of black, followed by five reds, five greens
+         and five blues, you can see how the palette base array is
+         used to group the colors together.  The reds start at color
+         index 1, the greens at color index 6, and the blues at color
+         index 11.
+
+         INDEX    COLOR     BASE
+         -----    -----     ----
+            0      000        0
+            1      100        1
+            2      200        1
+            3      300        1
+            4      400        1
+            5      500        1
+            6      010        6
+            7      020        6
+            8      030        6
+            9      040        6
+           10      050        6
+           11      001       11
+           12      002       11
+           13      003       11
+           14      004       11
+           15      005       11
+
+         The base value is used when performing shading operations,
+         and if incorrectly set will result in odd-looking images.
+
+         WORD -- Color palette type (0=Seven-shade, 1=Fourteen shade,
+         2=Custom)
+
+         WORD -- Wireframe line color (1-15)
+
+         WORD -- Outline line color (0-15)
+
+         150 BYTEs -- Filler for future expansion
+
+
+         The object data is a variable-sized section which depends on
+         the complexity of the object.  The section repeats for each
+         object in the file, and is structured as follows:
+
+         9 BYTEs -- Object name (8 characters max) with null
+         terminator.
+
+         WORD -- Number of vertices in object (15000 maximum)
+
+         The following structure defines the X, Y and Z coordinates
+         for each vertex of the object.  It is made up of three words
+         and repeats the number of times specified by the vertex count
+
+
+
+                                     - 77 -
+
+
+
+
+
+
+
+         word above.
+
+         WORD -- X coordinate of vertex, stored in the standard CAD-3D
+         fixed-point format.  For example, an X coordinate of 23.69 is
+         stored as an integer value of 2369.  When reading this value,
+         simply convert it to a floating-point variable and divide by
+         100.
+
+         WORD -- Y coordinate of vertex, also in fixed-point format.
+         See above for description of format.
+
+         WORD -- Z coordinate of vertex, also in fixed-point format.
+         See above for description of the format.
+
+
+         After all the vertices' coordinates have been read in, the
+         next part of the file describes the triangular faces which
+         make up the object.
+
+         WORD -- Number of triangular faces in the object (30000
+         maximum)
+
+         The following structure tells the face structure of the
+         object.  It is made up of four words and is repeated once for
+         every face in the object, specified by the face count above.
+         Each face is triangular, and defined by three vertices, or
+         points, referred to as A, B and C.  When looking at the face
+         of the triangle facing outward, the A-B-C order of the
+         vertices is counterclockwise.  This allows for quick
+         calculation of whether or not a face is visible.  Each face,
+         in addition to having the three vertices of the triangle
+         defined, has a color and edge-flag word.  This word tells the
+         color of the face and whether or not the line of one of the
+         three edges (A-B, B-C, C-A) is to be drawn in edges-only
+         mode.
+
+         WORD -- Number of first vertex in the face, termed point A.
+         This value can range from zero to the number of vertices in
+         the object, and corresponds to the vertices read from the
+         file earlier.
+
+         WORD -- Number of second vertex in the face, termed point B.
+         This value can range from zero to the number of vertices in
+         the object, and corresponds to the vertices read from the
+         file earlier.
+
+         WORD -- Number of the third vertex in the face, termed point
+         C.  This value can range from zero to the number of vertices
+         in the object, and corresponds to the vertices read from the
+         file earlier.
+
+         WORD -- Color/edge flag indicator.  The low byte of this
+         value is a number from 1 to 15 and tells the color used for
+         that face when drawing.  This value is used by the object
+         shading routine to determine the color group within the
+
+
+
+                                     - 78 -
+
+
+
+
+
+
+
+         palette used by this face.  The upper byte is used to tell
+         the program which edges are to be shown by a line segment
+         when drawing in "edges only" mode.  The three low-order bits
+         in this byte are used as flags for this purpose; a zero in
+         the bit indicates that no line is to be drawn, a one in the
+         bit indicates that the edge is to be drawn.  The bit
+         assignments are:
+
+             Bit 2: Line segment A-B
+             Bit 1: Line segment B-C
+             Bit 0: Line segment C-A
+
+         The face data repeats until all faces have been defined.
+         This is the end of the file.
+
+
+
+         SPIN TEMPLATE FILE FORMAT
+
+         The CAD-3D spin tool template file is a convenient way to
+         store often-used templates for spun objects.  It is an ideal
+         way to send a simple spun object to another user of CAD-3D
+         2.0 (they cannot be used by CAD-3D 1.0), since the compact
+         template file is smaller than the resulting 3D object, making
+         transmission via telecommunications network an economical
+         option.
+
+         The template file contains all information necessary to
+         create a spun object except for the number of degrees or the
+         percentage for a partial spin.  The file contains the number
+         of points in the template, the number of segments, a flag
+         which tells whether or not the first point is connected to
+         the last, and the actual coordinate data for the template.
+
+         The format of the file is as follows:
+
+         WORD -- Number of points in the template, a number from 1 to
+         99.
+
+         WORD -- Number of segments in the spun object, a number from
+         1 to 48.  Note that segment values less than 3 may not
+         execute in partial or full spin operations.
+
+         WORD -- Connect flag.  0 indicates that the first point and
+         the last point are not connected, 1 indicates that they are
+         connected.  When a template is loaded, the "Connect"
+         selection in the drop-down menu will be set to the
+         appropriate setting.
+
+         The following section of the file is a table of the X
+         coordinates of all the points in the template.  There are n
+         WORDs in this table, where n is the number of points in the
+         template, specified in the first word of the file.
+
+         n WORDs -- The values of the X coordinates of the points in
+
+
+
+                                     - 79 -
+
+
+
+
+
+
+
+         the spin template.  These values range from 0 to 300.  A
+         value of zero indicates that the point lies on the spin
+         tool's central axis at the center of the spin tool window; a
+         value of 300 indicates that the point lies at the far right
+         of the window.
+
+         The following section of the file is a table of the Y
+         coordinates of all the points in the template.  There are n
+         WORDs in this table, where n is the number of points in the
+         template, specified in the first word of the file.
+
+         n WORDs -- The values of the Y coordinates of the points in
+         the spin template.  These values range from -150 to 150.  A
+         value of -150 indicates that the point lies at the top of the
+         spin tool window; a value of 150 indicates that the point
+         lies at the bottom of the window.
+
+
+
+         EXTRUDE TEMPLATE FILE FORMAT
+
+         The CAD-3D extrude tool template file is almost exactly the
+         same as the spin tool template file.
+
+         The template file contains all information necessary to
+         create an extruded object.  It contains the number of points
+         in the template, the number of segments, and the actual
+         coordinate data for the template.
+
+         The format of the file is as follows:
+
+         WORD -- Number of points in the template, a number from 1 to
+         99.
+
+         WORD -- Number of segments in the spun object, a number from
+         1 to 50.
+
+         The following section of the file is a table of the X
+         coordinates of all the points in the template.  There are n
+         WORDs in this table, where n is the number of points in the
+         template, specified in the first word of the file.
+
+         n WORDs -- The values of the X coordinates of the points in
+         the spin template.  These values range from -300 to 300.  A
+         value of -300 indicates that the point lies at the far left
+         of the extrude tool window; a value of 300 indicates that the
+         point lies at the far right of the window.
+
+         The following section of the file is a table of the Y
+         coordinates of all the points in the template.  There are n
+         WORDs in this table, where n is the number of points in the
+         template, specified in the first word of the file.
+
+         n WORDs -- The values of the Y coordinates of the points in
+         the extrude template.  These values range from -150 to 150.
+
+
+
+                                     - 80 -
+
+
+
+
+
+
+
+         A value of -150 indicates that the point lies at the top of
+         the extrude tool window; a value of 150 indicates that the
+         point lies at the bottom of the window.
+
+
+
+         CYBERMATE COMPRESSED DELTA FILE FORMAT
+
+         The Cybermate animation system uses a "delta" compression
+         technique for storage of animated sequences.  A delta
+         compression is a simple technique which compares a frame of
+         animation to the previous frame, storing only the changes (or
+         deltas) that occurred from one frame to the next.
+
+         In the current application of the delta compression
+         technique, the first frame of the animation sequence is
+         stored in a DEGAS-format picture file, and the remainder of
+         the animation sequence is stored as a series of delta values
+         in a .DLT file.
+
+         Each frame of the animation is recorded as a series of delta
+         values, each of which is stored as a WORD value from 0 to
+         31996 which indicate an offset into the 32000-byte display
+         bitmap memory, then a LONG value which must be EOR'ed at the
+         specified point in the display memory.  This changes the
+         previous frame's LONG value to the new frame's value.  The
+         EOR technique allows animations to be played in reverse as
+         well.
+
+         Each frame has a WORD which indicates the number of deltas
+         that are present for that frame.  When all those are
+         processed, a new frame delta count WORD is read and the
+         process is repeated.
+
+         The .DLT file has the following format:
+
+         WORD -- The number of deltas in this frame.  A zero in this
+         flag indicates the end of the file.  Frames with no deltas
+         (the same as the previous frame) are special cases and a
+         dummy delta offset and LONG EOR value of zero are provided in
+         the delta data which follows.
+
+         The following structure is repeated the number of times
+         specified in the delta count for this frame.
+
+         WORD -- Offset into 32000-byte screen RAM for the delta data.
+         This number is a multiple of 4 from 0 to 31996.  It should be
+         used as an offset from the start of screen RAM to EOR the
+         following LONG.
+
+         LONG -- Delta data.  This value is EOR'ed with the screen
+         data at [screenbase + offset] to change the previous frame's
+         data to the new frame's.
+
+         Once all deltas for a particular frame have been processed,
+
+
+
+                                     - 81 -
+
+
+
+
+
+
+
+         the program reads the number of deltas for the next frame,
+         and continues with this process until all frames have been
+         processed (delta count = 0).
+
+
+
+         DEGAS UNCOMPRESSED PICTURE FORMAT
+
+         DEGAS image files are used to store the first frame (both
+         left and right-eye views) in a Cybermate animation sequence.
+         This was done so that the first frame could be modified after
+         the animation was recorded, if desired.
+
+         This file format is extremely simple, and is defined as
+         follows:
+
+
+         WORD -- Resolution of image (0=Low rez color, 1=Medium rez
+         color, 2=Monochrome)
+
+         16 WORDS -- BIOS-format color palette.  Colors are stored as
+         RBG values.  The low nybble (bits 0-3) contains the blue
+         level (0-7), the next nybble (bits 4-7) contains the green
+         level (0-7), and the next nybble (bits 8-11) contains the red
+         color level (0-7).  The high-order nybble (bits 12-15) is not
+         used and should be set to zero.  The first word in the
+         palette is for color 0, the last word is color 15.
+
+         32000 bytes -- ST memory image bitmap.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                     - 82 -
+
+
+
+
+
+
+
+                       Section 6:  CAD-3D 2.0 Specifics
+
+
+         NON-STANDARD AXIS LABELING
+
+         CAD-3D uses a non-standard coordinate system, and it is
+         important to remember how this system is oriented when using
+         the communication pipe.
+
+         CAD-3D's coordinate system is oriented as follows:
+
+         The X axis, as viewed from the top of the universe (see the
+         TOP view window) runs from left to right.  The lowest X value
+         an object can have is -45.00 (the left side of the window),
+         and the highest value is 45.00 (the right side of the
+         window).
+
+         The Y axis, as viewed from the top of the universe (see the
+         TOP view window) runs from bottom to top.  The lowest Y value
+         an object can have is -45.00 (the bottom of the window), and
+         the highest value is 45.00 (the top of the window).  This is
+         considered non-standard by most people, as this axis is
+         usually considered the Z axis.
+
+         The Z axis, as viewed from the front of the universe (see the
+         FRONT window) runs from bottom to top.  The lowest Z value is
+         -45.00 (the bottom of the window), and the highest value is
+         45.00 (the top of the window).  This is also condsidered
+         non-standard, as this is axis is usually labeled as the Y
+         axis.
+
+         The reason the axis system is non-standard is due to the way
+         I learned 3D graphics, which was charting in geometry.  In
+         most examples, the X and Y axes were always a sheet of graph
+         paper on a desktop, and the Z values were "altitudes" above
+         or below the sheet.  The lack of formal education in this
+         area led to the 3D axes being "mis-labeled" from the
+         standpoint of most 3D users.
+
+         The non-standard orientation has been preserved in this
+         version in order to remain compatible with the previous
+         version of CAD-3D.  If this causes problems for you, just
+         exchange the Y and Z axes when working with them in CAD-3D.
+
+
+         OBJECT NAME CONVENTIONS
+
+         Because CAD-3D allows you to refer to objects by name, it is
+         very easy for most people to use.  When naming your objects,
+         please use meaningful names so that they can be easily
+         recognized.  Names such as WINGLET are much easier to
+         identify than names like XXX.  It's especially important to
+         name objects well if you'll be exchanging your files with
+         others.
+
+
+
+
+                                     - 83 -
+
+
+
+
+
+
+
+         Object names in CAD-3D can be up to eight characters in
+         length, and are case-sensitive.  This allows very flexible
+         naming of objects.  Be sure you are using the proper name
+         when using the communication pipe -- "ABC" is not the same as
+         "abc" or "ABc".  If you use the communication pipe for
+         manipulation of objects, you must be careful to use the
+         proper name or CAD-3D will not find the object.
+
+
+         "FIXED-POINT" MATH FORMAT
+
+         CAD-3D 2.0's communication pipe and file formats use an
+         integer format to store floating-point values.  This is done
+         to save disk space and make the program compatible with other
+         compilers which may use a different floating-point format.
+         The fixed-point format used is simply the integer equivalent
+         of the floating-point value multiplied by 100.  This results
+         in values with two digits to the right of the decimal (i.e.
+         1.567 becomes 1.56).  This precision is used because two
+         decimal places is the precision used in the boolean shape
+         operations in the JOIN function.  The Motorola Fast Floating
+         Point library is used in CAD-3D, and the 3D object vertex
+         coordinates had to be truncated to two decimal places in
+         order to avoid serious problems with the math results.
+
+         For this reason, you should keep your objects as large as
+         possible when executing JOIN operations -- it will prevent
+         extreme truncation.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                     - 84 -
+
+

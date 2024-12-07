@@ -1,0 +1,366 @@
+---- ExifTool ----
+ExifTool Version Number         : 11.30
+---- System ----
+File Name                       : Issue 212.jpg
+Directory                       : .
+File Size                       : 5.4 MB
+File Modification Date/Time     : 2019:07:26 02:35:29+02:00
+File Access Date/Time           : 2019:08:31 14:48:07+02:00
+File Inode Change Date/Time     : 2019:08:31 14:02:15+02:00
+File Permissions                : rw-r--r--
+---- File ----
+File Type                       : JPEG
+File Type Extension             : jpg
+MIME Type                       : image/jpeg
+Exif Byte Order                 : Little-endian (Intel, II)
+Current IPTC Digest             : 406eace5ab4609384cb92cbc4e6b7688
+Image Width                     : 3840
+Image Height                    : 2160
+Encoding Process                : Baseline DCT, Huffman coding
+Bits Per Sample                 : 8
+Color Components                : 3
+Y Cb Cr Sub Sampling            : YCbCr4:4:4 (1 1)
+---- IFD0 ----
+Image Description               : Nafissa im Hill Tribe Museum
+Make                            : PENTAX
+Camera Model Name               : PENTAX K-50
+Orientation                     : Horizontal (normal)
+X Resolution                    : 300
+Y Resolution                    : 300
+Resolution Unit                 : inches
+Software                        : Adobe Photoshop CS6 (Windows)
+Modify Date                     : 2015:11:19 09:44:05
+Artist                          : Walter Hangartner
+Copyright                       : Â©2015 Walter Hangartner, all rights reserved
+---- ExifIFD ----
+Exposure Time                   : 1/40
+F Number                        : 5.6
+Exposure Program                : Landscape
+ISO                             : 400
+Exif Version                    : 0221
+Date/Time Original              : 2015:10:07 07:45:07
+Create Date                     : 2015:10:07 07:45:07
+Shutter Speed Value             : 1/40
+Aperture Value                  : 5.6
+Exposure Compensation           : 0
+Metering Mode                   : Multi-segment
+Flash                           : Off, Did not fire
+Focal Length                    : 18.0 mm
+Color Space                     : sRGB
+Exif Image Width                : 3840
+Exif Image Height               : 2160
+Focal Plane X Resolution        : 2079.152893
+Focal Plane Y Resolution        : 2079.152893
+Focal Plane Resolution Unit     : cm
+Sensing Method                  : One-chip color area
+Custom Rendered                 : Normal
+Exposure Mode                   : Auto
+White Balance                   : Auto
+Focal Length In 35mm Format     : 27 mm
+Scene Capture Type              : Landscape
+Contrast                        : High
+Saturation                      : Normal
+Sharpness                       : Hard
+Subject Distance Range          : Distant
+Lens Info                       : 18-135mm f/3.5-5.6
+Lens Model                      : smc PENTAX-DA 18-135mm F3.5-5.6 ED AL[IF] DC WR
+---- IFD1 ----
+Compression                     : JPEG (old-style)
+X Resolution                    : 72
+Y Resolution                    : 72
+Resolution Unit                 : inches
+Thumbnail Offset                : 1006
+Thumbnail Length                : 9708
+Thumbnail Image                 : (Binary data 9708 bytes, use -b option to extract)
+---- IPTC ----
+Coded Character Set             : UTF8
+Application Record Version      : 0
+Caption-Abstract                : Nafissa im Hill Tribe Museum
+Writer-Editor                   : Walter Hangartner
+Headline                        : Nafissa im Hill Tribe Museum
+Special Instructions            : Digital Camera Pentax K-50 Ver. 1.02
+By-line                         : Walter Hangartner
+By-line Title                   : Freelance Photographer
+Credit                          : Walter Hangartner
+Source                          : Walter Hangartner
+Date Created                    : 2015:10:07
+Time Created                    : 07:45:07+00:00
+City                            : Chiangrai
+Sub-location                    : Hill Tribe Museum
+Province-State                  : Chiangrai
+Country-Primary Location Name   : Thailand
+Country-Primary Location Code   : TH
+Original Transmission Reference : Digital Camera Pentax K-50 Ver.
+Keywords                        : Nafissa
+Copyright Notice                : Â©2015 Walter Hangartner, all rights reserved
+---- Photoshop ----
+IPTC Digest                     : 406eace5ab4609384cb92cbc4e6b7688
+Print Info 2                    : ...printOutput.PstSbool.InteenumInteClrm.printSixteenBitbool.printerNameTEXT..printProofSetupObjc.Proof Setup.proofSetup.Bltnenum.builtinProof.proofCMYK
+Print Style                     : ...printOutputOptions.CptnboolClbrboolRgsMboolCrnCboolCntCboolLblsboolNgtvboolEmlDboolIntrboolBckgObjc.RGBC.Rd  doub@oàGrn doub@oàBl  doub@oàBrdTUntF#RltBld UntF#RltRsltUntF#Pxl@rÀ.vectorDatabool.PgPsenumPgPsPgPCLeftUntF#RltTop UntF#RltScl UntF#Prc@Y.cropWhenPrintingbool.cropRectBottomlong.cropRectLeftlong.cropRectRightlong.cropRectToplong
+X Resolution                    : 300
+Displayed Units X               : inches
+Y Resolution                    : 300
+Displayed Units Y               : inches
+Print Style                     : Centered
+Print Position                  : 0 0
+Print Scale                     : 1
+Global Angle                    : 30
+Global Altitude                 : 30
+Print Flags                     : 0 0 0 0 0 0 0 0 1
+Print Flags Info                : ..
+Color Halftoning Info           : /ff.lff../ff.¡™š..2.Z..5.-..
+Color Transfer Funcs            : ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ.èÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ.èÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ.èÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ.è
+Grid Guides Info                : ..@.@
+URL List                        : 
+Slices Group Name               : 2015_1007_074507AA
+Num Slices                      : 1
+Pixel Aspect Ratio              : 1
+IDs Base Value                  : 1
+Photoshop Thumbnail             : (Binary data 9708 bytes, use -b option to extract)
+Has Real Merged Data            : Yes
+Writer Name                     : Adobe Photoshop
+Reader Name                     : Adobe Photoshop CS6
+Photoshop Quality               : 12
+Photoshop Format                : Standard
+Progressive Scans               : 3 Scans
+---- XMP-x ----
+XMP Toolkit                     : Adobe XMP Core 5.3-c011 66.145661, 2012/02/06-14:56:27
+---- XMP-xmp ----
+Creator Tool                    : K-50 Ver. 1.02
+Modify Date                     : 2015:11:19 09:44:05+01:00
+Create Date                     : 2015:10:07 07:45:07
+Rating                          : 0
+Metadata Date                   : 2015:11:19 09:44:05+01:00
+---- XMP-aux ----
+Lens Info                       : 18-135mm f/3.5-5.6
+Lens                            : smc PENTAX-DA 18-135mm F3.5-5.6 ED AL[IF] DC WR
+Lens ID                         : 8 215
+Approximate Focus Distance      : 4
+Distortion Correction Already Applied: True
+Lateral Chromatic Aberration Correction Already Applied: True
+Vignette Correction Already Applied: True
+---- XMP-photoshop ----
+Date Created                    : 2015:10:07 07:45:07
+Authors Position                : Freelance Photographer
+Caption Writer                  : Walter Hangartner
+Country                         : Thailand
+Transmission Reference          : Digital Camera Pentax K-50 Ver. 1.02
+Instructions                    : Digital Camera Pentax K-50 Ver. 1.02
+Credit                          : Walter Hangartner
+Source                          : Walter Hangartner
+City                            : Chiangrai
+State                           : Chiangrai
+Headline                        : Nafissa im Hill Tribe Museum
+Color Mode                      : RGB
+ICC Profile Name                : sRGB IEC61966-2.1
+---- XMP-xmpMM ----
+Document ID                     : xmp.did:f9bae545-69ba-4f41-a899-6c9e93621876
+Original Document ID            : C8A3BC5C7BF55A1B8112634101F780F8
+Instance ID                     : xmp.iid:F0192D0E998EE5118C17926CD6631352
+History Action                  : saved, saved, derived, saved, saved, converted, derived, saved
+History Instance ID             : xmp.iid:49c8c39f-54db-964f-85b8-ff6b27ffc11a, xmp.iid:ef05558d-1f98-9842-967c-1a140ee28621, xmp.iid:f9bae545-69ba-4f41-a899-6c9e93621876, xmp.iid:EF192D0E998EE5118C17926CD6631352, xmp.iid:F0192D0E998EE5118C17926CD6631352
+History When                    : 2015:11:11 13:39:30+01:00, 2015:11:19 09:43:06+01:00, 2015:11:19 09:44:03+01:00, 2015:11:19 09:44:05+01:00, 2015:11:19 09:44:05+01:00
+History Software Agent          : Adobe Photoshop Camera Raw 9.1 (Windows), Adobe Photoshop Camera Raw 9.1 (Windows), Adobe Photoshop Camera Raw 9.1 (Windows), Adobe Photoshop CS6 (Windows), Adobe Photoshop CS6 (Windows)
+History Changed                 : /metadata, /metadata, /, /, /
+History Parameters              : converted from image/dng to image/tiff, from image/tiff to image/jpeg, converted from image/tiff to image/jpeg
+Derived From Instance ID        : xmp.iid:EF192D0E998EE5118C17926CD6631352
+Derived From Document ID        : xmp.did:f9bae545-69ba-4f41-a899-6c9e93621876
+Derived From Original Document ID: C8A3BC5C7BF55A1B8112634101F780F8
+---- XMP-dc ----
+Format                          : image/jpeg
+Rights                          : Â©2015 Walter Hangartner, all rights reserved
+Creator                         : Walter Hangartner
+Description                     : Nafissa im Hill Tribe Museum
+Subject                         : Nafissa
+---- XMP-exifEX ----
+Photographic Sensitivity        : 400
+Lens Model                      : smc PENTAX-DA 18-135mm F3.5-5.6 ED AL[IF] DC WR
+Lens Info                       : 18-135mm f/3.5-5.6
+---- XMP-iptcCore ----
+Country Code                    : TH
+Location                        : Hill Tribe Museum
+Creator Address                 : Walter Hangartner.Blumenfeldstrasse 37
+Creator City                    : ZÃ¼rich
+Creator Region                  : ZÃ¼rich
+Creator Postal Code             : 8046
+Creator Country                 : Switzerland
+Creator Work Telephone          : +41 (44) 3710054; +41 (79) 6625530
+Creator Work Email              : walter.hangartner@gmail.com
+---- XMP-crs ----
+Raw File Name                   : 2015_1007_074507AA.DNG
+Version                         : 9.1
+Process Version                 : 6.7
+White Balance                   : As Shot
+Auto White Version              : 134348800
+Color Temperature               : 4150
+Tint                            : +9
+Saturation                      : 0
+Sharpness                       : 25
+Luminance Smoothing             : 0
+Color Noise Reduction           : 25
+Vignette Amount                 : 0
+Shadow Tint                     : 0
+Red Hue                         : 0
+Red Saturation                  : 0
+Green Hue                       : 0
+Green Saturation                : 0
+Blue Hue                        : 0
+Blue Saturation                 : 0
+Vibrance                        : 0
+Hue Adjustment Red              : 0
+Hue Adjustment Orange           : 0
+Hue Adjustment Yellow           : 0
+Hue Adjustment Green            : 0
+Hue Adjustment Aqua             : 0
+Hue Adjustment Blue             : 0
+Hue Adjustment Purple           : 0
+Hue Adjustment Magenta          : 0
+Saturation Adjustment Red       : 0
+Saturation Adjustment Orange    : 0
+Saturation Adjustment Yellow    : 0
+Saturation Adjustment Green     : 0
+Saturation Adjustment Aqua      : 0
+Saturation Adjustment Blue      : 0
+Saturation Adjustment Purple    : 0
+Saturation Adjustment Magenta   : 0
+Luminance Adjustment Red        : 0
+Luminance Adjustment Orange     : 0
+Luminance Adjustment Yellow     : 0
+Luminance Adjustment Green      : 0
+Luminance Adjustment Aqua       : 0
+Luminance Adjustment Blue       : 0
+Luminance Adjustment Purple     : 0
+Luminance Adjustment Magenta    : 0
+Split Toning Shadow Hue         : 0
+Split Toning Shadow Saturation  : 0
+Split Toning Highlight Hue      : 0
+Split Toning Highlight Saturation: 0
+Split Toning Balance            : 0
+Parametric Shadows              : 0
+Parametric Darks                : 0
+Parametric Lights               : 0
+Parametric Highlights           : 0
+Parametric Shadow Split         : 25
+Parametric Midtone Split        : 50
+Parametric Highlight Split      : 75
+Sharpen Radius                  : +1.0
+Sharpen Detail                  : 25
+Sharpen Edge Masking            : 0
+Post Crop Vignette Amount       : 0
+Grain Amount                    : 0
+Color Noise Reduction Detail    : 50
+Color Noise Reduction Smoothness: 50
+Lens Profile Enable             : 1
+Lens Manual Distortion Amount   : 0
+Perspective Vertical            : 0
+Perspective Horizontal          : 0
+Perspective Rotate              : 0.0
+Perspective Scale               : 100
+Perspective Aspect              : 0
+Perspective Upright             : 0
+Auto Lateral CA                 : 1
+Exposure 2012                   : +0.65
+Contrast 2012                   : +17
+Highlights 2012                 : 0
+Shadows 2012                    : 0
+Whites 2012                     : +2
+Blacks 2012                     : 0
+Clarity 2012                    : 0
+Defringe Purple Amount          : 0
+Defringe Purple Hue Lo          : 30
+Defringe Purple Hue Hi          : 70
+Defringe Green Amount           : 0
+Defringe Green Hue Lo           : 40
+Defringe Green Hue Hi           : 60
+Dehaze                          : 0
+Tone Map Strength               : 0
+Convert To Grayscale            : False
+Tone Curve Name                 : Medium Contrast
+Tone Curve Name 2012            : Linear
+Camera Profile                  : Adobe Standard
+Camera Profile Digest           : 82DD98D4174C7C3586B6068858D6F772
+Lens Profile Setup              : LensDefaults
+Has Settings                    : True
+Crop Top                        : 0.046561
+Crop Left                       : 0
+Crop Bottom                     : 0.895826
+Crop Right                      : 1
+Crop Angle                      : 0
+Crop Constrain To Warp          : 0
+Crop Width                      : 9
+Crop Height                     : 16
+Crop Unit                       : Unknown (3)
+Has Crop                        : True
+Already Applied                 : True
+Tone Curve                      : 0, 0, 32, 22, 64, 56, 128, 128, 192, 196, 255, 255
+Tone Curve Red                  : 0, 0, 255, 255
+Tone Curve Green                : 0, 0, 255, 255
+Tone Curve Blue                 : 0, 0, 255, 255
+Tone Curve PV2012               : 0, 0, 255, 255
+Tone Curve PV2012 Red           : 0, 0, 255, 255
+Tone Curve PV2012 Green         : 0, 0, 255, 255
+Tone Curve PV2012 Blue          : 0, 0, 255, 255
+---- XMP-xmpRights ----
+Usage Terms                     : For consideration only, no reproduction without prior permission
+---- ICC-header ----
+Profile CMM Type                : Linotronic
+Profile Version                 : 2.1.0
+Profile Class                   : Display Device Profile
+Color Space Data                : RGB
+Profile Connection Space        : XYZ
+Profile Date Time               : 1998:02:09 06:49:00
+Profile File Signature          : acsp
+Primary Platform                : Microsoft Corporation
+CMM Flags                       : Not Embedded, Independent
+Device Manufacturer             : Hewlett-Packard
+Device Model                    : sRGB
+Device Attributes               : Reflective, Glossy, Positive, Color
+Rendering Intent                : Media-Relative Colorimetric
+Connection Space Illuminant     : 0.9642 1 0.82491
+Profile Creator                 : Hewlett-Packard
+Profile ID                      : 0
+---- ICC_Profile ----
+Profile Copyright               : Copyright (c) 1998 Hewlett-Packard Company
+Profile Description             : sRGB IEC61966-2.1
+Media White Point               : 0.95045 1 1.08905
+Media Black Point               : 0 0 0
+Red Matrix Column               : 0.43607 0.22249 0.01392
+Green Matrix Column             : 0.38515 0.71687 0.09708
+Blue Matrix Column              : 0.14307 0.06061 0.7141
+Device Mfg Desc                 : IEC http://www.iec.ch
+Device Model Desc               : IEC 61966-2.1 Default RGB colour space - sRGB
+Viewing Cond Desc               : Reference Viewing Condition in IEC61966-2.1
+Luminance                       : 76.03647 80 87.12462
+Technology                      : Cathode Ray Tube Display
+Red Tone Reproduction Curve     : (Binary data 2060 bytes, use -b option to extract)
+Green Tone Reproduction Curve   : (Binary data 2060 bytes, use -b option to extract)
+Blue Tone Reproduction Curve    : (Binary data 2060 bytes, use -b option to extract)
+---- ICC-view ----
+Viewing Cond Illuminant         : 19.6445 20.3718 16.8089
+Viewing Cond Surround           : 3.92889 4.07439 3.36179
+Viewing Cond Illuminant Type    : D50
+---- ICC-meas ----
+Measurement Observer            : CIE 1931
+Measurement Backing             : 0 0 0
+Measurement Geometry            : Unknown
+Measurement Flare               : 0.999%
+Measurement Illuminant          : D65
+---- Adobe ----
+DCT Encode Version              : 100
+APP14 Flags 0                   : [14]
+APP14 Flags 1                   : (none)
+Color Transform                 : YCbCr
+---- Composite ----
+Aperture                        : 5.6
+Date/Time Created               : 2015:10:07 07:45:07+00:00
+Image Size                      : 3840x2160
+Megapixels                      : 8.3
+Scale Factor To 35 mm Equivalent: 1.5
+Shutter Speed                   : 1/40
+Circle Of Confusion             : 0.020 mm
+Depth Of Field                  : inf (1.68 m - inf)
+Field Of View                   : 67.4 deg
+Focal Length                    : 18.0 mm (35 mm equivalent: 27.0 mm)
+Hyperfocal Distance             : 2.89 m
+Lens ID                         : smc PENTAX-DA 18-135mm F3.5-5.6 ED AL [IF] DC WR
+Light Value                     : 8.3

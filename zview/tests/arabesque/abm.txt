@@ -1,0 +1,12 @@
++ 0  ESO89a      = pM85
++ 0  ES088b      = pM86 ?
++ 6  width image
++ 8  height image
++10  number plane ? 
++12  image block size
++14  id_byte
++15  pack_byte
++16  special_byte
++17  compressed image data
+
+Rockyone
