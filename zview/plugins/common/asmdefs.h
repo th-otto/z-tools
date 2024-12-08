@@ -17,7 +17,9 @@
 
 /* Use the right prefix for registers.  */
 
+#ifndef REG
 #define REG(x) CONCAT1 (__REGISTER_PREFIX__, x)
+#endif
 
 /* Use the right prefix for immediate values.  */
 

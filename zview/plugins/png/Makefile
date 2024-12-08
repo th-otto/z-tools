@@ -2,6 +2,7 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
+LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o 
 LIB       = -lpng -lz -lm
 
 SFLAGS += -DPNGLIB_SLB -DZLIB_SLB -DSHAREDLIB=\"zvpng.slb\"

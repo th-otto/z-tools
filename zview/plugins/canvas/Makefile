@@ -1,5 +1,6 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
+include ../pluginvars
 
 SFLAGS += -DSHAREDLIB=\"zvcanvas.slb\"
 

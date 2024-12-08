@@ -474,10 +474,11 @@ void __CDECL reader_get_txt(IMGINFO info, txt_data *txtdata)
  * return:	 																		*
  *      TRUE if all ok else FALSE.													*
  *==================================================================================*/
-boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
+boolean __CDECL reader_read(IMGINFO info, uint8_t *_buffer)
 {
+	uint8_t *volatile buffer = _buffer;
 	struct _mypng_info *myinfo = (struct _mypng_info *)info->_priv_ptr;
-	uint8_t *buf;
+	uint8_t *volatile buf;
 	int16_t i;
 
 	if (myinfo->channels == 4)

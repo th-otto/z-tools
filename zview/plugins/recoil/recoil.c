@@ -7069,6 +7069,7 @@ static void PgrRenderer_Construct(PgrRenderer *self)
 
 static int PgrRenderer_GetPlayfieldByte(PgrRenderer *self, int y, int column)
 {
+	(void)y;
 	return self->base.content[self->screenOffset + column];
 }
 
@@ -7919,6 +7920,10 @@ static boolean RECOIL_ApplyBlend(RECOIL *self)
 
 static int RECOIL_ReadFile(const RECOIL *self, const char *filename, uint8_t *content, int contentLength)
 {
+	(void)self;
+	(void)filename;
+	(void)content;
+	(void)contentLength;
 	return -1;
 }
 
@@ -9932,6 +9937,7 @@ static boolean RECOIL_DecodeSc4(RECOIL *self, uint8_t const *content, int conten
 
 static int RECOIL_GetMsx128Height(const RECOIL *self, uint8_t const *content, int contentLength)
 {
+	(void)self;
 	if (contentLength < 135 || content[0] != 254)
 		return -1;
 	int header = RECOIL_GetMsxHeader(content);
@@ -16032,6 +16038,7 @@ static boolean RECOIL_DecodeP3c(RECOIL *self, uint8_t const *content, int conten
 
 static boolean RECOIL_UnpackLz4(const RECOIL *self, uint8_t const *content, int contentLength, uint8_t *unpacked, int unpackedLength)
 {
+	(void)self;
 	if (contentLength < 11 || content[0] != 4 || content[1] != 34 || content[2] != 77 || content[3] != 24 || (content[4] & 195) != 64)
 		return FALSE;
 	Lz4Stream stream;
@@ -16414,6 +16421,7 @@ static boolean RECOIL_DecodePcs(RECOIL *self, uint8_t const *content, int conten
 
 static uint8_t const *RECOIL_UnpackPbx(const RECOIL *self, uint8_t const *content, int contentLength, uint8_t *unpacked, int bitmapOffset, int bytesPer16Pixels, int unpackedLength)
 {
+	(void)self;
 	if (content[4] != 128 || content[5] != 1)
 		return contentLength == unpackedLength ? content : NULL;
 	PackBitsStream rle;
@@ -20071,6 +20079,7 @@ static boolean RECOIL_DecodeAgs(RECOIL *self, uint8_t const *content, int conten
 
 static boolean RECOIL_UnpackRip(const RECOIL *self, uint8_t const *content, int contentOffset, int contentLength, uint8_t *unpacked, int unpackedLength)
 {
+	(void)self;
 	if (contentOffset + 304 > contentLength || !RECOIL_IsStringAt(content, contentOffset, "PCK"))
 		return FALSE;
 	FanoTree lengthTree;
