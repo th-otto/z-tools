@@ -80,6 +80,7 @@ PLUGINS = \
 	prismpnt \
 	pro89xx \
 	psx \
+	qoi \
 	qpaint \
 	rag_d \
 	recoil \

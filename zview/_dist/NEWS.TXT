@@ -119,6 +119,7 @@ for that format, it is prioritized.
  * New plugin for NetPbm image format(s) (*.PPM/*.PGM/*.PBM/*.PAM)
  * New plugin for Grafix (*.GRX)
  * New plugin for MTV Raytracer (*.MTV)
+ * New plugin for Quite OK Image Format (*.QOI)
  * New plugin from RECOIL with 552 file formats
 
  Obsolete plugins:
