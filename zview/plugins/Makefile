@@ -58,6 +58,7 @@ PLUGINS = \
 	megapnt \
 	mpp \
 	mspaint \
+	mtv \
 	neoani \
 	neochrome \
 	pablopnt \

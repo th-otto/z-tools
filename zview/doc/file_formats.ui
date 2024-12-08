@@ -153,6 +153,8 @@ supported features of the formats.
 !hline
  Microsoft Paint !! .msp            !! Any             !! 1              !! None/RLE        !!
 !hline
+ MTV Raytracer !! .mtv              !! Any             !! 24             !! None            !!
+!hline
  Multi Palette !! .mpp              !! 320x199         !! 24             !! None            !!
  Picture       !!                   !! 416x273         !! 24             !! None            !!
 !hline
