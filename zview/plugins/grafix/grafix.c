@@ -6,6 +6,7 @@
 #include "exports.h"
 
 /*
+http://downloads.atari-home.de/Public_Domain/Serie_ST-Computer/600-699/PDATS696.msa
 */
 
 
@@ -39,20 +40,19 @@ long __CDECL get_option(zv_int_t which)
 #endif
 
 
-struct file_header {
-	uint32_t magic;
-	uint16_t version;
-	char comment[22];
-	uint16_t compression;
-	uint16_t width;
-	uint16_t height;
-	uint16_t colors;
-	uint16_t palette[256][3];
-	uint16_t reserved;
-	uint32_t image_size;
-	uint32_t compressed_size1;
-	uint32_t compressed_size2;
-};
+typedef struct {
+	uint32_t magic;				/* 'GRXP' */
+	uint16_t version;			/* currently 1.01 */
+	char info[22];				/* any text */
+	uint16_t compress;			/* compression flag */
+	uint16_t pic_w;				/* width */
+	uint16_t pic_h;				/* height */
+	uint16_t ncolors;			/* number of colors */
+	uint16_t palette[256][3];	/* color info, in VDI order */
+	uint16_t TC_normal;			/* reserved */
+	uint32_t orig;				/* original size */
+	uint32_t b_size[2];			/* size of the two compressed blocks */
+} GRX_HEAD;
 
 struct code {
 	uint16_t code;
@@ -275,7 +275,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	uint8_t *bmap;
 	size_t file_size;
 	size_t image_size;
-	struct file_header header;
+	GRX_HEAD header;
 
 	if ((handle = (int16_t)Fopen(name, FO_READ)) < 0)
 	{
@@ -301,7 +301,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		RETURN_ERROR(EC_HeaderVersion);
 	}
 	info->indexed_color = TRUE;
-	switch (header.colors)
+	switch (header.ncolors)
 	{
 	case 2:
 		info->planes = 1;
@@ -321,8 +321,8 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		RETURN_ERROR(EC_ColorCount);
 	}
 
-	image_size = (((size_t)header.width + 15) >> 4) * 2 * info->planes * header.height;
-	if (image_size != header.image_size)
+	image_size = (((size_t)header.pic_w + 15) >> 4) * 2 * info->planes * header.pic_h;
+	if (image_size != header.orig)
 	{
 		Fclose(handle);
 		RETURN_ERROR(EC_BitmapLength);
@@ -333,27 +333,27 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		Fclose(handle);
 		RETURN_ERROR(EC_Malloc);
 	}
-	if (header.compression)
+	if (header.compress)
 	{
 		uint8_t *file;
 		size_t size;
 		size_t decompressed;
 
 		size = image_size >> 1;
-		file = malloc(MAX(header.compressed_size1, header.compressed_size2));
+		file = malloc(MAX(header.b_size[0], header.b_size[1]));
 		if (file == NULL)
 		{
 			free(bmap);
 			Fclose(handle);
 			RETURN_ERROR(EC_Malloc);
 		}
-		if ((size_t) Fread(handle, header.compressed_size1, file) != header.compressed_size1)
+		if ((size_t) Fread(handle, header.b_size[0], file) != header.b_size[0])
 		{
 			free(bmap);
 			Fclose(handle);
 			RETURN_ERROR(EC_Fread);
 		}
-		unpack_grx(file, header.compressed_size1, bmap, size, &decompressed);
+		unpack_grx(file, header.b_size[0], bmap, size, &decompressed);
 		if (decompressed != size)
 		{
 			free(file);
@@ -361,14 +361,14 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			Fclose(handle);
 			RETURN_ERROR(EC_DecompError);
 		}
-		if ((size_t) Fread(handle, header.compressed_size2, file) != header.compressed_size2)
+		if ((size_t) Fread(handle, header.b_size[1], file) != header.b_size[1])
 		{
 			free(file);
 			free(bmap);
 			Fclose(handle);
 			RETURN_ERROR(EC_Fread);
 		}
-		unpack_grx(file, header.compressed_size2, bmap + size, size, &decompressed);
+		unpack_grx(file, header.b_size[1], bmap + size, size, &decompressed);
 		if (decompressed != size)
 		{
 			free(file);
@@ -390,8 +390,8 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	}
 	Fclose(handle);
 
-	info->width = header.width;
-	info->height = header.height;
+	info->width = header.pic_w;
+	info->height = header.pic_h;
 	info->colors = 1L << info->planes;
 	info->components = 1;
 	info->real_width = info->width;

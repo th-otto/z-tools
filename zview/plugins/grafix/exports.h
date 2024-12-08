@@ -34,4 +34,4 @@
 #undef LIBFUNC2
 #undef NOFUNC
 
-#define SHAREDLIB "zvtiny.slb"
+#define SHAREDLIB "zvgrafix.slb"
