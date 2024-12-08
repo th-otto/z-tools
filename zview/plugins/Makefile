@@ -82,6 +82,7 @@ PLUGINS = \
 	psx \
 	qoi \
 	qpaint \
+	qrt \
 	rag_d \
 	recoil \
 	rembrndt \

@@ -217,6 +217,8 @@ supported features of the formats.
  Public        !! .cmp              !! 640x400         !! 1              !! RLE             !! 
  Painter       !!                   !! 640x800         !! 1              !! RLE             !! 
 !hline
+ Quick Ray Tracer!! .qrt            !! Any             !! 24             !! None            !! Encoder
+!hline
  Quite OK Image!! .qoi              !! Any             !! 24/32          !! Deflate         !! Encoder
 !hline
  Quantum       !! .pbx              !! 320x200         !! 7              !! RLE/None        !! 
