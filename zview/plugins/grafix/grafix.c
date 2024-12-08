@@ -61,6 +61,7 @@ struct code {
 };
 
 
+#if 0
 static void init_codes(struct code *offsets)
 {
 	unsigned int i;
@@ -204,6 +205,71 @@ static void unpack_grx(uint8_t *source, size_t src_length, uint8_t *dst, size_t 
 	}
 }
 
+#else
+
+static int unpack_grx(uint8_t *src, size_t src_length, uint8_t *dst, size_t dst_length)
+{
+	uint8_t *dst_end = dst + dst_length;
+	uint8_t *src_end = src + src_length;
+	uint8_t *offsets[1024];
+	int bits = 0;
+	int bitsCount = 0;
+	int codes = 258;
+	int codeBits = 9;
+	
+	while (dst < dst_end)
+	{
+		int code;
+		
+		while (bitsCount < codeBits)
+		{
+			if (src >= src_end)
+				return FALSE;
+			bits |= *src++ << bitsCount;
+			bitsCount += 8;
+		}
+		code = bits & ((1 << codeBits) - 1);
+		bits >>= codeBits;
+		bitsCount -= codeBits;
+		switch (code)
+		{
+		case 256:
+			if (codeBits == 10)
+				return FALSE;
+			codeBits = 10;
+			break;
+		case 257:
+			codes = 258;
+			codeBits = 9;
+			break;
+		default:
+			if (codes >= 1024)
+				return FALSE;
+			offsets[codes] = dst;
+			if (code < 256)
+			{
+				*dst++ = code;
+			} else if (code >= codes)
+			{
+				return FALSE;
+			} else
+			{
+				uint8_t *source = offsets[code];
+				uint8_t *end = offsets[code + 1];
+				if (dst + (end - source) >= dst_end)
+					return FALSE;
+				do
+					*dst++ = *source++;
+				while (source <= end);
+			}
+			codes++;
+			break;
+		}
+	}
+	return TRUE;
+}
+#endif
+
 
 
 static int vdi2bios(int idx, int planes)
@@ -337,7 +403,9 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	{
 		uint8_t *file;
 		size_t size;
+#if 0
 		size_t decompressed;
+#endif
 
 		size = image_size >> 1;
 		file = malloc(MAX(header.b_size[0], header.b_size[1]));
@@ -353,8 +421,12 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			Fclose(handle);
 			RETURN_ERROR(EC_Fread);
 		}
+#if 0
 		unpack_grx(file, header.b_size[0], bmap, size, &decompressed);
 		if (decompressed != size)
+#else
+		if (!unpack_grx(file, header.b_size[0], bmap, size))
+#endif
 		{
 			free(file);
 			free(bmap);
@@ -368,8 +440,12 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			Fclose(handle);
 			RETURN_ERROR(EC_Fread);
 		}
+#if 0
 		unpack_grx(file, header.b_size[1], bmap + size, size, &decompressed);
 		if (decompressed != size)
+#else
+		if (!unpack_grx(file, header.b_size[1], bmap + size, size))
+#endif
 		{
 			free(file);
 			free(bmap);
