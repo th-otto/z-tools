@@ -1,5 +1,7 @@
  .globl slb_header
  .text
+ .globl _start
+_start:
 slb_header:
  .dc.l 0x70004afc
  .dc.l _slbname

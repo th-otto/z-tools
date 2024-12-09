@@ -44,7 +44,7 @@ ASFLAGS = $(CFLAGS) -Wa,--register-prefix-optional
 LDFLAGS  = -s
 ARFLAGS  = rcs
 
-LDSHARED = $(CC) -s -nostartfiles -Wl,--mprg-flags,0x0f
+LDSHARED = $(CC) -s -nostartfiles -Wl,--mprg-flags,0x0f -Wl,--entry,_start
 LDSHAREDLIBC = -nostdlib -lgcc
 SFLAGS =
 

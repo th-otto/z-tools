@@ -10,7 +10,18 @@
 
 	.globl C_SYMBOL_NAME(slb_header)
 
+#ifdef __ELF__
+	.section	.text.startup
+#else
 	.text
+#endif
+
+/*
+ * This special label ensures that this code is used as entry point,
+ * even if the linker doesn't put it at the start of the TEXT segment.
+ */
+	.globl	_start
+_start:
 
 #define WITH_FUNCNAMES 1
 
