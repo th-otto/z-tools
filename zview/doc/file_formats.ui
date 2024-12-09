@@ -237,6 +237,8 @@ supported features of the formats.
 !hline
  Signum        !! .imc              !! 640x400         !! 1              !! None            !!
 !hline
+ SGI           !! .sgi              !! Any             !! 8/24/32        !! None            !! 8 planes is grayscale
+!hline
  Spectrum      !! .spu/.spc/.sps    !! 320x200         !! 12/15          !! RLE             !!
                !! .spx              !! 320xAny         !! 12             !! None/ICE        !!
 !hline

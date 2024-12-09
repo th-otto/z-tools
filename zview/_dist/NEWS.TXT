@@ -122,6 +122,7 @@ for that format, it is prioritized.
  * New plugin for Quite OK Image Format (*.QOI)
  * New plugin for Quick Ray Tracer (*.QRT)
  * New plugin for CompuServe RLE (*.RLE)
+ * New plugin for Silicon Graphics Image (*.SGI)
  * New plugin from RECOIL with 552 file formats
 
  Obsolete plugins:
