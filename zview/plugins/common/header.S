@@ -5,7 +5,7 @@
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
-#include "symbols.h"
+#include "asmdefs.h"
 #include "plugver.h"
 
 	.globl C_SYMBOL_NAME(slb_header)

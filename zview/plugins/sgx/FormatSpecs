@@ -1,0 +1,137 @@
+  ================================
+  = The SGX Graphics File Format =  - Version 4.2, 06.04.2009
+  ================================
+
+  File Format Information
+  ~~~~~~~~~~~~~~~~~~~~~~~
+  Pictures in the "SGX Graphics File Format" consist of two parts:
+  a header and an attached packed or unpacked data section.
+
+  Both sections are sequentially arranged within the same file.
+
+  Construction (all fields in Motorola BYTE order):
+
+  00  ID              UBYTE[18]       "SVG Graphics File" + 0-Byte
+                                     OR "SGX Graphics File" + 0-Byte
+  18  Version         UWORD           currently 1
+  20  GfxDataOffset   ULONG           header length (depends on version)
+  24  LeftEdge        ULONG           as with e.g. ILBM
+  28  TopEdge         ULONG           ...
+  32  Width           ULONG           ...
+  36  Height          ULONG           ...
+  40  ColorDepth      ULONG           used colors as x of 2^x
+  44  ViewMode32      ULONG           32 Bit Amiga AGA 8 Bit ViewMode
+  48  PixelBits       UBYTE           1, 8, 24, 32, 48, 64
+  49  PixelPlanes     UBYTE           # of planes with PixelBits
+  50  BytesPerLine    ULONG           bpl of a PixelPlane
+  54  ColorMap        UBYTE [256][3]  unused, if > 256 Colors (zero-ed)
+
+  Note: On specific platforms certain alignment restrictions may
+        prevent you from putting this into exactly one C structure.
+
+  For SVG:
+  --------
+  After that either follows XPK compressed data or uncompressed
+  data, which can be detected by the leading chars "XPK" or "PP20"
+  for packed data at GfxDataOffset (relative to beginning of the file).
+  Structure of packed data is as follows:
+
+  0x00  ID              UBYTE[3]/[4]    XPK / PP20
+  0x04  Data            UBYTE[]         compressed data (upto EOF)
+
+  => Note, that XPK compression is deprecated. Please use SGX/LZ77 instead.
+
+  For SGX:
+  --------
+  After that either follows ZIP compressed data or uncompressed
+  data, which can be detected by the leading chars "LZ77" for
+  packed data at GfxDataOffset (relative to beginning of the file).
+  Structure of packed data is as follows:
+
+  0x00  ID              UBYTE[4]        LZ77
+  0x04  Length          ULONG           size of uncompressed data
+  0x08  Data            UBYTE[]         compressed data (upto EOF)
+
+  Please note, that with upto 256 colors (ColorDepth <= 8) it has
+  to be checked, whether the graphics actually is EHB / HAM.
+  Use the Viewmode32 field for checking this when reading,
+  and eventually binary-OR the field with HAM_KEY / EHB_KEY when saving.
+
+  Note:
+  -----
+  "PixelBits" and "PixelPlanes" do allow for a lot of combinations, obviously.
+  However not all of them are legal.
+
+  Actually used and supported by current software are only the
+  following:
+
+     Bits   Planes  Depth  Content
+     ---------------------------------------------------------------------
+     1      1..8    1..8   (unaligned Bitmaps with 2..256 colors)
+     8      1       1..8   (chunky Bitmaps with 2..256 colors)
+     24     1       24     (24 Bit RGB Bitmaps with 8:8:8 RGB)
+     32     1       32     (32 Bit RGBA Bitmaps with 8:8:8:8 RGBA)
+     48     1       48     (48 Bit RGB Bitmaps with 16:16:16 RGB)
+     64     1       64     (64 Bit RGBA Bitmaps with 16:16:16:16 RGBA)
+
+  So >24 Bit Data should not be saved planewise, but as 24/32/48/64 Bit RGB(A).
+
+  If you ever should save any other data, please avoid any planar
+  configurations and respect the following rules for RGB data chunks:
+
+     Bits   Planes  Depth  Content
+     ---------------------------------------------------------------------
+     16     1       15/16  (15/16 Bit Bitmap with 5:5:5:1 RGB0/A)
+     32     1       24/32  (24/32 Bit RGB Bitmaps with 8:8:8:8 RGB0/A)
+     48     1       48     (48    Bit RGB Bitmaps with 16:16:16 RGB)
+     64     1       48/64  (48/64 Bit RGB Bitmaps with 16:16:16:16 RGB0/A)
+     ... etc ...
+
+ Note, that an alpha channel can only be correctly identified, when
+ "ColorDepth" is handled as an indicator, whether there actually is one,
+ or not. Programs not supporting alpha channels should simply ignore
+ the color depth and interpret "Bits=16 and Planes=1" as 5:5:5:0 RGB
+ and "Bits=32 and Planes=1" as 8:8:8:0 RGB and so on...
+
+ Planar configuration actually only is intended for 2..256 color
+ bitmaps - so please adhered to the convention to use only values
+ in the range "1..8" for Planes with Bits=1 (and Depth==Planes).
+
+ Note: Storing of "masks" as known from IFF-ILBM could be achieved
+       using different values for Planes and Depth, in theory.
+       This is not recommended, better stick to IFF-ILBM then.
+
+ Alpha Channel Remarks
+ ---------------------
+ For 8 Bit alpha channel values, the following interpreation is
+ mandatory:
+
+  0x00  fully transparent (100% transparent)
+  ...
+  0xFF  fully opaque      (0% transparent)
+
+ Any value X inbetween accordingly therefore has a transparency
+ of (255-X)/255 percent.
+
+ 1 bit transparency translates into boolean transparency being
+ mapped to the aformentioned values (0% resp. 100%)
+
+ In case of 16 bit or greater transparency values the scheme is
+ similar, so use 0x0000 and 0xFFFF (instead of 0x00 / 0xFF).
+
+ This BTW matches the PNG specification.
+
+ If you want to scale down a 16 bit alpha channel to 8 bit,
+ use the following approach:
+
+        0xhhll -> 0xhh
+
+ If you want to scale up a 8 bit alpha channel to 16 bit,
+ do it as follows:
+
+        0xll   -> 0xllll
+
+ Otherwise it would not be guaranteed that a maximum
+ transparency of 0xFF / 0xFFFF is equal in both notations.
+
+

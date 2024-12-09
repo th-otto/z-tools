@@ -89,6 +89,8 @@ PLUGINS = \
 	rgb \
 	rle \
 	seq \
+	sgi \
+	sgx \
 	signum \
 	spectrum \
 	specx \
