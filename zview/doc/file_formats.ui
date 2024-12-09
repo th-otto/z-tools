@@ -47,6 +47,10 @@ supported features of the formats.
                !! .ce2              !! 640x200         !! 15             !! None            !!
                !! .ce3              !! 640x400         !! 6              !! None            !!
 !hline
+ CompuServe RLE!! .rle              !! 256x192         !! 1              !! RLE             !!
+               !!                   !! 128x96          !! 1              !!                !!
+               !!                   !! 640x200         !! 1              !!                 !!
+!hline
  CrackArt      !! .ca1              !! 320x200         !! 4              !! None/RLE        !!
                !! .ca2              !! 640x200         !! 2              !! None/RLE        !!
                !! .ca3              !! 640x400         !! 1              !! None/RLE        !!

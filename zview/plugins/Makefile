@@ -87,6 +87,7 @@ PLUGINS = \
 	recoil \
 	rembrndt \
 	rgb \
+	rle \
 	seq \
 	signum \
 	spectrum \

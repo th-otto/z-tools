@@ -1,47 +1,9 @@
-#define	VERSION	     0x208
-#define NAME        "RGB Intermediate Format"
-#define AUTHOR      "Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
-
 #include "plugin.h"
 #include "zvplugin.h"
-
-/*
-RGB Intermediate Format    *.RGB (ST low resolution only)
-
-This format was invented by Lars Michael to facilitate conversions between
-standard ST picture formats and higher resolution formats like GIF and IFF. It
-supports 12 bits of color resolution by keeping the red, green and blue
-components in separate bit planes.
-
-1 word          resolution (ignored)
-16 word         palette (ignored)
-16000 words     red plane (screen memory)
-1 word          resolution (ignored)
-16 word         palette (ignored)
-16000 words     green plane (screen memory)
-1 word          resolution (ignored)
-16 word         palette (ignored)
-16000 words     blue plane (screen memory)
-------------
-96102 bytes     total
-
-The format was derived by concatenating three DEGAS .PI1 files together -- one
-for each color gun. The RGB value for a pixel is constructed by looking at the
-appropriate pixel in the red plane, green plane, and blue plane. The bitplanes
-are in standard ST low resolution screen RAM format, but where pixel values in
-screen RAM refer to palette entries (0 through 15), pixel values here
-correspond to absolute R, G, and B values. The red, green, and blue components
-for each pixel range from 0 to 15 (4 bits), yielding a total of 12 bits of
-color information per pixel. Not coincidentally, this is exactly the format of
-ST palette entries (although on ST's without the extended palette only the
-lower 3 bits of each color component are used).
-
-You can view a single bit plane on a standard ST by splitting the .RGB file
-into its three DEGAS .PI1 components and setting the palette to successively
-brighter shades of gray.
-*/
-
+/* only need the meta-information here */
+#define LIBFUNC(a,b,c)
+#define NOFUNC
+#include "exports.h"
 
 #ifdef PLUGIN_SLB
 
@@ -50,9 +12,9 @@ long __CDECL get_option(zv_int_t which)
 	switch (which)
 	{
 	case OPTION_CAPABILITIES:
-		return CAN_DECODE;
+		return CAN_DECODE | CAN_ENCODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("RGB\0");
+		return (long) (EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -62,6 +24,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
+	case INFO_MISC:
+		return (long)MISC_INFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}
@@ -69,7 +35,6 @@ long __CDECL get_option(zv_int_t which)
 }
 #endif
 
-#define SCREEN_SIZE 32000L
 
 /*==================================================================================*
  * boolean __CDECL reader_init:														*
@@ -85,56 +50,126 @@ long __CDECL get_option(zv_int_t which)
  *==================================================================================*/
 boolean __CDECL reader_init(const char *name, IMGINFO info)
 {
-	int16_t handle;
 	uint8_t *bmap;
-
-	if ((handle = (int16_t) Fopen(name, FO_READ)) < 0)
-	{
-		RETURN_ERROR(EC_Fopen);
-	}
-	if (Fseek(0, handle, SEEK_END) != 96102L)
+	size_t image_size;
+	int16_t handle;
+	uint16_t magic;
+	uint8_t c;
+	uint8_t type;
+	int16_t count;
+	size_t pos;
+	uint8_t pixel;
+	
+	handle = (int16_t) Fopen(name, FO_READ);
+	if (handle < 0)
 	{
 		Fclose(handle);
-		RETURN_ERROR(EC_FileLength);
+		RETURN_ERROR(EC_Fopen);
 	}
-	bmap = malloc(SCREEN_SIZE * 3);
+	if (Fread(handle, sizeof(magic), &magic) != sizeof(magic))
+	{
+		Fclose(handle);
+		RETURN_ERROR(EC_Fread);
+	}
+	if (magic != 0x1b47)
+	{
+		Fclose(handle);
+		RETURN_ERROR(EC_FileId);
+	}
+	if (Fread(handle, sizeof(type), &type) != sizeof(type))
+	{
+		Fclose(handle);
+		RETURN_ERROR(EC_Fread);
+	}
+
+	strcpy(info->info, "CompuServe RLE");
+	switch (type)
+	{
+	case 0x4d:
+		info->width = 128;
+		info->height = 96;
+		strcat(info->info, " (Medium)");
+		break;
+	case 0x48:
+		info->width = 256;
+		info->height = 192;
+		strcat(info->info, " (High)");
+		break;
+	case 0x53:
+		info->width = 640;
+		info->height = 200;
+		strcat(info->info, " (Super)");
+		break;
+	default:
+		Fclose(handle);
+		RETURN_ERROR(EC_ResolutionType);
+	}
+
+	image_size = (size_t)info->width * info->height;
+	bmap = (uint8_t *)Malloc(image_size);
 	if (bmap == NULL)
 	{
 		Fclose(handle);
 		RETURN_ERROR(EC_Malloc);
 	}
-	if (Fseek(34, handle, SEEK_SET) < 0 ||
-		Fread(handle, SCREEN_SIZE, bmap) != SCREEN_SIZE ||
-		Fseek(34, handle, SEEK_CUR) < 0 ||
-		Fread(handle, SCREEN_SIZE, bmap + SCREEN_SIZE) != SCREEN_SIZE ||
-		Fseek(34, handle, SEEK_CUR) < 0 ||
-		Fread(handle, SCREEN_SIZE, bmap + 2 * SCREEN_SIZE) != SCREEN_SIZE)
-	{
-		free(bmap);
-		Fclose(handle);
-		RETURN_ERROR(EC_Fread);
-	}
-	Fclose(handle);
 
-	info->width = 320;
-	info->height = 200;
-	info->planes = 12;
-	info->colors = 1L << 12;
+	pixel = 1;
+	pos = 0;
+	for (;;)
+	{
+		if (Fread(handle, sizeof(c), &c) != sizeof(c))
+			break;
+		if (c == 0x1b)
+			break;
+		if (c < 32 || c > 127)
+		{
+			if (pos == image_size - 1)
+			{
+				/* last pixel is often missing */
+				bmap[pos++] = pixel;
+				break;
+			}
+			Mfree(bmap);
+			Fclose(handle);
+			RETURN_ERROR(EC_DecompError);
+		}
+		for (count = c - 32; count > 0; count--)
+		{
+			if (pos < image_size)
+				bmap[pos++] = pixel;
+		}
+		pixel ^= 1;
+	}
+		
+	Fclose(handle);
+	while (pos < image_size)
+	{
+		bmap[pos++] = 0;
+	}
+	
+	info->palette[0].red =
+	info->palette[0].green =
+	info->palette[0].blue = 0;
+	info->palette[1].red =
+	info->palette[1].green =
+	info->palette[1].blue = 255;
+
+	info->planes = 1;
 	info->indexed_color = FALSE;
-	info->components = 3;
+	info->components = 1;
+	info->colors = 1L << 1;
 	info->real_width = info->width;
 	info->real_height = info->height;
 	info->memory_alloc = TT_RAM;
-	info->page = 1;						/* required - more than 1 = animation */
+	info->page = 1;
 	info->orientation = UP_TO_DOWN;
-	info->num_comments = 0;				/* required - disable exif tab */
-	info->_priv_var = 0;				/* y position in bmap */
-	info->_priv_ptr = bmap;
+	info->num_comments = 0;
+	strcpy(info->compression, "RLE");
 
-	strcpy(info->info, "RGB Intermediate Format");
-	strcpy(info->compression, "None");
-	
-	RETURN_SUCCESS();
+	info->_priv_ptr = bmap;
+	info->_priv_var = 0;				/* y offset */
+
+	return TRUE;
 }
 
 
@@ -151,41 +186,11 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
  *==================================================================================*/
 boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 {
-	int x;
-	int bit;
-	uint16_t *red_plane;
-	uint16_t *green_plane;
-	uint16_t *blue_plane;
+	uint8_t *bmap = (uint8_t *)info->_priv_ptr;
 	
-	red_plane = (uint16_t *)(info->_priv_ptr + info->_priv_var);
-	green_plane = red_plane + SCREEN_SIZE / 2;
-	blue_plane = green_plane + SCREEN_SIZE / 2;
-	x = info->width >> 4;
-	info->_priv_var += x << 3;
-	do
-	{
-		for (bit = 15; bit >= 0; bit--)
-		{
-			*buffer++ =
-				((((red_plane[0] >> bit) & 1) << 0) |
-				 (((red_plane[1] >> bit) & 1) << 1) |
-				 (((red_plane[2] >> bit) & 1) << 2) |
-				 (((red_plane[3] >> bit) & 1) << 3)) << 4;
-			*buffer++ =
-				((((green_plane[0] >> bit) & 1) << 0) |
-				 (((green_plane[1] >> bit) & 1) << 1) |
-				 (((green_plane[2] >> bit) & 1) << 2) |
-				 (((green_plane[3] >> bit) & 1) << 3)) << 4;
-			*buffer++ =
-				((((blue_plane[0] >> bit) & 1) << 0) |
-				 (((blue_plane[1] >> bit) & 1) << 1) |
-				 (((blue_plane[2] >> bit) & 1) << 2) |
-				 (((blue_plane[3] >> bit) & 1) << 3)) << 4;
-		}
-		red_plane += 4;
-		green_plane += 4;
-		blue_plane += 4;
-	} while (--x > 0);
+	bmap += info->_priv_var;
+	info->_priv_var += info->width;
+	memcpy(buffer, bmap, info->width);
 
 	RETURN_SUCCESS();
 }
@@ -204,7 +209,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
  *==================================================================================*/
 void __CDECL reader_quit(IMGINFO info)
 {
-	free(info->_priv_ptr);
+	Mfree(info->_priv_ptr);
 	info->_priv_ptr = 0;
 }
 
