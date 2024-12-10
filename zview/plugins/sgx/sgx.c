@@ -216,7 +216,6 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	handle = (int16_t) Fopen(name, FO_READ);
 	if (handle < 0)
 	{
-		Fclose(handle);
 		RETURN_ERROR(EC_Fopen);
 	}
 	file_size = Fseek(0, handle, SEEK_END);
@@ -342,7 +341,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	info->_priv_var = 0;		/* y offset */
 	info->_priv_var_more = bytes_per_line;
 
-	return TRUE;
+	RETURN_SUCCESS();
 }
 
 

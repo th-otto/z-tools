@@ -102,6 +102,7 @@ PLUGINS = \
 	tga \
 	tiff \
 	tiny \
+	uimg \
 	zz_rough \
 	webp \
 	$(empty)

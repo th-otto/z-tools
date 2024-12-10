@@ -272,6 +272,8 @@ supported features of the formats.
 !hline
  TmS Cranach   !! .esm              !! Any             !! 1              !! None            !! Encoder
 !hline
+ uConvert      !! .uim/.uimg        !! Any             !! 1-8/16/24/32   !! None            !!
+!hline
  WebP          !! .web/.webp        !! Any             !! 24/32          !! VP8             !! Animation
 !hline
  ZZ_ROUGH      !! .rgh              !! 320x200         !! 4              !! RLE             !!
