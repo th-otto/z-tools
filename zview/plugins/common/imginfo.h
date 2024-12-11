@@ -109,7 +109,7 @@ typedef struct _img_info
 	uint16_t	components;  			/* Picture components 										*/
 	uint16_t	planes;					/* Picture bits by pixel									*/
 	uint32_t	colors;					/* Picture colors number									*/
-	int16_t		orientation;			/* picture orientation: UP_TO_DOWN or DONW_TO_UP ( ex: TGA)	*/
+	int16_t		orientation;			/* picture orientation: UP_TO_DOWN or DOWN_TO_UP ( ex: TGA)	*/
 	uint16_t	page;					/* Number of page/image in the file 						*/
 	uint16_t	delay;					/* Animation delay in 200th sec. between each frame.		*/
 	uint16_t	num_comments;			/* Lines in the file's comment. ( 0 if none) 	 			*/

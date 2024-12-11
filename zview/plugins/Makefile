@@ -56,6 +56,7 @@ PLUGINS = \
 	jpg \
 	macpaint \
 	megapnt \
+	mgf \
 	mpp \
 	mspaint \
 	mtv \
