@@ -3,7 +3,7 @@
 echo rvm_autoupdate_flag=0 >> ~/.rvmrc
 
 sudo apt-get update
-sudo apt-get install -y pkg-config curl xz-utils libjson-perl libwww-perl
+sudo apt-get install -y pkg-config curl xz-utils libjson-perl libwww-perl dos2unix
 
 DOWNLOAD_DIR=http://tho-otto.de/snapshots
 URL=http://tho-otto.de/download
