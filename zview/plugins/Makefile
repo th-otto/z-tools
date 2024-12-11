@@ -53,6 +53,7 @@ PLUGINS = \
 	imgscan \
 	indypnt \
 	inshape \
+	invision \
 	jpg \
 	macpaint \
 	megapnt \

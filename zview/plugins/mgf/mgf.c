@@ -178,7 +178,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	if (header.width > 65535L || header.height > 65535L)
 	{
 		Fclose(handle);
-		RETURN_ERROR(EC_BufferOverrun);
+		RETURN_ERROR(EC_InvalidHeader);
 	}
 
 	file_size -= sizeof(header);

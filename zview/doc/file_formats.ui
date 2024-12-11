@@ -148,6 +148,11 @@ supported features of the formats.
 !hline
  InShape       !! .iim              !! Any             !! 1/4/8/24/32    !! None            !! 8 planes is grayscale
 !hline
+ Invision      !! .r01              !! Any             !! 1              !! None            !!
+               !! .r02              !! Any             !! 2              !!                 !!
+               !! .r04              !! Any             !! 4              !!                 !!
+               !! .r08              !! Any             !! 8              !!                 !!
+!hline
  JPEG          !! .jpg              !! Any             !! 8/24           !! JPEG            !! Lossy compression
                !! .jpe              !!                 !!                !!                 !! Thumbnail
                !! .jpeg             !!                 !!                !!                 !! Textual data
@@ -157,7 +162,8 @@ supported features of the formats.
 !hline
  MegaPaint     !! .bld              !! Any             !! 1              !! RLE             !!
 !hline
- Microsoft Paint !! .msp            !! Any             !! 1              !! None/RLE        !!
+ Microsoft     !! .msp              !! Any             !! 1              !! None/RLE        !!
+ Paint         !!                   !!                 !!                !!                 !!
 !hline
  MTV Raytracer !! .mtv              !! Any             !! 24             !! None            !!
 !hline
@@ -223,7 +229,8 @@ supported features of the formats.
  Public        !! .cmp              !! 640x400         !! 1              !! RLE             !! 
  Painter       !!                   !! 640x800         !! 1              !! RLE             !! 
 !hline
- Quick Ray Tracer!! .qrt            !! Any             !! 24             !! None            !! Encoder
+ Quick Ray     !! .qrt              !! Any             !! 24             !! None            !! Encoder
+ Tracer        !!                   !!                 !!                !!                 !!
 !hline
  Quite OK Image!! .qoi              !! Any             !! 24/32          !! Deflate         !! Encoder
 !hline
@@ -246,7 +253,8 @@ supported features of the formats.
 !hline
  Spooky Sprites!! .tre              !! Any             !! 16             !! RLE             !!
 !hline
- Sinbad Slideshow!! .ssb            !! 320x200         !! 4              !! None            !!
+ Sinbad        !! .ssb              !! 320x200         !! 4              !! None            !!
+ Slideshow     !!                   !!                 !!                !!                 !!
 !hline
  STAD          !! .pac              !! 640x400         !! 1              !! RLE             !!
 !hline

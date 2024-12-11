@@ -109,6 +109,10 @@ void __CDECL plugin_encoder_quit(SLB *slb, IMGINFO info);
 #define	EC_DecoderOptions	48	/* decoder option out of range			*/
 #define	EC_EncoderOptions	49	/* encoder option out of range			*/
 #define	EC_WidthOver4K		50	/* width exceeds 4096 pixels			*/
+#define	EC_DirectColorERR	51	/* plugin doesn't support direct color  */
+#define	EC_Requires256		52	/* plugin requires 256 color mode		*/
+#define	EC_BadGlobalAES		53	/* Invalid pointer to AES global array	*/
+#define	EC_InvalidHeader	54	/* Header failed sandity check(s)		*/
 /* new error codes will be added to the end of this list as needed */
 
 /*
