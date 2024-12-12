@@ -127,6 +127,7 @@ for that format, it is prioritized.
  * New plugin for uConvert bitmap format (*.UIM/*.UIMG)
  * New plugin for GemView MGF format (*.MGF)
  * New plugin for INVISION Elite Color (*.R01/*.R02/*.R04/*.R08)
+ * New plugin for Scalable Vector Graphics (*.SVG/*.SVGZ)
  * New plugin from RECOIL with 552 file formats
 
  Obsolete plugins:

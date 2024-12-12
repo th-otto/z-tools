@@ -100,6 +100,7 @@ PLUGINS = \
 	ssb \
 	stad \
 	sun \
+	svg \
 	synarts \
 	tga \
 	tiff \

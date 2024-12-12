@@ -244,6 +244,9 @@ supported features of the formats.
 !hline
  RGB Intermed. !! .rgb              !! 320x200         !! 12             !! None            !! 
 !hline
+ Scalable Vector!! .svg/.svgz       !! Any             !! 24             !! None/Deflate    !!
+ Graphics      !!                   !!                 !!                !!                 !!
+!hline
  Signum        !! .imc              !! 640x400         !! 1              !! None            !!
 !hline
  SGI           !! .sgi              !! Any             !! 8/24/32        !! None            !! 8 planes is grayscale
