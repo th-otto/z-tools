@@ -124,7 +124,7 @@ static long init_png_slb(void)
 	long ret;
 
 	funcs = get_slb_funcs();
-	nf_debugprintf("zvpng: open pnglib\n");
+	nf_debugprintf(("zvpng: open pnglib\n"));
 	if ((ret = funcs->p_slb_open(LIB_PNG, NULL)) < 0)
 		return ret;
 	return 0;
@@ -136,7 +136,7 @@ static void quit_png_slb(void)
 	struct _zview_plugin_funcs *funcs;
 
 	funcs = get_slb_funcs();
-	nf_debugprintf("zvpng: close pnglib\n");
+	nf_debugprintf(("zvpng: close pnglib\n"));
 	funcs->p_slb_close(LIB_PNG);
 }
 #endif

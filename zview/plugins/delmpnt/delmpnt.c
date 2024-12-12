@@ -254,7 +254,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 	uint16_t plane7;
 	uint16_t *ptr;
 	
-	ptr = (uint16_t *)(info->_priv_ptr + pos);
+	ptr = (uint16_t *)((uint8_t *)info->_priv_ptr + pos);
 	info->_priv_var += info->width;
 	x = 0;
 	while (x < info->width)

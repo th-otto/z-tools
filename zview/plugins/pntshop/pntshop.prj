@@ -28,7 +28,7 @@ pntshop.ldg
 
 =
 ..\common\pcstart.s
-pscldg.c
+ldg.c
 pntshop.c
 
 ..\..\ldglib\ldglib.c

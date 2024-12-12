@@ -163,20 +163,20 @@ static uint8_t *stos_compressed(uint8_t *file, size_t size, uint16_t *colors)
 
 	if (get_long(file) != STOS_HD)
 	{
-		nf_debugprintf("This is not valid STOS compressed screen!\n");
+		nf_debugprintf(("This is not valid STOS compressed screen!\n"));
 		return NULL;
 	}
 	screen = malloc(SCREEN_SIZE);
 	if (screen == NULL)
 	{
-		nf_debugprintf("Out of memory!\n");
+		nf_debugprintf(("Out of memory!\n"));
 		return NULL;
 	}
 	memset(screen, 0, SCREEN_SIZE);	/* clear screen */
 	res = get_word(file + 4);
 	if (res > 2)
 	{
-		nf_debugprintf("This is not valid STOS compressed screen!\n");
+		nf_debugprintf(("This is not valid STOS compressed screen!\n"));
 		free(screen);
 		return NULL;
 	}
@@ -187,7 +187,7 @@ static uint8_t *stos_compressed(uint8_t *file, size_t size, uint16_t *colors)
 	x_res = get_word(file + 10);
 	if (x_res * plane_size > line_size || x_res == 0)
 	{
-		nf_debugprintf("This is not valid STOS compressed screen!\n");
+		nf_debugprintf(("This is not valid STOS compressed screen!\n"));
 		free(screen);
 		return NULL;
 	}
@@ -195,7 +195,7 @@ static uint8_t *stos_compressed(uint8_t *file, size_t size, uint16_t *colors)
 	block_size = get_word(file + 16);
 	if (blocks * block_size > y_size || blocks * block_size == 0)
 	{
-		nf_debugprintf("This is not valid STOS compressed screen!\n");
+		nf_debugprintf(("This is not valid STOS compressed screen!\n"));
 		free(screen);
 		return NULL;
 	}
@@ -205,7 +205,7 @@ static uint8_t *stos_compressed(uint8_t *file, size_t size, uint16_t *colors)
 	pointer1 = get_long(file + 24);
 	if (literal >= size || pointer0 >= size || pointer1 >= size)
 	{
-		nf_debugprintf("STOS decompression error!\n");
+		nf_debugprintf(("STOS decompression error!\n"));
 		free(screen);
 		return NULL;
 	}
@@ -247,7 +247,7 @@ static uint8_t *stos_compressed(uint8_t *file, size_t size, uint16_t *colors)
 						}
 						if (line >= SCREEN_SIZE)
 						{
-							nf_debugprintf("STOS decompression error!\n");
+							nf_debugprintf(("STOS decompression error!\n"));
 							free(screen);
 							return NULL;
 						}
@@ -268,7 +268,7 @@ static uint8_t *stos_compressed(uint8_t *file, size_t size, uint16_t *colors)
 								cmd1 = file[pointer1++];
 								if (literal > size || pointer0 > size || pointer1 > size)
 								{
-									nf_debugprintf("STOS decompression error!\n");
+									nf_debugprintf(("STOS decompression error!\n"));
 									free(screen);
 									return NULL;
 								}
@@ -465,7 +465,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 			uint16_t plane1;
 			uint16_t *ptr;
 			
-			ptr = (uint16_t *)(info->_priv_ptr + info->_priv_var);
+			ptr = (uint16_t *)((uint8_t *)info->_priv_ptr + info->_priv_var);
 			info->_priv_var += info->width >> 2;
 			x = info->width >> 4;
 			do
@@ -493,7 +493,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 			uint16_t plane3;
 			uint16_t *ptr;
 			
-			ptr = (uint16_t *)(info->_priv_ptr + info->_priv_var);
+			ptr = (uint16_t *)((uint8_t *)info->_priv_ptr + info->_priv_var);
 			info->_priv_var += info->width >> 1;
 			x = info->width >> 4;
 			do

@@ -8,17 +8,17 @@ all:: pablopnt.ldg zvppp.slb
 
 include $(top_srcdir)/rules
 
-pablopnt.ldg: pppldg.o pablopnt.o $(LDGOBJS)
+pablopnt.ldg: ldg.o pablopnt.o $(LDGOBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) -Wl,--stack,$(STACKSIZE) $(LIB)
 
-zvppp.slb: header.lo pppslb.lo pablopnt.lo
+zvppp.slb: header.lo slb.lo pablopnt.lo
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-pppslb.lo pablopnt.lo: ../common/plugin.h ../common/zview.h exports.h
+slb.lo pablopnt.lo: ../common/plugin.h ../common/zview.h exports.h
 pablopnt.lo pablopnt.o: pablopnt.c pppdepac.c
 
 clean:

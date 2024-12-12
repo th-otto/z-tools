@@ -1,7 +1,8 @@
 animatic.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,12 +27,12 @@ animatic.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-animaldg.c
+..\common\pcstart.s
+ldg.c
 anima.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcstdlib.lib

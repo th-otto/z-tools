@@ -186,7 +186,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	{
 		int j;
 		
-		j = header.frame_count;
+		j = (int)header.frame_count;
 		i = j - 1;
 		while (i >= 0)
 		{

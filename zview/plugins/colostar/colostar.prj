@@ -1,7 +1,8 @@
 colostar.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,12 +27,12 @@ colostar.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-colorldg.c
+..\common\pcstart.s
+ldg.c
 colostar.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcstdlib.lib

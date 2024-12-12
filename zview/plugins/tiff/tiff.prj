@@ -1,7 +1,8 @@
 tiff.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,17 +27,17 @@ tiff.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-tiffldg.c
+..\common\pcstart.s
+ldg.c
 tiff.c
-
-ldglib\ldglib.c
-ldglib\stdpc.s
 
 000\tiff.lib
 000\lzma.lib
 000\jpeg8.lib
 000\zlib.lib
+
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pcfltlib.lib
 pctoslib.lib

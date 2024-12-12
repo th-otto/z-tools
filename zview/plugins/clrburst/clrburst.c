@@ -202,7 +202,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 	screen16 = (const uint16_t *)info->_priv_ptr;
 	palettes = (const uint16_t *)info->_priv_ptr_more;
 	planes = (int16_t)(intptr_t)info->__priv_ptr_more;
-	y = info->_priv_var_more;
+	y = (int)info->_priv_var_more;
 	palettes += y * 16;
 	y++;
 	info->_priv_var_more = y;

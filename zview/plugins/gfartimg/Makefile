@@ -8,17 +8,17 @@ all:: gfartimg.ldg zvgrimg.slb
 
 include $(top_srcdir)/rules
 
-gfartimg.ldg: gfartldg.o gfartimg.o $(LDGOBJS)
+gfartimg.ldg: ldg.o gfartimg.o $(LDGOBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) -Wl,--stack,$(STACKSIZE) $(LIB)
 
-zvgrimg.slb: header.lo gfartslb.lo gfartimg.lo
+zvgrimg.slb: header.lo slb.lo gfartimg.lo
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-gfartslb.lo gfartimg.lo: ../common/plugin.h ../common/zview.h exports.h
+slb.lo gfartimg.lo: ../common/plugin.h ../common/zview.h exports.h
 gfartimg.lo gfartimg.o: gfartimg.c ../gfartani/gfatable.c ../gfartani/gfadepac.c
 
 clean:

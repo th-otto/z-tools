@@ -215,7 +215,7 @@ static void decode_rle8(int16_t handle, IMGINFO info, uint8_t *bmap, uint32_t li
 				if ((x + command_byte) > xmargin || y >= info->height)
 				{
 					/* corrupted */
-					nf_debugprintf("corrupted\n");
+					nf_debugprintf(("corrupted\n"));
 					break;
 				}
 				for (i = 0; i < command_byte; i++)
@@ -239,7 +239,7 @@ static void decode_rle8(int16_t handle, IMGINFO info, uint8_t *bmap, uint32_t li
 			if ((x + status_byte) > xmargin || y >= info->height)
 			{
 				/* corrupted */
-				nf_debugprintf("corrupted\n");
+				nf_debugprintf(("corrupted\n"));
 				break;
 			}
 			if (Fread(handle, 1, &second_byte) != 1)
@@ -274,50 +274,50 @@ static void decode_rle4(int16_t handle, IMGINFO info, uint8_t *bmap, uint32_t li
 	{
 		if (Fread(handle, 1, &status_byte) != 1)
 			break;
-		nf_debugprintf("status_byte $%02x, x=%u\n", status_byte, x);
+		nf_debugprintf(("status_byte $%02x, x=%u\n", status_byte, x));
 		if (status_byte == 0)
 		{						/* get control byte */
 			if (Fread(handle, 1, &command_byte) != 1)
 			{
 				/* corrupted */
-				nf_debugprintf("corrupted\n");
+				nf_debugprintf(("corrupted\n"));
 				break;
 			}
 			if (command_byte == RLE_COMMAND)
 			{					/* end of row? */
-				nf_debugprintf("end of row, x=%u, y=%u\n", x, y);
+				nf_debugprintf(("end of row, x=%u, y=%u\n", x, y));
 				y++;
 				x = 0;
 			} else if (command_byte == RLE_ENDOFBITMAP)
 			{					/* end of bitmap? */
-				nf_debugprintf("end of bitmap\n");
+				nf_debugprintf(("end of bitmap\n"));
 				break;
 			} else if (command_byte == RLE_DELTA)
 			{					/* delta offset? */
 				if (Fread(handle, 2, buff) != 2)
 				{
 					/* corrupted */
-					nf_debugprintf("corrupted\n");
+					nf_debugprintf(("corrupted\n"));
 					break;
 				}
 				x += buff[0];
 				y += buff[1];
-				nf_debugprintf("delta x=%u y=%u -> x=%u, y=%u\n", buff[0], buff[1], x, y);
+				nf_debugprintf(("delta x=%u y=%u -> x=%u, y=%u\n", buff[0], buff[1], x, y));
 			} else
 			{					/* literal group? */
 				if ((x + command_byte) > xmargin || y >= info->height)
 				{
 					/* corrupted */
-					nf_debugprintf("corrupted\n");
+					nf_debugprintf(("corrupted\n"));
 					break;
 				}
-				nf_debugprintf("literal %u\n", command_byte);
+				nf_debugprintf(("literal %u\n", command_byte));
 				for (i = 0; i < (command_byte >> 1); i++)
 				{
 					if (Fread(handle, 1, &second_byte) != 1)
 					{
 						/* corrupted */
-						nf_debugprintf("corrupted\n");
+						nf_debugprintf(("corrupted\n"));
 						break;
 					}
 					bmap[(y * line_size) + x] = second_byte >> 4;
@@ -330,7 +330,7 @@ static void decode_rle4(int16_t handle, IMGINFO info, uint8_t *bmap, uint32_t li
 					if (Fread(handle, 1, &second_byte) != 1)
 					{
 						/* corrupted */
-						nf_debugprintf("corrupted\n");
+						nf_debugprintf(("corrupted\n"));
 						break;
 					}
 					bmap[(y * line_size) + x] = second_byte >> 4;
@@ -347,16 +347,16 @@ static void decode_rle4(int16_t handle, IMGINFO info, uint8_t *bmap, uint32_t li
 			if ((x + status_byte) > xmargin || y >= info->height)
 			{
 				/* corrupted */
-				nf_debugprintf("corrupted\n");
+				nf_debugprintf(("corrupted\n"));
 				break;
 			}
 			if (Fread(handle, 1, &second_byte) != 1)
 			{
 				/* corrupted */
-				nf_debugprintf("corrupted\n");
+				nf_debugprintf(("corrupted\n"));
 				break;
 			}
-			nf_debugprintf("repeat %u $%02x\n", status_byte, second_byte);
+			nf_debugprintf(("repeat %u $%02x\n", status_byte, second_byte));
 			for (i = 0; i < (status_byte >> 1); i++)
 			{
 				bmap[(y * line_size) + x] = second_byte >> 4;
@@ -419,7 +419,7 @@ static void decode_rle24(int16_t handle, IMGINFO info, uint8_t *bmap, uint32_t l
 				if ((x + command_byte) > xmargin || y >= info->height)
 				{
 					/* corrupted */
-					nf_debugprintf("corrupted\n");
+					nf_debugprintf(("corrupted\n"));
 					break;
 				}
 				for (i = 0; i < command_byte; i++)
@@ -445,7 +445,7 @@ static void decode_rle24(int16_t handle, IMGINFO info, uint8_t *bmap, uint32_t l
 			if ((x + status_byte) > xmargin || y >= info->height)
 			{
 				/* corrupted */
-				nf_debugprintf("corrupted\n");
+				nf_debugprintf(("corrupted\n"));
 				break;
 			}
 			if (Fread(handle, 3, buff) != 3)
@@ -652,9 +652,9 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		info->orientation = UP_TO_DOWN;
 	}
 
-	nf_debugprintf("line_size1: %u %u\n", line_size, compressed);
+	nf_debugprintf(("line_size1: %u %u\n", line_size, compressed));
 	line_size += fill4B(line_size);
-	nf_debugprintf("line_size2: %u\n", line_size);
+	nf_debugprintf(("line_size2: %u\n", line_size));
 	datasize = line_size * info->height;
 	bmap = malloc(datasize + 256L);
 	if (bmap == NULL)

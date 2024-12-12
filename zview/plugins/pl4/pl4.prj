@@ -1,7 +1,8 @@
 pl4.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,13 +27,13 @@ pl4.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-pl4ldg.c
+..\common\pcstart.s
+ldg.c
 lz4.s
 pl4.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcstdlib.lib

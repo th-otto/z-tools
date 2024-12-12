@@ -144,7 +144,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		ptr += frame_size;
 	}
 	num_frames = i;
-	nf_debugprintf("frames = %u\n", num_frames);
+	nf_debugprintf(("frames = %u\n", num_frames));
 	if (num_frames == 0)
 	{
 		free(data);
@@ -156,7 +156,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			uint8_t *tmp;
 			
 			/* play backwards */
-			nf_debugprintf("play backwards\n");
+			nf_debugprintf(("play backwards\n"));
 			j = num_frames - 1;
 			for (i = 0; i < j; j--, i++)
 			{
@@ -171,7 +171,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			uint16_t k;
 			
 			/* reverse direction at end of play */
-			nf_debugprintf("reverse direction at end\n");
+			nf_debugprintf(("reverse direction at end\n"));
 			k = num_frames;
 			j = num_frames;
 			for (i = 0; i < num_frames && k < ZVIEW_MAX_IMAGES; k++, i++)
@@ -236,7 +236,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 	{
 		info->_priv_var_more = info->page_wanted;
 		pos = 0;
-		nf_debugprintf("decode frame %u of %u\n", info->page_wanted, img->imagecount);
+		nf_debugprintf(("decode frame %u of %u\n", info->page_wanted, img->imagecount));
 		if (info->page_wanted >= img->imagecount)
 			return FALSE;
 		info->delay = img->delay[info->page_wanted];

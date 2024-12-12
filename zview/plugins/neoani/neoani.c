@@ -280,7 +280,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 
 	if (cur_y == 0)
 	{
-		int handle = info->_priv_var_more;
+		int handle = (int)info->_priv_var_more;
 		Fseek(frame_positions[info->page_wanted], handle, SEEK_SET);
 		if ((size_t)Fread(handle, frame_size, screen16) != frame_size)
 			return FALSE;

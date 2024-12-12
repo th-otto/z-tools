@@ -210,7 +210,7 @@ boolean __CDECL encoder_init(const char *name, IMGINFO info)
 	data = (uint8_t *)Malloc(bytes_per_row);
 	if (data == NULL)
 		RETURN_ERROR(EC_Malloc);
-	handle = Fcreate(name, 0);
+	handle = (int)Fcreate(name, 0);
 	if (handle < 0)
 	{
 		Mfree(data);

@@ -80,7 +80,7 @@ static uint16_t read_int(IMGINFO info)
 				break;
 		} else if (ISDIGIT(ch))
 		{
-			if (val >= (65540U / 10) || (val >= (65530U / 10) && ch >= '6'))
+			if (val >= (65540UL / 10) || (val >= (65530U / 10) && ch >= '6'))
 				return -1;
 			val = val * 10 + (ch - '0');
 			i = 1;
@@ -128,22 +128,22 @@ static int read_pam_header(IMGINFO info)
 		{
 			if ((info->width = read_int(info)) == (uint16_t)-1)
 				return FALSE;
-			nf_debugprintf("width: %u\n", info->width);
+			nf_debugprintf(("width: %u\n", info->width));
 		} else if (strcmp(namebuf, "HEIGHT") == 0)
 		{
 			if ((info->height = read_int(info)) == (uint16_t)-1)
 				return FALSE;
-			nf_debugprintf("heigth: %u\n", info->width);
+			nf_debugprintf(("heigth: %u\n", info->width));
 		} else if (strcmp(namebuf, "DEPTH") == 0)
 		{
 			if ((info->components = read_int(info)) == (uint16_t)-1)
 				return FALSE;
-			nf_debugprintf("depth: %u\n", info->components);
+			nf_debugprintf(("depth: %u\n", info->components));
 		} else if (strcmp(namebuf, "MAXVAL") == 0)
 		{
 			if ((maxval = read_int(info)) == (uint16_t)-1)
 				return FALSE;
-			nf_debugprintf("maxval: %u\n", maxval);
+			nf_debugprintf(("maxval: %u\n", maxval));
 		} else if (strcmp(namebuf, "TUPLTYPE") == 0)
 		{
 			/* ignored for now */
@@ -153,7 +153,7 @@ static int read_pam_header(IMGINFO info)
 			} while (ch > 0x0a);
 		} else
 		{
-			nf_debugprintf("unknown hdr type: %s\n", namebuf);
+			nf_debugprintf(("unknown hdr type: %s\n", namebuf));
 			return FALSE;
 		}
 	}

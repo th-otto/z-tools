@@ -1,7 +1,8 @@
 flic.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,12 +27,12 @@ flic.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-flicldg.c
+..\common\pcstart.s
+ldg.c
 flic.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcstdlib.lib

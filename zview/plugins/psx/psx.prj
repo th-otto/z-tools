@@ -28,7 +28,7 @@ psx.ldg
 
 =
 ..\common\pcstart.s
-psxldg.c
+ldg.c
 psx.c
 
 ..\..\ldglib\ldglib.c

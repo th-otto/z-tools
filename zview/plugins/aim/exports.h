@@ -1,10 +1,16 @@
 /*
- * aim/exports.h - internal header with definitions of all exported functions
+ * exports.h - internal header with definitions of all exported functions
  *
  * Copyright (C) 2019 Thorsten Otto
  *
  * For conditions of distribution and use, see copyright file.
  */
+
+#define VERSION		0x0201
+#define NAME        "AIM (Atari Image Manager)"
+#define DATE        __DATE__ " " __TIME__
+#define AUTHOR      "Thorsten Otto"
+#define EXTENSIONS  "COL\0" "IM\0"
 
 #ifndef LIBFUNC
 # error "LIBFUNC must be defined before including this file"
@@ -27,3 +33,5 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
+
+#define SHAREDLIB "zvaim.slb"

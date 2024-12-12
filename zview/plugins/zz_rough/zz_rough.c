@@ -219,7 +219,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 	uint16_t plane3;
 	uint16_t *ptr;
 	
-	ptr = (uint16_t *)(info->_priv_ptr + info->_priv_var);
+	ptr = (uint16_t *)((uint8_t *)info->_priv_ptr + info->_priv_var);
 	x = info->width >> 4;
 	info->_priv_var += x << 3;
 	do

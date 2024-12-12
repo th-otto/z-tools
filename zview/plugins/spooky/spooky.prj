@@ -28,7 +28,7 @@ spooky.ldg
 
 =
 ..\common\pcstart.s
-treldg.c
+ldg.c
 spooky.c
 
 ..\..\ldglib\ldglib.c

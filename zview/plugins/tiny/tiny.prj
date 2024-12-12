@@ -28,7 +28,7 @@ tiny.ldg
 
 =
 ..\common\pcstart.s
-tinyldg.c
+ldg.c
 tiny.c
 
 ..\..\ldglib\ldglib.c

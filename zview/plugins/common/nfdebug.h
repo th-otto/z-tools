@@ -48,6 +48,7 @@ static void nf_debugprintf(const char *format, ...)
 	va_end(args);
 	ops.nf_call(nf_stderr | 0, buf);
 }
+#define nf_debugprintf(x) nf_debugprintf x
 #else
-#define nf_debugprintf(format, ...)
+#define nf_debugprintf(x)
 #endif

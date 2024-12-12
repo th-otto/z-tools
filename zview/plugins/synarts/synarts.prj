@@ -28,7 +28,7 @@ synarts.ldg
 
 =
 ..\common\pcstart.s
-synldg.c
+ldg.c
 synarts.c
 
 ..\..\ldglib\ldglib.c

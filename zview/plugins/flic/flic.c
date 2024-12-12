@@ -585,7 +585,7 @@ static int read_delta_flc(int16_t handle, IMGINFO info)
 			}
 			break;
 		case 1:
-			nf_debugprintf("bit error at DTA_LC\n");
+			nf_debugprintf(("bit error at DTA_LC\n"));
 			return FALSE;
 		case 2:
 			bmap[pos + (info->width - 1)] = count & 0xff;
@@ -850,7 +850,7 @@ static int read_delta_flc16(int16_t handle, IMGINFO info)
 			}
 			break;
 		case 1:
-			nf_debugprintf("bit error at DTA_LC\n");
+			nf_debugprintf(("bit error at DTA_LC\n"));
 			return FALSE;
 		case 2:
 			{
@@ -879,7 +879,7 @@ static int read_frame(int16_t handle, IMGINFO info)
 
 	if (read_frame_header(handle, &frame_header) == FALSE)
 		return FALSE;
-	nf_debugprintf("frm_type=0x%x subcnt=%u size=%lu\n", frame_header.type, frame_header.chunks, (unsigned long)frame_header.size);
+	nf_debugprintf(("frm_type=0x%x subcnt=%u size=%lu\n", frame_header.type, frame_header.chunks, (unsigned long)frame_header.size));
 	if (frame_header.chunks == 0 && frame_header.size == sizeof(FRAME_TYPE))
 		return TRUE;
 	
@@ -892,10 +892,10 @@ static int read_frame(int16_t handle, IMGINFO info)
 		{
 			if (read_chunk_header(handle, &chunk_header) == FALSE)
 				return FALSE;
-			nf_debugprintf("frame %u: chunk_type=%u pos=0x%lx size=0x%lx\n",
+			nf_debugprintf(("frame %u: chunk_type=%u pos=0x%lx size=0x%lx\n",
 				info->page_wanted, chunk_header.type,
 				(unsigned long)Fseek(0, handle, SEEK_CUR) - sizeof(chunk_header),
-				(unsigned long)chunk_header.size);
+				(unsigned long)chunk_header.size));
 			switch (chunk_header.type)
 			{
 			case 11: /* COLOR_64 */
@@ -908,22 +908,22 @@ static int read_frame(int16_t handle, IMGINFO info)
 					return FALSE;
 				break;
 			case 7: /* DELTA_FLC (FLI_SS2) */
-				nf_debugprintf("frame %u: delta_lfc\n", info->page_wanted);
+				nf_debugprintf(("frame %u: delta_lfc\n", info->page_wanted));
 				if (read_delta_flc(handle, info) == FALSE)
 					return FALSE;
 				break;
 			case 12: /* DELTA_FLI (FLI_LC) */
-				nf_debugprintf("frame %u: delta_fli\n", info->page_wanted);
+				nf_debugprintf(("frame %u: delta_fli\n", info->page_wanted));
 				if (read_delta_fli(handle, info) == FALSE)
 					return FALSE;
 				break;
 			case 15: /* BYTE_RUN (FLI_BRUN) */
-				nf_debugprintf("frame %u: byte_run\n", info->page_wanted);
+				nf_debugprintf(("frame %u: byte_run\n", info->page_wanted));
 				if (read_image(handle, info) == FALSE)
 					return FALSE;
 				break;
 			case 25: /* DTA_BRUN */
-				nf_debugprintf("frame %u: dta_brun\n", info->page_wanted);
+				nf_debugprintf(("frame %u: dta_brun\n", info->page_wanted));
 				switch (info->planes)
 				{
 				case 15:
@@ -932,12 +932,12 @@ static int read_frame(int16_t handle, IMGINFO info)
 						return FALSE;
 					break;
 				default:
-					nf_debugprintf("DTA_BRUN not supported at color depth=%u\n", info->planes);
+					nf_debugprintf(("DTA_BRUN not supported at color depth=%u\n", info->planes));
 					return FALSE;
 				}
 				break;
 			case 27: /* DTA_LC */
-				nf_debugprintf("frame %u: dta_lfc\n", info->page_wanted);
+				nf_debugprintf(("frame %u: dta_lfc\n", info->page_wanted));
 				switch (info->planes)
 				{
 				case 15:
@@ -946,7 +946,7 @@ static int read_frame(int16_t handle, IMGINFO info)
 						return FALSE;
 					break;
 				default:
-					nf_debugprintf("DTA_LC not supported at color depth=%u\n", info->planes);
+					nf_debugprintf(("DTA_LC not supported at color depth=%u\n", info->planes));
 					return FALSE;
 				}
 				break;
@@ -966,13 +966,13 @@ static int read_frame(int16_t handle, IMGINFO info)
 				Fseek(chunk_header.size - sizeof(chunk_header), handle, SEEK_CUR);
 				break;
 			default:
-				nf_debugprintf("unknown sub chunk type=%u\n", chunk_header.type);
+				nf_debugprintf(("unknown sub chunk type=%u\n", chunk_header.type));
 				return FALSE;
 			}
 		}
 		break;
 	default:
-		nf_debugprintf("unknown frame type=0x%x\n", frame_header.type);
+		nf_debugprintf(("unknown frame type=0x%x\n", frame_header.type));
 		return FALSE;
 	}
 
@@ -1021,13 +1021,13 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	case 0xaf44:
 		break;
 	default:
-		nf_debugprintf("unsupported flic format=0x%x\n", flic_header.type);
+		nf_debugprintf(("unsupported flic format=0x%x\n", flic_header.type));
 		Fclose(handle);
 		return FALSE;
 	}
 	if (file_size < flic_header.size)
 	{
-		nf_debugprintf("file size < header size - short file=%lu\n", (unsigned long)flic_header.size);
+		nf_debugprintf(("file size < header size - short file=%lu\n", (unsigned long)flic_header.size));
 		Fclose(handle);
 		return FALSE;
 	}
@@ -1050,7 +1050,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		image_size = (size_t)info->width * info->height * 3;
 		break;
 	default:
-		nf_debugprintf("unsupported depth %u\n", info->planes);
+		nf_debugprintf(("unsupported depth %u\n", info->planes));
 		Fclose(handle);
 		return FALSE;
 	}
@@ -1075,7 +1075,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		}
 		if (frame_header.type == FRAME_CHUNK)
 		{
-			nf_debugprintf("offsets[%u]=%lu size=%lu\n", i, (unsigned long)pos, (unsigned long)frame_header.size);
+			nf_debugprintf(("offsets[%u]=%lu size=%lu\n", i, (unsigned long)pos, (unsigned long)frame_header.size));
 			if (real_frames < ZVIEW_MAX_IMAGES)
 				frame_positions[real_frames++] = pos;
 		}
@@ -1083,7 +1083,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		{
 			uint8_t c;
 			
-			nf_debugprintf("!odd frm_size=%lu\n", (unsigned long)frame_header.size);
+			nf_debugprintf(("!odd frm_size=%lu\n", (unsigned long)frame_header.size));
 			/* check type field of next frame */
 			Fseek(frame_header.size - 12, handle, SEEK_CUR);
 			if (Fread(handle, sizeof(c), &c) != sizeof(c))
@@ -1095,10 +1095,10 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			if (c != 0xfa)
 			{
 				frame_header.size++;
-				nf_debugprintf("frame size rounded up\n");
+				nf_debugprintf(("frame size rounded up\n"));
 			} else
 			{
-				nf_debugprintf("odd frame size left as is\n");
+				nf_debugprintf(("odd frame size left as is\n"));
 			}
 			Fseek(pos + sizeof(frame_header), handle, SEEK_SET);
 		}

@@ -17,17 +17,17 @@ all:: png.ldg zvpng.slb
 
 include $(top_srcdir)/rules
 
-png.ldg: pngldg.o png.o $(LDGOBJS)
+png.ldg: ldg.o png.o $(LDGOBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) -Wl,--stack,$(STACKSIZE) $(LIB)
 
-zvpng.slb: header.lo pngslb.lo png.lo $(LIBPNG_SOBJS)
+zvpng.slb: header.lo slb.lo png.lo $(LIBPNG_SOBJS)
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) -lpng.slb -lz.slb -lm $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-pngslb.lo png.lo: ../common/plugin.h ../common/zview.h exports.h
+slb.lo png.lo: ../common/plugin.h ../common/zview.h exports.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb libpng/*.o libpng/*.lo *.pdb

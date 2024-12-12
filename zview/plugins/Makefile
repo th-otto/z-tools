@@ -3,9 +3,9 @@ include $(top_srcdir)/configvars
 
 PLUGINS = \
 	aim \
-	animaster \
+	animastr \
 	animatic \
-	arabesque \
+	arabesqu \
 	art \
 	ascii \
 	bmp \
@@ -13,7 +13,7 @@ PLUGINS = \
 	canvas \
 	cel \
 	coke \
-	colorburst \
+	clrburst \
 	colostar \
 	colr \
 	compeyes \
@@ -22,10 +22,10 @@ PLUGINS = \
 	dali \
 	degas \
 	degasx \
-	delmpaint \
+	delmpnt \
 	deskpic \
 	doodle \
-	dunegraph \
+	dungraph \
 	duo \
 	d_graph \
 	eggpaint \
@@ -62,7 +62,7 @@ PLUGINS = \
 	mspaint \
 	mtv \
 	neoani \
-	neochrome \
+	neochrom \
 	pablopnt \
 	paintpro \
 	pblcpntr \

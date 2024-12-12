@@ -90,7 +90,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		header.magic[2] != 'P' ||
 		header.mode > 3)
 	{
-		nf_debugprintf("header failed\n");
+		nf_debugprintf(("header failed\n"));
 		Fclose(handle);
 		return FALSE;
 	}
@@ -104,7 +104,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	pixbuf = decode_mpp(mode, ste, extra, handle);
 	if (pixbuf == NULL)
 	{
-		nf_debugprintf("decode pixbuf failed\n");
+		nf_debugprintf(("decode pixbuf failed\n"));
 		Fclose(handle);
 		return FALSE;
 	}
@@ -115,7 +115,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		pixbuf2 = decode_mpp(mode, ste, extra, handle);
 		if (pixbuf2 == NULL)
 		{
-			nf_debugprintf("decode pixbuf2 failed\n");
+			nf_debugprintf(("decode pixbuf2 failed\n"));
 			pixbuf_delete(pixbuf);
 			Fclose(handle);
 			return FALSE;

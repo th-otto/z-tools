@@ -8,17 +8,17 @@ all:: hrm.ldg zvhrm.slb
 
 include $(top_srcdir)/rules
 
-hrm.ldg: hrmldg.o hrm.o $(LDGOBJS)
+hrm.ldg: ldg.o hrm.o $(LDGOBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) -Wl,--stack,$(STACKSIZE) $(LIB)
 
-zvhrm.slb: header.lo hrmslb.lo hrm.lo
+zvhrm.slb: header.lo slb.lo hrm.lo
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-hrmslb.lo hrm.lo: ../common/plugin.h ../common/zview.h exports.h
+slb.lo hrm.lo: ../common/plugin.h ../common/zview.h exports.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

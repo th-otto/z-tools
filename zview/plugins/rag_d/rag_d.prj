@@ -28,7 +28,7 @@ rag_d.ldg
 
 =
 ..\common\pcstart.s
-ragldg.c
+ldg.c
 rag_d.c
 
 ..\..\ldglib\ldglib.c

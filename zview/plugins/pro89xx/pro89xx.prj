@@ -28,7 +28,7 @@ pro89xx.ldg
 
 =
 ..\common\pcstart.s
-hirldg.c
+ldg.c
 pro89xx.c
 
 ..\..\ldglib\ldglib.c

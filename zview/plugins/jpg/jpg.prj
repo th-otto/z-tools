@@ -1,7 +1,8 @@
 jpg.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,16 +27,16 @@ jpg.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-jpgldg.c
+..\common\pcstart.s
+ldg.c
 jpg.c
 jpgdsp.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
-
 000\exif.lib
 000\jpeg8.lib
+
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pcfltlib.lib
 pctoslib.lib

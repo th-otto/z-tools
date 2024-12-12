@@ -8,10 +8,10 @@ all:: crackart.ldg zvcart.slb
 
 include $(top_srcdir)/rules
 
-crackart.ldg: cartldg.o crackart.o $(LDGOBJS)
+crackart.ldg: ldg.o crackart.o $(LDGOBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) -Wl,--stack,$(STACKSIZE) $(LIB)
 
-zvcart.slb: header.lo cartslb.lo crackart.lo
+zvcart.slb: header.lo slb.lo crackart.lo
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
@@ -21,7 +21,7 @@ header.lo: ../common/header.S exports.h
 ca_unpac.o: ca_unpac.s Makefile
 	$(CC) $(ASFLAGS) -c $< -o $@
 
-cartslb.lo crackart.lo: ../common/plugin.h ../common/zview.h exports.h
+slb.lo crackart.lo: ../common/plugin.h ../common/zview.h exports.h
 crackart.lo crackart.o: crackart.c ca_unpac.c
 
 clean:

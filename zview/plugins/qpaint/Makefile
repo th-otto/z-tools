@@ -8,17 +8,17 @@ all:: qpaint.ldg zvqpbx.slb
 
 include $(top_srcdir)/rules
 
-qpaint.ldg: qpbxldg.o qpaint.o $(LDGOBJS)
+qpaint.ldg: ldg.o qpaint.o $(LDGOBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) -Wl,--stack,$(STACKSIZE) $(LIB)
 
-zvqpbx.slb: header.lo qpbxslb.lo qpaint.lo
+zvqpbx.slb: header.lo slb.lo qpaint.lo
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-qpbxslb.lo qpaint.lo: ../common/plugin.h ../common/zview.h exports.h
+slb.lo qpaint.lo: ../common/plugin.h ../common/zview.h exports.h
 qpaint.lo qpaint.o: qpaint.c ../degas/packbits.c
 
 clean:

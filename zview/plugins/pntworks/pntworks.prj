@@ -28,7 +28,7 @@ pntworks.ldg
 
 =
 ..\common\pcstart.s
-pwgpldg.c
+ldg.c
 pntworks.c
 
 ..\..\ldglib\ldglib.c

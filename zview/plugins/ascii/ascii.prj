@@ -1,7 +1,8 @@
 ascii.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,12 +27,12 @@ ascii.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-asciildg.c
+..\common\pcstart.s
+ldg.c
 ascii.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcstdlib.lib

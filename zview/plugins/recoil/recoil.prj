@@ -1,7 +1,8 @@
 recoil.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,13 +27,13 @@ recoil.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-recoildg.c
+..\common\pcstart.s
+ldg.c
 recoimod.c
 recoil.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcstdlib.lib

@@ -1,7 +1,8 @@
 iff_rgbn.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,12 +27,12 @@ iff_rgbn.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-iffldg.c
+..\common\pcstart.s
+ldg.c
 iff_rgbn.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcstdlib.lib

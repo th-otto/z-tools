@@ -28,7 +28,7 @@ rgb.ldg
 
 =
 ..\common\pcstart.s
-rgbldg.c
+ldg.c
 rgb.c
 
 ..\..\ldglib\ldglib.c

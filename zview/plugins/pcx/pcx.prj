@@ -1,7 +1,8 @@
 pcx.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,12 +27,12 @@ pcx.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-pcxldg.c
+..\common\pcstart.s
+ldg.c
 pcx.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcstdlib.lib

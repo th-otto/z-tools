@@ -175,7 +175,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			return FALSE;
 		}
 		data_size = read_int(handle);
-		nf_debugprintf("ppp: datasize=%lu\n", data_size);
+		nf_debugprintf(("ppp: datasize=%lu\n", data_size));
 		bmap = malloc(SCREEN_SIZE + 256);
 		temp = malloc(data_size);
 		if (bmap == NULL || temp == NULL)
@@ -188,7 +188,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		pos = Fseek(0, handle, SEEK_CUR);
 		Fread(handle, sizeof(header), &header);
 		Fseek(pos, handle, SEEK_SET);
-		nf_debugprintf("ppp: resolution=%u compression=%u\n", header.resolution, header.compression);
+		nf_debugprintf(("ppp: resolution=%u compression=%u\n", header.resolution, header.compression));
 		if ((size_t)Fread(handle, data_size, temp) != data_size)
 		{
 			free(temp);
@@ -200,7 +200,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	} else if (strcmp(ext, "SRC") == 0)
 	{
 		data_size = file_size;
-		nf_debugprintf("src: datasize=%lu\n", data_size);
+		nf_debugprintf(("src: datasize=%lu\n", data_size));
 		bmap = malloc(SCREEN_SIZE + 256);
 		temp = malloc(data_size);
 		if (bmap == NULL || temp == NULL)
@@ -213,7 +213,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		pos = Fseek(0, handle, SEEK_CUR);
 		Fread(handle, sizeof(header), &header);
 		Fseek(pos, handle, SEEK_SET);
-		nf_debugprintf("src: resolution=%u compression=%u\n", header.resolution, header.compression);
+		nf_debugprintf(("src: resolution=%u compression=%u\n", header.resolution, header.compression));
 		if ((size_t)Fread(handle, data_size, temp) != data_size)
 		{
 			free(temp);
@@ -229,7 +229,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		
 		nlines = read_int(handle);
 		data_size = read_int(handle);
-		nf_debugprintf("bib: datasize=%lu\n", data_size);
+		nf_debugprintf(("bib: datasize=%lu\n", data_size));
 		for (i = 0; i < nlines * 4; i++)
 			read_str(handle, strbuf, &strbuf[sizeof(strbuf)]);
 		bmap = malloc(SCREEN_SIZE + 256);
@@ -244,7 +244,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		pos = Fseek(0, handle, SEEK_CUR);
 		Fread(handle, sizeof(header), &header);
 		Fseek(pos, handle, SEEK_SET);
-		nf_debugprintf("bib: resolution=%u compression=%u\n", header.resolution, header.compression);
+		nf_debugprintf(("bib: resolution=%u compression=%u\n", header.resolution, header.compression));
 		if ((size_t)Fread(handle, data_size, temp) != data_size)
 		{
 			free(temp);
@@ -375,7 +375,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 			uint16_t plane1;
 			uint16_t *ptr;
 			
-			ptr = (uint16_t *)(info->_priv_ptr + info->_priv_var);
+			ptr = (uint16_t *)((uint8_t *)info->_priv_ptr + info->_priv_var);
 			info->_priv_var += info->width >> 2;
 			x = info->width >> 4;
 			do
@@ -403,7 +403,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 			uint16_t plane3;
 			uint16_t *ptr;
 			
-			ptr = (uint16_t *)(info->_priv_ptr + info->_priv_var);
+			ptr = (uint16_t *)((uint8_t *)info->_priv_ptr + info->_priv_var);
 			info->_priv_var += info->width >> 1;
 			x = info->width >> 4;
 			do

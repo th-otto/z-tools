@@ -303,7 +303,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 
 	case 2:
 		{
-			int type = info->_priv_var_more;
+			int type = (int)info->_priv_var_more;
 			uint16_t *bmap = (uint16_t *)info->_priv_ptr;
 			
 			bmap += info->_priv_var;
@@ -361,7 +361,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 	
 	case 4:
 		{
-			int type = info->_priv_var_more;
+			int type = (int)info->_priv_var_more;
 			uint16_t *bmap = (uint16_t *)info->_priv_ptr;
 			
 			bmap += info->_priv_var;
@@ -429,7 +429,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 
 	case 8:
 		{
-			int type = info->_priv_var_more;
+			int type = (int)info->_priv_var_more;
 			uint16_t *bmap = (uint16_t *)info->_priv_ptr;
 			
 			bmap += info->_priv_var;
@@ -503,7 +503,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 	case 15:
 	case 16:
 		{
-			int type = info->_priv_var_more;
+			int type = (int)info->_priv_var_more;
 			uint16_t *bmap = (uint16_t *)info->_priv_ptr;
 			uint16_t color;
 			
@@ -548,7 +548,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 		
 	case 24:
 		{
-			int type = info->_priv_var_more;
+			int type = (int)info->_priv_var_more;
 			uint8_t *bmap = (uint8_t *)info->_priv_ptr;
 
 			bmap += info->_priv_var;

@@ -200,7 +200,7 @@ boolean __CDECL encoder_init(const char *name, IMGINFO info)
 	data = QOI_MALLOC(image_size);
 	if (data == NULL)
 		RETURN_ERROR(EC_Malloc);
-	handle = Fcreate(name, 0);
+	handle = (int)Fcreate(name, 0);
 	if (handle < 0)
 	{
 		QOI_FREE(data);

@@ -343,7 +343,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 			uint16_t num_deltas;
 			uint16_t delta_offset;
 			uint32_t delta_value;
-			int handle = info->_priv_var_more;
+			int handle = (int)info->_priv_var_more;
 			
 			bmap32 = (uint32_t *)info->_priv_ptr;
 			Fseek(frame_positions[info->page_wanted], handle, SEEK_SET);

@@ -258,7 +258,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		Fclose(handle);
 		RETURN_ERROR(EC_Fread);
 	}
-	nf_debugprintf("magic: 0x%08x planes=%u compression=%u\n", header.magic, header.planes, header.compression);
+	nf_debugprintf(("magic: 0x%08x planes=%u compression=%u\n", header.magic, header.planes, header.compression));
 	if (header.magic != 0x504E5400L && /* 'PNT\0' */
 		header.magic != 0x54504100L)   /* 'TPA\0' */
 	{
@@ -302,7 +302,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		}
 		file_size -= palette_size;
 	}
-	nf_debugprintf("filesize=%lu imagesize=%lu datasize=%u\n", file_size, image_size, header.image_size);
+	nf_debugprintf(("filesize=%lu imagesize=%lu datasize=%u\n", file_size, image_size, header.image_size));
 	
 	bmap = malloc(image_size);
 	if (bmap == NULL)
@@ -450,7 +450,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 			uint16_t plane1;
 			uint16_t *ptr;
 			
-			ptr = (uint16_t *)(info->_priv_ptr + info->_priv_var);
+			ptr = (uint16_t *)((uint8_t *)info->_priv_ptr + info->_priv_var);
 			x = (info->width + 15) >> 4;
 			info->_priv_var += x << 2;
 			do
@@ -479,7 +479,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 			uint16_t plane3;
 			uint16_t *ptr;
 			
-			ptr = (uint16_t *)(info->_priv_ptr + info->_priv_var);
+			ptr = (uint16_t *)((uint8_t *)info->_priv_ptr + info->_priv_var);
 			x = (info->width + 15) >> 4;
 			info->_priv_var += x << 3;
 			do
@@ -518,7 +518,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 			uint16_t plane7;
 			uint16_t *ptr;
 			
-			ptr = (uint16_t *)(info->_priv_ptr + info->_priv_var);
+			ptr = (uint16_t *)((uint8_t *)info->_priv_ptr + info->_priv_var);
 			x = (info->width + 15) >> 4;
 			info->_priv_var += x << 4;
 			do

@@ -214,7 +214,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 {
 	const uint16_t *screen16 = (const uint16_t *)info->_priv_ptr;
-	int pos = info->_priv_var;
+	int pos = (int)info->_priv_var;
 	uint16_t x;
 	int16_t i;
 	uint16_t byte;

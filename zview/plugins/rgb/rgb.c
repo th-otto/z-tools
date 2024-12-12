@@ -157,7 +157,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 	uint16_t *green_plane;
 	uint16_t *blue_plane;
 	
-	red_plane = (uint16_t *)(info->_priv_ptr + info->_priv_var);
+	red_plane = (uint16_t *)((uint8_t *)info->_priv_ptr + info->_priv_var);
 	green_plane = red_plane + SCREEN_SIZE / 2;
 	blue_plane = green_plane + SCREEN_SIZE / 2;
 	x = info->width >> 4;

@@ -283,7 +283,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 	const uint16_t *screen2;
 	
 	screen1 = (const uint16_t *)info->_priv_ptr;
-	screen2 = (const uint16_t *)(info->_priv_ptr + SCREEN_SIZE);
+	screen2 = screen1 + SCREEN_SIZE / 2;
 	x = 0;
 	w = 0;
 	do

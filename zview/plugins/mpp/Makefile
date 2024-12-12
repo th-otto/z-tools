@@ -8,17 +8,17 @@ all:: mpp.ldg zvmpp.slb
 
 include $(top_srcdir)/rules
 
-mpp.ldg: mppldg.o mpp.o $(LDGOBJS)
+mpp.ldg: ldg.o mpp.o $(LDGOBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) -Wl,--stack,$(STACKSIZE) $(LIB)
 
-zvmpp.slb: header.lo mppslb.lo mpp.lo
+zvmpp.slb: header.lo slb.lo mpp.lo
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-mppslb.lo mpp.lo: ../common/plugin.h ../common/zview.h exports.h
+slb.lo mpp.lo: ../common/plugin.h ../common/zview.h exports.h
 mpp.lo mpp.o: mpp.c mpp2bmp.c pixbuf.c pixbuf.h
 
 clean:

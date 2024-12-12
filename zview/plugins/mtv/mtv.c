@@ -128,7 +128,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 
 boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 {
-	int handle = info->_priv_var;
+	int handle = (int)info->_priv_var;
 	size_t linesize = (size_t)info->width * 3;
 
 	if ((size_t)Fread(handle, linesize, buffer) != linesize)
@@ -140,7 +140,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 
 void __CDECL reader_quit(IMGINFO info)
 {
-	int handle = info->_priv_var;
+	int handle = (int)info->_priv_var;
 	
 	if (handle > 0)
 	{

@@ -183,7 +183,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	ptr += 2;
 	height = *((uint16_t *)ptr);
 	ptr += 2;
-	nf_debugprintf("width=%u height %u format=$%04x\n", width, height, format);
+	nf_debugprintf(("width=%u height %u format=$%04x\n", width, height, format));
 
 	if (format == 0x3961)
 	{
@@ -193,7 +193,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		{
 			sizes[i] = *((uint16_t *)ptr);
 			ptr += 2;
-			nf_debugprintf("size[%u] = %u\n", i, sizes[i]);
+			nf_debugprintf(("size[%u] = %u\n", i, sizes[i]));
 		}
 	} else if (format == 0x3862)
 	{
@@ -202,7 +202,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		{
 			sizes[i] = *((uint16_t *)ptr);
 			ptr += 2;
-			nf_debugprintf("size[%u] = %u\n", i, sizes[i]);
+			nf_debugprintf(("size[%u] = %u\n", i, sizes[i]));
 		}
 	} else if (format == 0x3861)
 	{
@@ -235,7 +235,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 				offset = unpack_stad(bmap, ptr, sizes[i], offset);
 				offset -= 2;
 				ptr += sizes[i];
-				nf_debugprintf("offset=%lu fpos=%lu\n", offset, ptr - data);
+				nf_debugprintf(("offset=%lu fpos=%lu\n", offset, ptr - data));
 			}
 		}
 		strcat(info->info, " (Type 9a)");

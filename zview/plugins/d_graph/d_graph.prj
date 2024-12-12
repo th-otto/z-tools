@@ -1,7 +1,8 @@
 d_graph.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,12 +27,12 @@ d_graph.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-dgrapldg.c
+..\common\pcstart.s
+ldg.c
 d_graph.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcstdlib.lib

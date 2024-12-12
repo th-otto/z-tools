@@ -28,7 +28,7 @@ sun.ldg
 
 =
 ..\common\pcstart.s
-sunldg.c
+ldg.c
 sun.c
 
 ..\..\ldglib\ldglib.c

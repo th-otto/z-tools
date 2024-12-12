@@ -230,15 +230,15 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	}
 	if (Fread(handle, sizeof(file_header), &file_header) != sizeof(file_header))
 	{
-		nf_debugprintf("read error 1\n");
+		nf_debugprintf(("read error 1\n"));
 		Fclose(handle);
 		return FALSE;
 	}
 
-	nf_debugprintf("mahic: %c%c%c method %d, %ux%u\n",
+	nf_debugprintf(("magic: %c%c%c method %d, %ux%u\n",
 		file_header.magic[0], file_header.magic[1], file_header.magic[2],
 		file_header.method,
-		file_header.xres, file_header.yres);
+		file_header.xres, file_header.yres));
 
 	if (file_header.magic[0] == 'D' &&
 		file_header.magic[1] == 'G' &&
@@ -254,7 +254,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		Fseek(2, handle, SEEK_CUR);
 	} else
 	{
-		nf_debugprintf("unsupported format\n");
+		nf_debugprintf(("unsupported format\n"));
 		Fclose(handle);
 		return FALSE;
 	}
@@ -272,7 +272,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	bmap = malloc(datasize);
 	if (bmap == NULL)
 	{
-		nf_debugprintf("memory exhausted\n");
+		nf_debugprintf(("memory exhausted\n"));
 		Fclose(handle);
 		return FALSE;
 	}
@@ -280,7 +280,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	{
 		if ((size_t)Fread(handle, datasize, bmap) != datasize)
 		{
-			nf_debugprintf("read error 2\n");
+			nf_debugprintf(("read error 2\n"));
 			free(bmap);
 			Fclose(handle);
 			return FALSE;
@@ -293,7 +293,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		if (Fread(handle, sizeof(compressed_size), &compressed_size) != sizeof(compressed_size) ||
 			compressed_size < 4)
 		{
-			nf_debugprintf("read error 4\n");
+			nf_debugprintf(("read error 4\n"));
 			free(bmap);
 			Fclose(handle);
 			return FALSE;
@@ -302,7 +302,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		compressed_size -= 4;
 		if (compressed_size > datasize)
 		{
-			nf_debugprintf("compressed size mismatch: %lu > %lu\n", (unsigned long)compressed_size, (unsigned long)datasize);
+			nf_debugprintf(("compressed size mismatch: %lu > %lu\n", (unsigned long)compressed_size, (unsigned long)datasize));
 			free(bmap);
 			Fclose(handle);
 			return FALSE;
@@ -311,7 +311,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		temp = malloc(datasize);
 		if (temp == NULL)
 		{
-			nf_debugprintf("memory exhausted\n");
+			nf_debugprintf(("memory exhausted\n"));
 			free(bmap);
 			Fclose(handle);
 			return FALSE;
@@ -319,7 +319,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		memset(temp, 0, datasize);
 		if ((size_t)Fread(handle, compressed_size, bmap) != compressed_size)
 		{
-			nf_debugprintf("read error 3\n");
+			nf_debugprintf(("read error 3\n"));
 			free(bmap);
 			Fclose(handle);
 			return FALSE;
@@ -339,7 +339,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			strcpy(info->compression, "RLE4");
 			break;
 		default:
-			nf_debugprintf("unssupported compression\n");
+			nf_debugprintf(("unssupported compression\n"));
 			free(temp);
 			free(bmap);
 			Fclose(handle);

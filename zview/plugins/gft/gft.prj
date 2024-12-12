@@ -1,7 +1,8 @@
 gft.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,12 +27,12 @@ gft.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-gftldg.c
+..\common\pcstart.s
+ldg.c
 gft.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcstdlib.lib

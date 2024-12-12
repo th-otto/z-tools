@@ -8,17 +8,17 @@ all:: pblcpntr.ldg zvcmp.slb
 
 include $(top_srcdir)/rules
 
-pblcpntr.ldg: cmpldg.o pblcpntr.o $(LDGOBJS)
+pblcpntr.ldg: ldg.o pblcpntr.o $(LDGOBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) -Wl,--stack,$(STACKSIZE) $(LIB)
 
-zvcmp.slb: header.lo cmpslb.lo pblcpntr.lo
+zvcmp.slb: header.lo slb.lo pblcpntr.lo
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-cmpslb.lo pblcpntr.lo: ../common/plugin.h ../common/zview.h exports.h
+slb.lo pblcpntr.lo: ../common/plugin.h ../common/zview.h exports.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

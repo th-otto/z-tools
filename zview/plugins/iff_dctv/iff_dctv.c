@@ -168,7 +168,7 @@ static void bail(void)
 {
 	int i;
 	
-	nf_debugprintf(msg);
+	nf_debugprintf((msg));
 	for (i = 0; i < 8; i++)
 	{
 		if (bitmap.Planes[i] != NULL)
@@ -231,7 +231,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	} bmhd;
 	uint16_t palette[16];
 	
-	nf_debugprintf("reader_init: %s\n", name);
+	nf_debugprintf(("reader_init: %s\n", name));
 
 	anno[0] = '\0';
 	for (i = 0; i < 8; i++)
@@ -284,7 +284,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			}
 		} else if (chunk_id == MAKE_ID('B', 'M', 'H', 'D'))
 		{
-			nf_debugprintf("load bmhd\n");
+			nf_debugprintf(("load bmhd\n"));
 			if (Fread(handle, sizeof(bmhd), &bmhd) != sizeof(bmhd))
 			{
 				bail("fread failed\n");
@@ -308,7 +308,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		{
 			uint32_t val;
 
-			nf_debugprintf("load camg\n");
+			nf_debugprintf(("load camg\n"));
 			if (Fread(handle, sizeof(val), &val) != sizeof(val))
 			{
 				bail("fread failed\n");
@@ -318,7 +318,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			camg = val & 0x8024L;
 		} else if (chunk_id == MAKE_ID('A', 'N', 'N', 'O'))
 		{
-			nf_debugprintf("load anno\n");
+			nf_debugprintf(("load anno\n"));
 			if (chunk_size <= sizeof(anno) - 1)
 			{
 				if ((size_t)Fread(handle, chunk_size, anno) != chunk_size)
@@ -330,12 +330,12 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 				anno[chunk_size] = '\0';
 			} else
 			{
-				nf_debugprintf("skipped - anno to long\n");
+				nf_debugprintf(("skipped - anno to long\n"));
 				Fseek(chunk_size, handle, SEEK_CUR);
 			}
 		} else if (chunk_id == MAKE_ID('C', 'M', 'A', 'P'))
 		{
-			nf_debugprintf("load cmap\n");
+			nf_debugprintf(("load cmap\n"));
 			if (chunk_size <= 16 * 3)
 			{
 				unsigned int colors;
@@ -360,7 +360,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			}
 		} else if (chunk_id == MAKE_ID('B', 'O', 'D', 'Y'))
 		{
-			nf_debugprintf("load body\n");
+			nf_debugprintf(("load body\n"));
 			if (image_size == 0)
 			{
 				bail("abort - BODY without bitmap header\n");
@@ -402,7 +402,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 					Fclose(handle);
 					return FALSE;
 				}
-				nf_debugprintf("decode packbits\n");
+				nf_debugprintf(("decode packbits\n"));
 				decode_packbits(body, temp, image_size);
 				free(temp);
 			} else
@@ -416,7 +416,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		{
 			if (chunk_size != 0)
 			{
-				nf_debugprintf("skipped a chunk\n");
+				nf_debugprintf(("skipped a chunk\n"));
 				Fseek(chunk_size, handle, SEEK_CUR);
 			}
 		}
@@ -432,7 +432,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 				Fseek(-1, handle, SEEK_CUR);
 		}
 	}
-	nf_debugprintf("fclose iff\n");
+	nf_debugprintf(("fclose iff\n"));
 	Fclose(handle);
 	
 	bitmap.BytesPerRow = ((((uint16_t)bmhd.width + 15) >> 4) << 4) / 8;
@@ -441,14 +441,14 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	
 	if (camg == 0)
 	{
-		nf_debugprintf("fixed missing camg\n");
+		nf_debugprintf(("fixed missing camg\n"));
 		if (bmhd.page_width >= 640)
 			camg = 0x8000;
 		if (bmhd.page_height >= 400)
 			camg |= 4;
 	}
 	
-	nf_debugprintf("reorder planes\n");
+	nf_debugprintf(("reorder planes\n"));
 	for (i = 0; i < bmhd.planes; i++)
 	{
 		uint8_t *plane;
@@ -478,15 +478,15 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	}
 	free(body);
 
-	nf_debugprintf("check sig\n");
+	nf_debugprintf(("check sig\n"));
 	if (CheckDCTV(&bitmap) == FALSE)
 	{
 		bail("sig not found\n");
 		return FALSE;
 	}
-	nf_debugprintf("sig ok\n");
+	nf_debugprintf(("sig ok\n"));
 	
-	nf_debugprintf("init cvt structure\n");
+	nf_debugprintf(("init cvt structure\n"));
 	cvt = AllocDCTV(&bitmap, camg & 4 ? 1 : 0); 
 	if (cvt == NULL)
 	{
@@ -494,10 +494,10 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		return FALSE;
 	}
 	
-	nf_debugprintf("cvt colors\n");
+	nf_debugprintf(("cvt colors\n"));
 	SetmapDCTV(cvt, palette);
 	
-	nf_debugprintf("info->structure\n");
+	nf_debugprintf(("info->structure\n"));
 	
 	info->planes = 24;
 	info->indexed_color = FALSE;

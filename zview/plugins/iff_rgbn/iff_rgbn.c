@@ -154,7 +154,7 @@ static char anno[256 + 1];
 #if NF_DEBUG
 static void bail(const char *msg)
 {
-	nf_debugprintf(msg);
+	nf_debugprintf((msg));
 }
 #else
 #define bail(msg)
@@ -274,7 +274,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	camg = 0;
 	rgb8 = 0;
 
-	nf_debugprintf("reader_init: %s\n", name);
+	nf_debugprintf(("reader_init: %s\n", name));
 
 	anno[0] = '\0';
 	handle = (int)Fopen(name, FO_READ);
@@ -335,7 +335,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			}
 		} else if (chunk_id == MAKE_ID('B', 'M', 'H', 'D'))
 		{
-			nf_debugprintf("load bmhd\n");
+			nf_debugprintf(("load bmhd\n"));
 			if (Fread(handle, sizeof(bmhd), &bmhd) != sizeof(bmhd))
 			{
 				bail("fread failed\n");
@@ -351,7 +351,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			image_size = (size_t)bmhd.width * (size_t)bmhd.height * 3;
 		} else if (chunk_id == MAKE_ID('C', 'A', 'M', 'G'))
 		{
-			nf_debugprintf("load camg\n");
+			nf_debugprintf(("load camg\n"));
 			if (Fread(handle, sizeof(camg), &camg) != sizeof(camg))
 			{
 				bail("fread failed\n");
@@ -361,7 +361,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			camg &= 0x8024L;
 		} else if (chunk_id == MAKE_ID('A', 'N', 'N', 'O'))
 		{
-			nf_debugprintf("load anno\n");
+			nf_debugprintf(("load anno\n"));
 			if (chunk_size <= sizeof(anno) - 1)
 			{
 				if ((size_t)Fread(handle, chunk_size, anno) != chunk_size)
@@ -373,12 +373,12 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 				anno[chunk_size] = '\0';
 			} else
 			{
-				nf_debugprintf("skipped - anno to long\n");
+				nf_debugprintf(("skipped - anno to long\n"));
 				Fseek(chunk_size, handle, SEEK_CUR);
 			}
 		} else if (chunk_id == MAKE_ID('B', 'O', 'D', 'Y'))
 		{
-			nf_debugprintf("load body\n");
+			nf_debugprintf(("load body\n"));
 			if (image_size == 0)
 			{
 				bail("abort - BODY without bitmap header\n");
@@ -411,7 +411,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 					Fclose(handle);
 					return FALSE;
 				}
-				nf_debugprintf("decode packbits\n");
+				nf_debugprintf(("decode packbits\n"));
 				if (decode_rgbx(temp, bmap, chunk_size, bmhd.width, bmhd.height, rgb8) == 0)
 				{
 					bail("abort - decode error detected\n");
@@ -432,7 +432,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		{
 			if (chunk_size != 0)
 			{
-				nf_debugprintf("skipped a chunk\n");
+				nf_debugprintf(("skipped a chunk\n"));
 				Fseek(chunk_size, handle, SEEK_CUR);
 			}
 		}
@@ -448,12 +448,12 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 				Fseek(-1, handle, SEEK_CUR);
 		}
 	}
-	nf_debugprintf("fclose iff\n");
+	nf_debugprintf(("fclose iff\n"));
 	Fclose(handle);
 	
 	if (camg == 0)
 	{
-		nf_debugprintf("fixed missing camg\n");
+		nf_debugprintf(("fixed missing camg\n"));
 		if (bmhd.page_width >= 640)
 			camg = 0x8000;
 		if (bmhd.page_height >= 400)
@@ -462,7 +462,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	
 	line_size = (size_t)bmhd.width * 3;
 
-	nf_debugprintf("info->structure\n");
+	nf_debugprintf(("info->structure\n"));
 	
 	info->planes = 24;
 	info->indexed_color = FALSE;
@@ -493,7 +493,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	strcat(info->info, " - Interchange File Format");
 	strcpy(info->compression, "RLE");
 	
-	nf_debugprintf("exit reader init ok\n");
+	nf_debugprintf(("exit reader init ok\n"));
 	
 	return TRUE;
 }

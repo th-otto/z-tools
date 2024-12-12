@@ -210,11 +210,11 @@ static void convert_high_resolution(const uint8_t *src, uint8_t *dst)
 	int x;
 	size_t offset;
 	
-	x = HIGH_WIDTH;
+	x = (int)HIGH_WIDTH;
 	do
 	{
 		offset = 0;
-		y = HIGH_HEIGHT / 2;
+		y = (int)HIGH_HEIGHT / 2;
 		do
 		{
 			dst[offset] = *src++;
@@ -222,7 +222,7 @@ static void convert_high_resolution(const uint8_t *src, uint8_t *dst)
 		} while (--y > 0);
 
 		offset = HIGH_WIDTH;
-		y = HIGH_HEIGHT / 2;
+		y = (int)HIGH_HEIGHT / 2;
 		do
 		{
 			dst[offset] = *src++;

@@ -1,7 +1,8 @@
 megapnt.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,12 +27,12 @@ megapnt.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-bldldg.c
+..\common\pcstart.s
+ldg.c
 megapnt.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcstdlib.lib

@@ -28,7 +28,7 @@ specx.ldg
 
 =
 ..\common\pcstart.s
-spxldg.c
+ldg.c
 specx.c
 
 ..\..\ldglib\ldglib.c

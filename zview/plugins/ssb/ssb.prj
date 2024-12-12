@@ -28,7 +28,7 @@ ssb.ldg
 
 =
 ..\common\pcstart.s
-ssbldg.c
+ldg.c
 ssb.c
 
 ..\..\ldglib\ldglib.c

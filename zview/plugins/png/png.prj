@@ -1,7 +1,8 @@
 png.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,15 +27,15 @@ png.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-pngldg.c
+..\common\pcstart.s
+ldg.c
 png.c
-
-ldglib\ldglib.c
-ldglib\stdpc.s
 
 000\pnglib16.lib
 000\zlib.lib
+
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcfltlib.lib

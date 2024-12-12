@@ -1,7 +1,8 @@
 pablopnt.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,13 +27,13 @@ pablopnt.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-pppldg.c
+..\common\pcstart.s
+ldg.c
 pppdepac.s
 pablopnt.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcstdlib.lib

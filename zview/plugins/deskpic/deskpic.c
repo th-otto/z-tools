@@ -220,7 +220,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	{
 		int i;
 		int j;
-		int colors = file_header.colors;
+		int colors = (int)file_header.colors;
 		
 		for (i = j = 0; i < colors; i++)
 		{

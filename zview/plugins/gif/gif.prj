@@ -2,7 +2,8 @@ gif.ldg
 
 .C[-I.]
 .C[-Igiflib]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -27,16 +28,16 @@ gif.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-gifldg.c
+..\common\pcstart.s
+ldg.c
 gif.c
 
 giflib\dgif_lib.c
 giflib\gifalloc.c
 giflib\fdopen.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcstdlib.lib

@@ -1,7 +1,8 @@
 compeyes.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,12 +27,12 @@ compeyes.ldg
 .L[-S=1024]
 
 =
-pcstart.s
-compldg.c
+..\common\pcstart.s
+ldg.c
 compeyes.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcstdlib.lib

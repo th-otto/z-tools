@@ -1,7 +1,8 @@
 iff_dctv.ldg
 
 .C[-I.]
-.C[-Ic:\pc\include]
+.C[-I..\common]
+.C[-I..\..]
 
 .C[-L80]
 
@@ -26,13 +27,13 @@ iff_dctv.ldg
 .L[-S=1024]
 
 =
-pcstart.s
+..\common\pcstart.s
 p2c.s
-iffldg.c
+ldg.c
 iff_dctv.c
 
-ldglib\ldglib.c
-ldglib\stdpc.s
+..\..\ldglib\ldglib.c
+..\..\ldglib\stdpc.s
 
 pctoslib.lib
 pcstdlib.lib

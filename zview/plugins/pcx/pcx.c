@@ -191,7 +191,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	
 	bytes_per_row = header.bytes_per_scanline * (size_t)header.planes;
 	image_size = bytes_per_row * info->height;
-	nf_debugprintf("bits=%u planes=%u width=%u height=%u scanline=%u pitch=%lu\n", header.bits, header.planes, info->width, info->height, header.bytes_per_scanline, bytes_per_row);
+	nf_debugprintf(("bits=%u planes=%u width=%u height=%u scanline=%u pitch=%lu\n", header.bits, header.planes, info->width, info->height, header.bytes_per_scanline, bytes_per_row));
 
 	strcpy(info->info, "PC Paintbrush v0");
 	info->info[15] = header.version + '0';
@@ -261,7 +261,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			RETURN_ERROR(EC_Fread);
 		}
 		srclen = decode_pcx(temp, bmap, image_size);
-		nf_debugprintf("decoded: %lu of %lu\n", srclen, file_size);
+		nf_debugprintf(("decoded: %lu of %lu\n", srclen, file_size));
 		if (srclen > file_size)
 		{
 			free(bmap);
@@ -395,7 +395,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 	size_t src = info->_priv_var;
 	int x;
 	
-	nf_debugprintf("src=%lu\n", src);
+	nf_debugprintf(("src=%lu\n", src));
 	switch (info->planes)
 	{
 	case 1:

@@ -15,17 +15,17 @@ all:: webp.ldg zvwebp.slb
 
 include $(top_srcdir)/rules
 
-webp.ldg: webpldg.o webp.o $(LDGOBJS)
+webp.ldg: ldg.o webp.o $(LDGOBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) -Wl,--stack,$(STACKSIZE) $(LIB)
 
-zvwebp.slb: header.lo webpslb.lo webp.lo $(webp_SOBJS)
+zvwebp.slb: header.lo slb.lo webp.lo $(webp_SOBJS)
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) -lwebpdemux -lwebp -lm $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-webpslb.lo webp.lo: ../common/plugin.h ../common/zview.h exports.h
+slb.lo webp.lo: ../common/plugin.h ../common/zview.h exports.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

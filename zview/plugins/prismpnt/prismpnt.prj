@@ -28,7 +28,7 @@ prismpnt.ldg
 
 =
 ..\common\pcstart.s
-prismldg.c
+ldg.c
 prismpnt.c
 
 ..\..\ldglib\ldglib.c

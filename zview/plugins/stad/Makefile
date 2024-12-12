@@ -8,17 +8,17 @@ all:: stad.ldg zvstad.slb
 
 include $(top_srcdir)/rules
 
-stad.ldg: stadldg.o stad.o $(LDGOBJS)
+stad.ldg: ldg.o stad.o $(LDGOBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) -Wl,--stack,$(STACKSIZE) $(LIB)
 
-zvstad.slb: header.lo stadslb.lo stad.lo
+zvstad.slb: header.lo slb.lo stad.lo
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDSHAREDLIBC)
 	$(STRIPEX) $@
 
 header.lo: ../common/header.S exports.h
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
-stadslb.lo stad.lo: ../common/plugin.h ../common/zview.h exports.h
+slb.lo stad.lo: ../common/plugin.h ../common/zview.h exports.h
 
 clean:
 	rm -f *.o *.lo *.a *.ldg *.slb *.pdb

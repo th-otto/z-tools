@@ -28,7 +28,7 @@ rembrndt.ldg
 
 =
 ..\common\pcstart.s
-tcpldg.c
+ldg.c
 rembrndt.c
 
 ..\..\ldglib\ldglib.c

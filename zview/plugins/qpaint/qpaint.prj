@@ -28,7 +28,7 @@ qpaint.ldg
 
 =
 ..\common\pcstart.s
-qpbxldg.c
+ldg.c
 qpaint.c
 
 ..\..\ldglib\ldglib.c
