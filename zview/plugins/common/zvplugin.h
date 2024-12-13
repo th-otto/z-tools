@@ -9,6 +9,10 @@
 #define __CDECL cdecl
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern char *zview_slb_dir;
 extern char *zview_slb_dir_end;
 
@@ -249,3 +253,7 @@ static inline const BASEPAGE *get_bp_address(const char *header)
 	}
 	return bp;
 }
+
+#ifdef __cplusplus
+}
+#endif

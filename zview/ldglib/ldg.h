@@ -34,6 +34,10 @@
 #define CDECL __CDECL
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef __GEMLIB__
 #define ldg_global	aes_global
 #else
@@ -192,5 +196,9 @@ struct _ldg_version {
 };
 
 extern struct _ldg_version  ldg_version;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __LDG__ */

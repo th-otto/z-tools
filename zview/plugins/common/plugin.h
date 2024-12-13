@@ -51,6 +51,10 @@
 
 #include "imginfo.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef K_ALT
 #define K_RSHIFT        0x0001
 #define K_LSHIFT        0x0002
@@ -248,12 +252,12 @@ struct _zview_plugin_funcs *get_slb_funcs(void);
 #define memcmp(d, s, l) get_slb_funcs()->p_memcmp(d, s, l)
 
 #define strlen(s) get_slb_funcs()->p_strlen(s)
-#define strcpy get_slb_funcs()->p_strcpy
-#define strncpy get_slb_funcs()->p_strncpy
-#define strcat get_slb_funcs()->p_strcat
-#define strncat get_slb_funcs()->p_strncat
-#define strcmp get_slb_funcs()->p_strcmp
-#define strncmp get_slb_funcs()->p_strncmp
+#define strcpy(d, s) get_slb_funcs()->p_strcpy(d, s)
+#define strncpy(d, s, n) get_slb_funcs()->p_strncpy(d, s, n)
+#define strcat(d, s) get_slb_funcs()->p_strcat(d, s)
+#define strncat(d, s, n) get_slb_funcs()->p_strncat(d, s, n)
+#define strcmp(s1, s2) get_slb_funcs()->p_strcmp(s1, s2)
+#define strncmp(s1, s2, n) get_slb_funcs()->p_strncmp(s1, s2, n)
 
 #define malloc(s) get_slb_funcs()->p_malloc(s)
 #define calloc(n, s) get_slb_funcs()->p_calloc(n, s)
@@ -261,34 +265,34 @@ struct _zview_plugin_funcs *get_slb_funcs(void);
 #define free(p) get_slb_funcs()->p_free(p)
 
 #define errno (get_slb_funcs()->p_get_errno())
-#define strerror get_slb_funcs()->p_strerror
-#define abort get_slb_funcs()->p_abort
+#define strerror(e) get_slb_funcs()->p_strerror(e)
+#define abort() get_slb_funcs()->p_abort()
 #define stderr (get_slb_funcs()->stderr_location)
 
-#define remove get_slb_funcs()->p_remove
+#define remove(p) get_slb_funcs()->p_remove(p)
 
 #define open get_slb_funcs()->p_open
-#define close get_slb_funcs()->p_close
-#define read get_slb_funcs()->p_read
-#define write get_slb_funcs()->p_write
-#define lseek get_slb_funcs()->p_lseek
+#define close(f) get_slb_funcs()->p_close(f)
+#define read(fildes, buf, nbyte) get_slb_funcs()->p_read(fildes, buf, nbyte)
+#define write(fildes, buf, nbyte) get_slb_funcs()->p_write(fildes, buf, nbyte)
+#define lseek(fd, offset, whence) get_slb_funcs()->p_lseek(fd, offset, whence)
 
-#define fopen get_slb_funcs()->p_fopen
-#define fdopen get_slb_funcs()->p_fdopen
-#define fclose get_slb_funcs()->p_fclose
-#define fseek get_slb_funcs()->p_fseek
-#define fseeko get_slb_funcs()->p_fseeko
-#define ftell get_slb_funcs()->p_ftell
-#define ftello get_slb_funcs()->p_ftello
-#define fread get_slb_funcs()->p_fread
-#define fwrite get_slb_funcs()->p_fwrite
-#define ferror get_slb_funcs()->p_ferror
-#define fflush get_slb_funcs()->p_fflush
+#define fopen(f, m) get_slb_funcs()->p_fopen(f, m)
+#define fdopen(fd, m) get_slb_funcs()->p_fdopen(fd, m)
+#define fclose(f) get_slb_funcs()->p_fclose(f)
+#define fseek(f, offset, whence) get_slb_funcs()->p_fseek(f, offset, whence)
+#define fseeko(f, offset, whence) get_slb_funcs()->p_fseeko(f, offset, whence)
+#define ftell(f) get_slb_funcs()->p_ftell(f)
+#define ftello(f) get_slb_funcs()->p_ftello(f)
+#define fread(ptr, size, nmemb, f) get_slb_funcs()->p_fread(ptr, size, nmemb, f)
+#define fwrite(ptr, size, nmemb, f) get_slb_funcs()->p_fwrite(ptr, size, nmemb, f)
+#define ferror(f) get_slb_funcs()->p_ferror(f)
+#define fflush(f) get_slb_funcs()->p_fflush(f)
 
 #define printf get_slb_funcs()->p_printf
 #define sprintf get_slb_funcs()->p_sprintf
-#define vsnprintf get_slb_funcs()->p_vsnprintf
-#define vfprintf get_slb_funcs()->p_vfprintf
+#define vsnprintf(str, size, format, ap) get_slb_funcs()->p_vsnprintf(str, size, format, ap)
+#define vfprintf(f, format, ap) get_slb_funcs()->p_vfprintf(f, format, ap)
 
 #if 0
 #undef vsnprintf
@@ -297,21 +301,21 @@ int vsnprintf(char *str, size_t size, const char *fmt, va_list va);
 void nf_debugprintf(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 #endif
 
-#define rand get_slb_funcs()->p_rand
-#define srand get_slb_funcs()->p_srand
+#define rand() get_slb_funcs()->p_rand()
+#define srand(seed) get_slb_funcs()->p_srand(seed)
 
-#define qsort get_slb_funcs()->p_qsort
-#define bsearch get_slb_funcs()->p_bsearch
+#define qsort(base, nmemb, size, compar) get_slb_funcs()->p_qsort(base, nmemb, size, compar)
+#define bsearch(key, base, nmemb, size, compar) get_slb_funcs()->p_bsearch(key, base, nmemb, size, compar)
 
-#define time get_slb_funcs()->p_time
-#define localtime get_slb_funcs()->p_localtime
-#define gmtime get_slb_funcs()->p_gmtime
+#define time(t) get_slb_funcs()->p_time(t)
+#define localtime(t) get_slb_funcs()->p_localtime(t)
+#define gmtime(tm) get_slb_funcs()->p_gmtime(tm)
 
 #define fstat(fd, s) get_slb_funcs()->p_fstat(fd, s)
 
-#define sigsetjmp get_slb_funcs()->p_sigsetjmp
+#define sigsetjmp(env, val) get_slb_funcs()->p_sigsetjmp(env, val)
 #define setjmp(j) get_slb_funcs()->p_sigsetjmp(j, 1)
-#define longjmp get_slb_funcs()->p_longjmp
+#define longjmp(env, val) get_slb_funcs()->p_longjmp(env, val)
 
 #define atof(x) get_slb_funcs()->p_atof(x)
 
@@ -346,6 +350,10 @@ void nf_debugprintf(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 #define EBADARG 64
 #undef ERANGE
 #define ERANGE 88
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

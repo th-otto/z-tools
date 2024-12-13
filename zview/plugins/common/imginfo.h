@@ -1,6 +1,10 @@
 #ifndef __ZVIEW_IMGINFO_H__
 #define __ZVIEW_IMGINFO_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(__PUREC__) && !defined(_COMPILER_H)
 /*
  * far from being a complete replacement for <stdint.h>,
@@ -147,5 +151,9 @@ typedef struct _img_info
 	int32_t		_priv_var;
 	int32_t		_priv_var_more;
 } img_info;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __ZVIEW_IMGINFO_H__ */

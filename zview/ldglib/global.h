@@ -21,7 +21,14 @@
  * $Id: global.h 9 2005-07-25 19:37:25Z bercegeay $
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void ldg_set_error	( int);
 LDG* ldg_load	( int apid, const char *path);
 int  ldg_unload	( int apid, LDG *ldg);
 
+#ifdef __cplusplus
+}
+#endif

@@ -46,6 +46,8 @@ ARFLAGS  = rcs
 
 LDSHARED = $(CC) -s -nostartfiles -Wl,--mprg-flags,0x0f -Wl,--entry,_start
 LDSHAREDLIBC = -nostdlib -lgcc
+LDSHAREDXX = $(CXX) -s -nostartfiles -Wl,--mprg-flags,0x0f -Wl,--entry,_start
+LDSHAREDLIBCXX = -nostdlib -lstdc++ -lgcc
 SFLAGS =
 
 CC_FOR_BUILD = gcc
