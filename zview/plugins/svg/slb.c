@@ -129,6 +129,9 @@ void __CDECL slb_close(BASEPAGE *bp)
 }
 
 
+#undef stderr
+FILE *stderr;
+
 /*
  * get the function table pointer passed from the application.
  * Automatically done in slb_zlib_open()
@@ -148,6 +151,8 @@ static long set_imports(struct _zview_plugin_funcs *funcs)
 	if (funcs->int_size != sizeof(int))
 		return -ERANGE;
 	proc->funcs = funcs;
+
+	stderr = funcs->stderr_location;
 
 	return 0;
 }

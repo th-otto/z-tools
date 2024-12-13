@@ -103,8 +103,11 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	svg_image = nsvgParse(data, "px", 96);
 	if (svg_image == NULL)
 	{
+		free(data);
 		RETURN_ERROR(EC_Malloc);
 	}
+	free(data);
+
 	info->width = svg_image->width;
 	info->height = svg_image->height;
 	if (info->width == 0 || info->height == 0)

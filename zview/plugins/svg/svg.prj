@@ -29,7 +29,7 @@ svg.ldg
 =
 ..\common\pcstart.s
 ldg.c
-svg.c
+svgnano.c
 
 ..\..\ldglib\ldglib.c
 ..\..\ldglib\stdpc.s
