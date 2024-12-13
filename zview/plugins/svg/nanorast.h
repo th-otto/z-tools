@@ -1677,8 +1677,12 @@ void nsvgRasterize(NSVGrasterizer *r,
 			return;
 	}
 
-	for (i = 0; i < h; i++)
-		memset(&dst[i * stride], 0, w * 4);
+#if defined(__atarist__) || defined(__TOS__)
+	/* make background white, opaque */
+	memset(dst, 0xff, h * stride);
+#else
+	memset(dst, 0, h * stride);
+#endif
 
 	for (shape = image->shapes; shape != NULL; shape = shape->next)
 	{

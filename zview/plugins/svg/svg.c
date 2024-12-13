@@ -126,8 +126,6 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		nsvgDelete(svg_image);
 		RETURN_ERROR(EC_Malloc);
 	}
-	/* make background all white, opaque */
-	memset(bmap, 0, image_size);
 
 	nsvgRasterize(svg_raster, svg_image, 0, 0, 1, bmap, info->width, info->height, (size_t)info->width * 4);
 	nsvgDeleteRasterizer(svg_raster);
@@ -177,20 +175,10 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 	/* RGBA */
 	do
 	{
-		if (bmap[3] == 0)
-		{
-			/* full transparent. Replace with background */
-			*buffer++ = 0xff;
-			*buffer++ = 0xff;
-			*buffer++ = 0xff;
-			bmap += 4;
-		} else
-		{
-			*buffer++ = *bmap++;
-			*buffer++ = *bmap++;
-			*buffer++ = *bmap++;
-			bmap++;
-		}
+		*buffer++ = *bmap++;
+		*buffer++ = *bmap++;
+		*buffer++ = *bmap++;
+		bmap++;
 	} while (--x > 0);
 
 	RETURN_SUCCESS();
