@@ -6,8 +6,8 @@ all:: sgx.ldg zvsgx.slb
 
 include $(top_srcdir)/rules
 
-sgx.ldg: ldg.o sgx.o fastlz.o $(LDGOBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) -Wl,--stack,$(STACKSIZE) $(LIB)
+sgx.ldg: $(LDGSTART) ldg.o sgx.o fastlz.o $(LDGOBJS)
+	$(CC) $(CFLAGS) -o $@ -nostartfiles $^ $(LDFLAGS) -Wl,--stack,$(STACKSIZE) $(LIB) -Wl,-Map,link.map
 
 zvsgx.slb: header.lo slb.lo sgx.lo fastlz.lo
 	$(LDSHARED) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDSHAREDLIBC)

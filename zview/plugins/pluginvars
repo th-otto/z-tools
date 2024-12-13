@@ -1,4 +1,5 @@
 CFLAGS += -Wextra
+LDGSTART = ../common/minicrt0.o ../common/minimain.o
 LDGOBJS = ../../ldglib/ldglib.o ../../ldglib/ldgcook.o ../../ldglib/ldgutil.o
 STACKSIZE = 64k
 
