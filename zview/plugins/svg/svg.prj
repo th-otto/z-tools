@@ -34,6 +34,7 @@ svgnano.c
 ..\..\ldglib\ldglib.c
 ..\..\ldglib\stdpc.s
 
+000\zlib.lib
 pctoslib.lib
 pcstdlib.lib
 pcfltlib.lib

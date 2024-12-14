@@ -7,6 +7,7 @@
  */
 
 #include <stdio.h>
+#include <slb/zlib.h>
 #include "plugin.h"
 #include "zvplugin.h"
 #include <errno.h>
@@ -188,4 +189,10 @@ long __CDECL slb_control(long fn, void *arg)
 		return (long)my_base->p_cmdlin;
 	}
 	return -ENOSYS;
+}
+
+
+SLB *slb_zlib_get(void)
+{
+	return get_slb_funcs()->p_slb_get(LIB_Z);
 }
