@@ -12,7 +12,7 @@
 #define NAME        "Scalable Vector Graphics"
 #define DATE        __DATE__ " " __TIME__
 #define EXTENSIONS  "SVG\0" "SVGZ\0"
-#define MISC_INFO   "Using NanoSVG by Mikko Mononen"
+#define MISC_INFO   misc_info
 
 #ifndef LIBFUNC
 # error "LIBFUNC must be defined before including this file"

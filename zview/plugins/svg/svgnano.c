@@ -15,6 +15,8 @@
 #define NF_DEBUG 0
 #include "nfdebug.h"
 
+char const misc_info[] = "Using NanoSVG by Mikko Mononen";
+
 /* nanosvg taken from
    https://github.com/memononen/nanosvg/commit/93ce879dc4c04a3ef1758428ec80083c38610b1f
    2024/12/12
@@ -184,6 +186,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			RETURN_ERROR(EC_DecompError);
 		}
 		gzclose(gzfile);
+		strcpy(info->compression, "Defl");
 	} else
 	{
 		nf_debugprintf(("uncompressed file\n"));
@@ -202,6 +205,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			RETURN_ERROR(EC_Fread);
 		}
 		Fclose(fd);
+		strcpy(info->compression, "None");
 	}
 
 	data[file_size] = '\0';					/* Must be null terminated. */
@@ -252,7 +256,6 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	info->num_comments = 0;
 
 	strcpy(info->info, "Scalable Vector Graphics");
-	strcpy(info->compression, "None");
 
 	info->_priv_ptr = bmap;
 	info->_priv_var = 0;		/* y offset */

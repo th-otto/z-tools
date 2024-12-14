@@ -1,7 +1,7 @@
 /* must include math.h here before atof etc. are redefined */
 #include <math.h>
-/* must include C++ headers here, or our macros get undefined by cstdio */
-#include <lunasvg/lunasvg.h>
+#include <plutosvg/plutosvg.h>
+#include <plutovg/plutovg.h>
 
 #ifdef ZLIB_SLB
 #include <slb/zlib.h>
@@ -17,9 +17,7 @@
 #define NF_DEBUG 0
 #include "nfdebug.h"
 
-extern "C" char const misc_info[] = "Using LunaSVG by Samuel Ugochukwu";
-
-using namespace lunasvg;
+char const misc_info[] = "Using PlutoSVG by Samuel Ugochukwu";
 
 #ifdef PLUGIN_SLB
 
@@ -90,7 +88,7 @@ static void quit_zlib_slb(void)
 
 
 /*
- * lunasvg has references to some functions
+ * plutosvg has references to some functions
  */
 void *(memcpy)(void *dest, const void *src, size_t len)
 {
@@ -139,21 +137,6 @@ int (strncmp)(const char *s1, const char *s2, size_t n)
 	return strncmp(s1, s2, n);
 }
 
-int (memcmp)(const void *s1, const void *s2, size_t n)
-{
-	return memcmp(s1, s2, n);
-}
-
-void (abort)(void)
-{
-	abort();
-}
-
-void *(memchr)(const void *s, int c, size_t n)
-{
-	return memchr(s, c, n);
-}
-
 FILE *(fopen)(const char *pathname, const char *mode)
 {
 	return fopen(pathname, mode);
@@ -174,11 +157,6 @@ int (fseek)(FILE *stream, long offset, int whence)
 	return fseek(stream, offset, whence);
 }
 
-int (lseek)(int fd, off_t offset, int whence)
-{
-	return lseek(fd, offset, whence);
-}
-
 int (fclose)(FILE *stream)
 {
 	return fclose(stream);
@@ -189,41 +167,9 @@ long (ftell)(FILE *stream)
 	return ftell(stream);
 }
 
-#undef sprintf
-int sprintf(char *str, const char *format, ...)
-{
-	va_list ap;
-	int ret;
-	
-	va_start(ap, format);
-	ret = vsnprintf(str, 0x7ffffff0l, format, ap);
-	va_end(ap);
-	return ret;
-}
-
-int (vsnprintf)(char *str, size_t size, const char *format, va_list ap)
-{
-	return vsnprintf(str, size, format, ap);
-}
-
 void *(bsearch)(const void *key, const void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *))
 {
 	return bsearch(key, base, nmemb, size, compar);
-}
-
-int (fputs)(const char *s, FILE *stream)
-{
-	return fwrite(s, 1, strlen(s), stream);
-}
-
-int (fflush)(FILE *stream)
-{
-	return fflush(stream);
-}
-
-char *(strerror)(int e)
-{
-	return strerror(e);
 }
 
 void (longjmp)(jmp_buf env, int val)
@@ -236,116 +182,8 @@ int (sigsetjmp)(sigjmp_buf env, int savesigs)
 	return sigsetjmp(env, savesigs);
 }
 
-ssize_t (write)(int fd, const void *buf, size_t count)
+int (fgetc)(FILE *stream)
 {
-	return write(fd, buf, count);
-}
-
-ssize_t (read)(int fd, void *buf, size_t count)
-{
-	return read(fd, buf, count);
-}
-
-FILE *(fdopen)(int fd, const char *mode)
-{
-	return fdopen(fd, mode);
-}
-
-int (fstat)(int fd, struct stat *statbuf)
-{
-	return fstat(fd, statbuf);
-}
-
-/*
- * Remaining functions are only referenced in libstc++,
- * from functions which are (hopefully) not used here
- */
-
-int (fileno)(FILE *stream)
-{
-	(void)stream;
-	return -1;
-}
-
-char *setlocale(int category, const char *name)
-{
-	static char c_locale[] = "C";
-	(void) category;
-	(void) name;
-	return c_locale;
-}
-
-int strcoll(const char *s1, const char *s2)
-{
-	(void)s1;
-	(void)s2;
-	return 0;
-}
-
-size_t (strxfrm)(char *dest, const char *src, size_t n)
-{
-	(void)dest;
-	(void)src;
-	(void)n;
-	return 0;
-}
-                      
-ssize_t (writev)(int fd, const struct iovec *iov, int iovcnt)
-{
-	(void)fd;
-	(void)iov;
-	(void)iovcnt;
-	return -1;
-}
-
-int (atexit)(void (*function)(void))
-{
-	(void)function;
-	return -1;
-}
-
-long double (strtold)(const char *nptr, char **endptr)
-{
-	(void)nptr;
-	(void)endptr;
-	return 0;
-}
-
-double (strtod)(const char *nptr, char **endptr)
-{
-	(void)nptr;
-	(void)endptr;
-	return 0;
-}
-
-float (strtof)(const char *nptr, char **endptr)
-{
-	(void)nptr;
-	(void)endptr;
-	return 0;
-}
-
-size_t (strftime)(char *s, size_t max, const char *format, const struct tm *tm)
-{
-	(void)s;
-	(void)max;
-	(void)format;
-	(void)tm;
-	return 0;
-}
-
-int (setvbuf)(FILE *stream, char *buf, int mode, size_t size)
-{
-	(void)stream;
-	(void)buf;
-	(void)mode;
-	(void)size;
-	return -1;
-}
-
-int (fputc)(int c, FILE *stream)
-{
-	(void)c;
 	(void)stream;
 	return -1;
 }
@@ -357,69 +195,10 @@ int (ungetc)(int c, FILE *stream)
 	return -1;
 }
 
-int (ioctl)(int fildes, int request, ...)
-{
-	(void)fildes;
-	(void)request;
-	return -1;
-}
-
-int (fgetc)(FILE *stream)
-{
-	(void)stream;
-	return -1;
-}
-
-char* (strerror_r)(int errnum, char* buf, size_t buflen)
-{
-	(void)errnum;
-	(void)buf;
-	(void)buflen;
-	return buf;
-}
-
-char *getenv(const char *name)
-{
-	(void)name;
-	return 0;
-}
-
-#undef open
-int (open)(const char *path, int oflag, ...)
-{
-	(void)path;
-	(void)oflag;
-	return -1;
-}
-
-int (close)(int fd)
-{
-	(void)fd;
-	return -1;
-}
-
-#include <poll.h>
-
-int (poll)(struct pollfd *fds, nfds_t nfds, int timeout)
-{
-	(void)fds;
-	(void)nfds;
-	(void)timeout;
-	return 0;
-}
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-void __main(void);
-#ifdef __cplusplus
-}
 #endif
 
 static uint32_t swap32(uint32_t l)
@@ -448,9 +227,12 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	uint32_t file_size;
 	int fd;
 	uint8_t magic[2];
-	
-	/* main() won't call __main() for global constructors, so do it here. */
-	__main();
+	plutosvg_document_t *document;
+	float xScale = 1.0f;
+	float yScale = 1.0f;
+	plutovg_surface_t *surface;
+	plutovg_color_t bg;
+	plutovg_canvas_t *canvas;
 
 #ifdef ZLIB_SLB
 	if (init_zlib_slb() < 0)
@@ -540,17 +322,18 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 
 	data[file_size] = '\0';					/* Must be null terminated. */
 
-	auto svg_image = Document::loadFromData(data, file_size);
-	if (svg_image == NULL)
+	document = plutosvg_document_load_from_data(data, file_size, -1, -1, NULL, NULL);
+	if (document == NULL)
 	{
 		free(data);
 		RETURN_ERROR(EC_Malloc);
 	}
 
-	info->width = svg_image->width();
-	info->height = svg_image->height();
+	info->width = plutosvg_document_get_width(document);
+	info->height = plutosvg_document_get_height(document);
 	if (info->width <= 0 || info->height <= 0)
 	{
+		plutosvg_document_destroy(document);
 		free(data);
 		RETURN_ERROR(EC_FileType);
 	}
@@ -558,23 +341,44 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	bmap = (uint8_t *)malloc(image_size);
 	if (bmap == NULL)
 	{
+		plutosvg_document_destroy(document);
 		free(data);
 		RETURN_ERROR(EC_Malloc);
 	}
 
-	float xScale = 1.0f;
-	float yScale = 1.0f;
-	Matrix matrix(xScale, 0, 0, yScale, 0, 0);
-	Bitmap bitmap(bmap, info->width, info->height, (size_t)info->width * 4);
-	if (bitmap.isNull())
+	surface = plutovg_surface_create_for_data(bmap, info->width, info->height, (size_t)info->width * 4);
+	if (surface == NULL)
 	{
 		free(bmap);
+		plutosvg_document_destroy(document);
+		free(data);
+		RETURN_ERROR(EC_Malloc);
+	}
+	canvas = plutovg_canvas_create(surface);
+	if (canvas == NULL)
+	{
+		plutovg_surface_destroy(surface);
+		free(bmap);
+		plutosvg_document_destroy(document);
+		free(data);
+		RETURN_ERROR(EC_Malloc);
+	}
+	plutovg_canvas_scale(canvas, xScale, yScale);
+	plutovg_color_init_rgba32(&bg, 0xffffffffUL);
+	plutovg_surface_clear(surface, &bg);
+	if (!plutosvg_document_render(document, NULL, canvas, NULL, NULL, NULL))
+	{
+		plutovg_canvas_destroy(canvas);
+		plutovg_surface_destroy(surface);
+		free(bmap);
+		plutosvg_document_destroy(document);
 		free(data);
 		RETURN_ERROR(EC_Malloc);
 	}
 
-	bitmap.clear(0xffffffffUL);
-	svg_image->render(bitmap, matrix);
+	plutovg_canvas_destroy(canvas);
+	plutovg_surface_destroy(surface);
+	plutosvg_document_destroy(document);
 	free(data);
 
 	info->planes = 24;

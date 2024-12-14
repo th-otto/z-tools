@@ -6,6 +6,7 @@
 #define NOFUNC
 #include "exports.h"
 
+extern char const misc_info[];
 
 static void __CDECL init(void)
 {

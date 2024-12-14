@@ -4,7 +4,7 @@ include ../pluginvars
 CFLAGS += -Waggregate-return
 CFLAGS += -Wdeclaration-after-statement
 
-LIB       = -lz -llunasvg -lplutovg -lm
+LIB       = -lz -llunasvg -lplutosvg -lplutovg -lm
 SFLAGS += -DZLIB_SLB
 
 all:: svg.ldg zvsvg.slb
@@ -15,7 +15,7 @@ svg.ldg: ldg.o svgluna.o $(LDGOBJS)
 	$(CXX) $(CFLAGS) -o $@ $^ $(LDFLAGS) -Wl,--stack,$(STACKSIZE) $(LIB)
 
 zvsvg.slb: header.lo slb.lo svgluna.lo
-	$(LDSHAREDXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) -llunasvg -lplutovg -lz.slb -lm $(LDSHAREDLIBCXX)
+	$(LDSHAREDXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) -llunasvg -lplutosvg -lplutovg -lz.slb -lm $(LDSHAREDLIBCXX)
 	$(STRIPEX) $@
 
 header.lo: ../common/header.S exports.h
