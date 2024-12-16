@@ -1,7 +1,7 @@
 top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
-CFLAGS += -Waggregate-return
+#CFLAGS += -Waggregate-return
 CFLAGS += -Wdeclaration-after-statement
 
 USE_LUNA  = 1

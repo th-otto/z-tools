@@ -3,6 +3,7 @@ svg.ldg
 .C[-I.]
 .C[-I..\common]
 .C[-I..\..]
+.C[-Ipluto]
 
 .C[-L80]
 
@@ -29,7 +30,22 @@ svg.ldg
 =
 ..\common\pcstart.s
 ldg.c
-svgnano.c
+svgpluto.c
+
+pluto\blend.c
+pluto\canvas.c
+pluto\font.c
+pluto\ftmath.c
+pluto\ftraster.c
+pluto\ftstroke.c
+pluto\matrix.c
+pluto\paint.c
+pluto\path.c
+pluto\raster.c
+pluto\surface.c
+pluto\surfacer.c
+pluto\surfacew.c
+pluto\plutosvg.c
 
 ..\..\ldglib\ldglib.c
 ..\..\ldglib\stdpc.s

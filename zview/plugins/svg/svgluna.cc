@@ -1,7 +1,7 @@
 /* must include math.h here before atof etc. are redefined */
 #include <math.h>
 /* must include C++ headers here, or our macros get undefined by cstdio */
-#include <lunasvg/lunasvg.h>
+#include "luna/lunasvg.h"
 
 #ifdef ZLIB_SLB
 #include <slb/zlib.h>

@@ -1,6 +1,9 @@
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
 %.o: %.S
 	$(CC) $(CFLAGS) $(ASFLAGS) -c $< -o $@
 
@@ -8,6 +11,9 @@
 	$(CC) $(CFLAGS) $(SFLAGS) -c $< -o $@
 
 %.lo: %.cc
+	$(CXX) $(CXXFLAGS) $(SFLAGS) -c $< -o $@
+
+%.lo: %.cpp
 	$(CXX) $(CXXFLAGS) $(SFLAGS) -c $< -o $@
 
 %.lo: %.S

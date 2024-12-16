@@ -1,7 +1,7 @@
 /* must include math.h here before atof etc. are redefined */
 #include <math.h>
-#include <plutosvg/plutosvg.h>
-#include <plutovg/plutovg.h>
+#include "pluto/plutosvg.h"
+#include "pluto/plutovg.h"
 
 #ifdef ZLIB_SLB
 #include <slb/zlib.h>
@@ -17,7 +17,7 @@
 #define NF_DEBUG 0
 #include "nfdebug.h"
 
-char const misc_info[] = "Using PlutoSVG by Samuel Ugochukwu";
+char const misc_info[] = "Using PlutoSVG " PLUTOSVG_VERSION_STRING " by Samuel Ugochukwu";
 
 #ifdef PLUGIN_SLB
 
@@ -322,7 +322,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 
 	data[file_size] = '\0';					/* Must be null terminated. */
 
-	document = plutosvg_document_load_from_data(data, file_size, -1, -1, NULL, NULL);
+	document = plutosvg_document_load_from_data(data, file_size, -1, -1, 0, NULL);
 	if (document == NULL)
 	{
 		free(data);
@@ -366,7 +366,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	plutovg_canvas_scale(canvas, xScale, yScale);
 	plutovg_color_init_rgba32(&bg, 0xffffffffUL);
 	plutovg_surface_clear(surface, &bg);
-	if (!plutosvg_document_render(document, NULL, canvas, NULL, NULL, NULL))
+	if (!plutosvg_document_render(document, NULL, canvas, NULL, 0, NULL))
 	{
 		plutovg_canvas_destroy(canvas);
 		plutovg_surface_destroy(surface);
