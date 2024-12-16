@@ -17,7 +17,7 @@
 #define NF_DEBUG 0
 #include "nfdebug.h"
 
-extern "C" char const misc_info[] = "Using LunaSVG by Samuel Ugochukwu";
+extern "C" char const misc_info[] = "Using LunaSVG " LUNASVG_VERSION_STRING " by Samuel Ugochukwu";
 
 using namespace lunasvg;
 
@@ -546,6 +546,13 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		free(data);
 		RETURN_ERROR(EC_Malloc);
 	}
+	/* Hide embedded images,
+	 * and update the layout after applying the style.
+	 * This is a workaround for a bug in plutovg,
+	 * when PNG images are used as background.
+	 */
+	svg_image->applyStyleSheet("image { display: none }");
+	svg_image->updateLayout();
 
 	info->width = svg_image->width();
 	info->height = svg_image->height();
