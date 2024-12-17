@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvasb.slb\"
-
 all:: animastr.ldg zvasb.slb
 
 include $(top_srcdir)/rules

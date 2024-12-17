@@ -1,10 +1,6 @@
 #include "plugin.h"
 #include "zvplugin.h"
-
-#define VERSION		0x0200
-#define AUTHOR      "Thorsten Otto"
-#define NAME        "Animaster (Sprite Bank)"
-#define DATE        __DATE__ " " __TIME__
+#include "exports.h"
 
 /*
 Animaster (Sprite Bank)    *.ASB (ST low resolution only)
@@ -63,6 +59,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
+	case INFO_MISC:
+		return (long)MISC_INFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}

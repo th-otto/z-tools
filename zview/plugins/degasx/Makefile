@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvdegasx.slb\"
-
 all:: degasx.ldg zvdegasx.slb
 
 include $(top_srcdir)/rules

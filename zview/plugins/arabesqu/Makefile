@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvabm.slb\"
-
 all:: arabesqu.ldg zvabm.slb
 
 include $(top_srcdir)/rules

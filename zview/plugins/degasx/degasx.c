@@ -1,10 +1,6 @@
 #include "plugin.h"
 #include "zvplugin.h"
-
-#define VERSION		0x0201
-#define NAME        "Degas Extended, FuckPaint"
-#define AUTHOR      "Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
+#include "exports.h"
 
 /*
 FuckPaint       *.PI4, *.PI9
@@ -29,7 +25,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long)("PI4\0" "PI5\0" "PI6\0" "PI7\0" "PI9\0");
+		return (long)(EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -39,6 +35,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
+	case INFO_MISC:
+		return (long)MISC_INFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}
@@ -70,7 +70,7 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 
 	if ((handle = (int16_t) Fopen(name, FO_READ)) < 0)
 	{
-		return FALSE;
+		RETURN_ERROR(EC_Fopen);
 	}
 	file_size = Fseek(0, handle, SEEK_END);
 	Fseek(0, handle, SEEK_SET);
@@ -120,7 +120,7 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 	} else
 	{
 		Fclose(handle);
-		return FALSE;
+		RETURN_ERROR(EC_FileLength);
 	}
 	datasize = (((size_t)info->width * info->planes) / 8) * info->height;
 	
@@ -128,7 +128,7 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 	if (bmap == NULL)
 	{
 		Fclose(handle);
-		return FALSE;
+		RETURN_ERROR(EC_Malloc);
 	}
 
 	colors = 1 << info->planes;
@@ -163,7 +163,7 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 	{
 		free(bmap);
 		Fclose(handle);
-		return FALSE;
+		RETURN_ERROR(EC_Fread);
 	}
 	Fclose(handle);
 
@@ -181,7 +181,7 @@ boolean __CDECL reader_init( const char *name, IMGINFO info)
 
 	strcpy(info->compression, "None");
 
-	return TRUE;
+	RETURN_SUCCESS();
 }
 
 
@@ -248,7 +248,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 		} while (--x > 0);		/* next x */
 	}
 
-	return TRUE;
+	RETURN_SUCCESS();
 }
 
 
@@ -284,6 +284,7 @@ void __CDECL reader_get_txt( IMGINFO info, txt_data *txtdata)
  *==================================================================================*/
 void __CDECL reader_quit(IMGINFO info)
 {
-	free(info->_priv_ptr);
+	void *p = info->_priv_ptr;
 	info->_priv_ptr = NULL;
+	free(p);
 }

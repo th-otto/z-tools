@@ -1,6 +1,7 @@
 #include "plugin.h"
 #include "zvplugin.h"
 #include "ldglib/ldg.h"
+#include "exports.h"
 
 /*==================================================================================*
  * boolean __CDECL init:															*
@@ -20,20 +21,24 @@ static void __CDECL init( void)
 
 static PROC Func[] = 
 {
-	{ "plugin_init", 	"", init },
-	{ "reader_init", 	"", reader_init },
-	{ "reader_get_txt", "", reader_get_txt },
-	{ "reader_read", 	"", reader_read },
-	{ "reader_quit", 	"", reader_quit },
+	{ "plugin_init", "Codec: " NAME, init },
+	{ "reader_init", "Author: " AUTHOR, reader_init },
+	{ "reader_read", "Date: " __DATE__, reader_read },
+	{ "reader_quit", "Time: " __TIME__, reader_quit },
+#ifdef MISC_INFO
+	{ "reader_get_txt", MISC_INFO, reader_get_txt }
+#else
+	{ "reader_get_txt", "", reader_get_txt }
+#endif
 };
 
 
 static LDGLIB plugin =
 {
-	0x201, 	/* Plugin version */
+	VERSION, 	/* Plugin version */
 	sizeof(Func) / sizeof(Func[0]),					/* Number of plugin's functions */
 	Func,				/* List of functions */
-	"ABM\0" "PUF\0",		/* File types handled */
+	EXTENSIONS,			/* File types handled */
 	LDG_NOT_SHARED, 	/* The flags NOT_SHARED is used here.. even if zview plugins are reentrant 
 					   	   and are shareable, we must use this flags because we don't know if the 
 					   	   user has ldg.prg deamon installed on his computer */

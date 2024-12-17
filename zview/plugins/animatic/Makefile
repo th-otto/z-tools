@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvflm.slb\"
-
 all:: animatic.ldg zvflm.slb
 
 include $(top_srcdir)/rules

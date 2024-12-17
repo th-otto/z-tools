@@ -1,8 +1,6 @@
 #include "plugin.h"
 #include "zvplugin.h"
 #include "ldglib/ldg.h"
-#define LIBFUNC(a,b,c)
-#define NOFUNC
 #include "exports.h"
 
 /*==================================================================================*

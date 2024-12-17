@@ -1,7 +1,5 @@
 #include "plugin.h"
 #include "zvplugin.h"
-#define LIBFUNC(a,b,c)
-#define NOFUNC
 #include "exports.h"
 
 struct file_header
@@ -128,7 +126,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	handle = (int16_t) Fopen(name, FO_READ);
 	if (handle < 0)
 	{
-		return FALSE;
+		RETURN_ERROR(EC_Fopen);
 	}
 
 	file_size = filesize(handle);
@@ -136,13 +134,13 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	if (data == NULL)
 	{
 		Fclose(handle);
-		return FALSE;
+		RETURN_ERROR(EC_Malloc);
 	}
 	if ((uint32_t)Fread(handle, file_size, data) != file_size)
 	{
 		free(data);
 		Fclose(handle);
-		return FALSE;
+		RETURN_ERROR(EC_Fread);
 	}
 	Fclose(handle);
 	custom_size = FALSE;
@@ -169,7 +167,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		} else
 		{
 			free(data);
-			return FALSE;
+			RETURN_ERROR(EC_FileLength);
 		}
 		strcat(info->info, "(color)");
 	} else
@@ -193,7 +191,8 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 			custom_size = TRUE;
 		} else
 		{
-			return FALSE;
+			free(data);
+			RETURN_ERROR(EC_FileLength);
 		}
 
 		for (i = 0; i < 256; i++)
@@ -221,7 +220,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	}
 	strcpy(info->compression, "None");
 	
-	return TRUE;
+	RETURN_SUCCESS();
 }
 
 
@@ -262,7 +261,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 	}
 	info->_priv_var = file_pos;
 
-	return TRUE;
+	RETURN_SUCCESS();
 }
 
 
@@ -279,10 +278,9 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
  *==================================================================================*/
 void __CDECL reader_quit(IMGINFO info)
 {
-	uint8_t *file_buffer = info->_priv_ptr;
-	
-	free(file_buffer);
+	void *p = info->_priv_ptr;
 	info->_priv_ptr = NULL;
+	free(p);
 }
 
 

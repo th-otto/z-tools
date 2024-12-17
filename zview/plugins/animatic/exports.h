@@ -1,16 +1,25 @@
 /*
- * animatic/exports.h - internal header with definitions of all exported functions
+ * exports.h - internal header with definitions of all exported functions
  *
  * Copyright (C) 2024 Thorsten Otto
  *
  * For conditions of distribution and use, see copyright file.
  */
 
+#define VERSION		0x0200
+#define AUTHOR      "Thorsten Otto"
+#define NAME        "Animatic (Film)"
+#define DATE        __DATE__ " " __TIME__
+#define EXTENSIONS  "FLM\0"
+
 #ifndef LIBFUNC
-# error "LIBFUNC must be defined before including this file"
+#define LIBFUNC(a,b,c)
 #endif
 #ifndef LIBFUNC2
 #define LIBFUNC2(_fn, name, _nargs) LIBFUNC(_fn, name, _nargs)
+#endif
+#ifndef NOFUNC
+#define NOFUNC
 #endif
 
 /*   0 */ LIBFUNC(0, slb_control, 2)
@@ -27,3 +36,5 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
+
+#define SHAREDLIB "zvflm.slb"
