@@ -20,10 +20,10 @@
 /* This is a new anti-aliasing scan-converter for FreeType 2.  The       */
 /* algorithm used here is _very_ different from the one in the standard  */
 /* `ftraster' module.  Actually, `ftgrays' computes the _exact_          */
-/* coverage of the outline on each pixel cell.                           */
+/* coverage of the outline on each pixel cell by straight segments.      */
 /*                                                                       */
 /* It is based on ideas that I initially found in Raph Levien's          */
-/* excellent LibArt graphics library (see http://www.levien.com/libart   */
+/* excellent LibArt graphics library (see https://www.levien.com/libart  */
 /* for more information, though the web pages do not tell anything       */
 /* about the renderer; you'll have to dive into the source code to       */
 /* understand how it works).                                             */
@@ -32,6 +32,14 @@
 /* compared to Raph's.  Coverage information is stored in a very         */
 /* different way, and I don't use sorted vector paths.  Also, it doesn't */
 /* use floating point values.                                            */
+/*                                                                       */
+/* Bézier segments are flattened by splitting them until their deviation*/
+/* from straight line becomes much smaller than a pixel.  Therefore, the */
+/* pixel coverage by a Bézier curve is calculated approximately.  To    */
+/* estimate the deviation, we use the distance from the control point    */
+/* to the conic chord centre or the cubic chord trisection.  These       */
+/* distances vanish fast after each split. In the conic case, they vanish*/
+/* predictably and the number of necessary splits can be calculated.     */
 /*                                                                       */
 /* This renderer has the following advantages:                           */
 /*                                                                       */
@@ -42,7 +50,7 @@
 /*   callback.                                                           */
 /*                                                                       */
 /* - A perfect anti-aliaser, i.e., it computes the _exact_ coverage on   */
-/*   each pixel cell.                                                    */
+/*   each pixel cell by straight segments.                               */
 /*                                                                       */
 /* - It performs a single pass on the outline (the `standard' FT2        */
 /*   renderer makes two passes).                                         */
@@ -50,7 +58,7 @@
 /* - It can easily be modified to render to _any_ number of gray levels  */
 /*   cheaply.                                                            */
 /*                                                                       */
-/* - For small (< 20) pixel sizes, it is faster than the standard        */
+/* - For small (< 80) pixel sizes, it is faster than the standard        */
 /*   renderer.                                                           */
 /*                                                                       */
 /*************************************************************************/
@@ -61,12 +69,6 @@
 
 #define PVG_FT_BEGIN_STMNT  do {
 #define PVG_FT_END_STMNT    } while ( 0 )
-
-#include <setjmp.h>
-
-#define pvg_ft_setjmp   setjmp
-#define pvg_ft_longjmp  longjmp
-#define pvg_ft_jmp_buf  jmp_buf
 
 #include <stddef.h>
 
@@ -91,7 +93,7 @@ typedef ptrdiff_t PVG_FT_PtrDist;
 
 #define ras       (*worker)
 
-  /* must be at least 6 bits! */
+/* must be at least 6 bits! */
 #define PIXEL_BITS  8
 
 #define ONE_PIXEL       ( 1L << PIXEL_BITS )
@@ -99,16 +101,17 @@ typedef ptrdiff_t PVG_FT_PtrDist;
 #define FRACT( x )      (TCoord)( (x) & ( ONE_PIXEL - 1 ) )
 
 #if PIXEL_BITS >= 6
-#define UPSCALE( x )    ( (x) * ( ONE_PIXEL >> 6 ) )
+#define UPSCALE( x )    ( (x) << ( PIXEL_BITS - 6 ) )
 #define DOWNSCALE( x )  ( (x) >> ( PIXEL_BITS - 6 ) )
 #else
 #define UPSCALE( x )    ( (x) >> ( 6 - PIXEL_BITS ) )
-#define DOWNSCALE( x )  ( (x) * ( 64 >> PIXEL_BITS ) )
+#define DOWNSCALE( x )  ( (x) << ( 6 - PIXEL_BITS ) )
 #endif
 
 /* Compute `dividend / divisor' and return both its quotient and     */
 /* remainder, cast to a specific type.  This macro also ensures that */
-/* the remainder is always positive.                                 */
+/* the remainder is always positive.  We use the remainder to keep   */
+/* track of accumulating errors and compensate for them.             */
 #define PVG_FT_DIV_MOD( type, dividend, divisor, quotient, remainder ) \
 PVG_FT_BEGIN_STMNT                                                   \
   (quotient)  = (type)( (dividend) / (divisor) );                \
@@ -120,29 +123,48 @@ PVG_FT_BEGIN_STMNT                                                   \
   }                                                              \
 PVG_FT_END_STMNT
 
-  /* These macros speed up repetitive divisions by replacing them */
-  /* with multiplications and right shifts.                       */
-#define PVG_FT_UDIVPREP( b )                                       \
-  long  b ## _r = (long)( ULONG_MAX >> PIXEL_BITS ) / ( b )
+#ifdef  __arm__
+/* Work around a bug specific to GCC which make the compiler fail to */
+/* optimize a division and modulo operation on the same parameters   */
+/* into a single call to `__aeabi_idivmod'.  See                     */
+/*                                                                   */
+/*  https://gcc.gnu.org/bugzilla/show_bug.cgi?id=43721               */
+#undef PVG_FT_DIV_MOD
+#define PVG_FT_DIV_MOD( type, dividend, divisor, quotient, remainder ) \
+PVG_FT_BEGIN_STMNT                                                   \
+    (quotient)  = (type)( (dividend) / (divisor) );                \
+    (remainder) = (type)( (dividend) - (quotient) * (divisor) );   \
+    if ( (remainder) < 0 )                                         \
+    {                                                              \
+      (quotient)--;                                                \
+      (remainder) += (type)(divisor);                              \
+    }                                                              \
+PVG_FT_END_STMNT
+#endif /* __arm__ */
+
+/* These macros speed up repetitive divisions by replacing them */
+/* with multiplications and right shifts.                       */
+#define PVG_FT_UDIVPREP( c, b )                                        \
+	long  b ## _r = c ? (long)( ULONG_MAX >> PIXEL_BITS ) / ( b ) : 0
 #define PVG_FT_UDIV( a, b )                                        \
-  ( ( (unsigned long)( a ) * (unsigned long)( b ## _r ) ) >>   \
-    ( sizeof( long ) * CHAR_BIT - PIXEL_BITS ) )
+  (TCoord)( ( (unsigned long)( a ) * (unsigned long)( b ## _r ) ) >>   \
+            ( sizeof( long ) * CHAR_BIT - PIXEL_BITS ) )
 
 
-  /*************************************************************************/
-  /*                                                                       */
-  /*   TYPE DEFINITIONS                                                    */
-  /*                                                                       */
+/*************************************************************************/
+/*                                                                       */
+/*   TYPE DEFINITIONS                                                    */
+/*                                                                       */
 
-  /* don't change the following types to PVG_FT_Int or PVG_FT_Pos, since we might */
-  /* need to define them to "float" or "double" when experimenting with   */
-  /* new algorithms                                                       */
+/* don't change the following types to PVG_FT_Int or PVG_FT_Pos, since we might */
+/* need to define them to "float" or "double" when experimenting with   */
+/* new algorithms                                                       */
 
 typedef long TCoord;					/* integer scanline/pixel coordinate */
 typedef long TPos;						/* sub-pixel coordinate              */
 typedef long TArea;						/* cell areas, coordinate products   */
 
-  /* maximal number of gray spans in a call to the span callback */
+/* maximal number of gray spans in a call to the span callback */
 #define PVG_FT_MAX_GRAY_SPANS  256
 
 
@@ -150,8 +172,8 @@ typedef struct TCell_ *PCell;
 
 typedef struct TCell_
 {
-	plutovg_int_t x;
-	plutovg_int_t cover;
+	TCoord x;							/* same with gray_TWorker.ex    */
+	TCoord cover;						/* same with gray_TWorker.cover */
 	TArea area;
 	PCell next;
 
@@ -166,9 +188,10 @@ typedef struct TWorker_
 	TPos count_ex, count_ey;
 
 	TArea area;
-	plutovg_int_t cover;
+	TCoord cover;
 	int invalid;
 
+	PCell *ycells;
 	PCell cells;
 	PVG_FT_PtrDist max_cells;
 	PVG_FT_PtrDist num_cells;
@@ -188,20 +211,17 @@ typedef struct TWorker_
 	plutovg_int_t band_size;
 	plutovg_int_t band_shoot;
 
-	pvg_ft_jmp_buf jump_buffer;
-
 	void *buffer;
 	long buffer_size;
 
-	PCell *ycells;
 	TPos ycount;
 } TWorker, *PWorker;
 
 
-  /*************************************************************************/
-  /*                                                                       */
-  /* Initialize the cells table.                                           */
-  /*                                                                       */
+/*************************************************************************/
+/*                                                                       */
+/* Initialize the cells table.                                           */
+/*                                                                       */
 static void gray_init_cells(RAS_ARG_ void *buffer, long byte_size)
 {
 	ras.buffer = buffer;
@@ -217,16 +237,15 @@ static void gray_init_cells(RAS_ARG_ void *buffer, long byte_size)
 }
 
 
-  /*************************************************************************/
-  /*                                                                       */
-  /* Compute the outline bounding box.                                     */
-  /*                                                                       */
+/*************************************************************************/
+/*                                                                       */
+/* Compute the outline bounding box.                                     */
+/*                                                                       */
 static void gray_compute_cbox(RAS_ARG)
 {
 	PVG_FT_Outline *outline = &ras.outline;
 	PVG_FT_Vector *vec = outline->points;
 	PVG_FT_Vector *limit = vec + outline->n_points;
-
 
 	if (outline->n_points <= 0)
 	{
@@ -264,10 +283,10 @@ static void gray_compute_cbox(RAS_ARG)
 }
 
 
-  /*************************************************************************/
-  /*                                                                       */
-  /* Record the current cell in the table.                                 */
-  /*                                                                       */
+/*************************************************************************/
+/*                                                                       */
+/* Record the current cell in the table.                                 */
+/*                                                                       */
 static PCell gray_find_cell(RAS_ARG)
 {
 	PCell *pcell, cell;
@@ -290,7 +309,7 @@ static PCell gray_find_cell(RAS_ARG)
 	}
 
 	if (ras.num_cells >= ras.max_cells)
-		pvg_ft_longjmp(ras.jump_buffer, 1);
+		return NULL;
 
 	cell = ras.cells + ras.num_cells++;
 	cell->x = x;
@@ -304,25 +323,28 @@ static PCell gray_find_cell(RAS_ARG)
 }
 
 
-static void gray_record_cell(RAS_ARG)
+static PVG_FT_Error gray_record_cell(RAS_ARG)
 {
 	if (ras.area | ras.cover)
 	{
 		PCell cell = gray_find_cell(RAS_VAR);
-
-
+		if (cell == NULL)
+			return ErrRaster_Memory_Overflow;
 		cell->area += ras.area;
 		cell->cover += ras.cover;
 	}
+	return 0;
 }
 
 
-  /*************************************************************************/
-  /*                                                                       */
-  /* Set the current cell to a new position.                               */
-  /*                                                                       */
-static void gray_set_cell(RAS_ARG_ TCoord ex, TCoord ey)
+/*************************************************************************/
+/*                                                                       */
+/* Set the current cell to a new position.                               */
+/*                                                                       */
+static PVG_FT_Error gray_set_cell(RAS_ARG_ TCoord ex, TCoord ey)
 {
+	PVG_FT_Error error;
+
 	/* Move the cell pointer to a new position.  We set the `invalid'      */
 	/* flag to indicate that the cell isn't part of those we're interested */
 	/* in during the render phase.  This means that:                       */
@@ -349,8 +371,12 @@ static void gray_set_cell(RAS_ARG_ TCoord ex, TCoord ey)
 	{
 		/* record the current one if it is valid */
 		if (!ras.invalid)
-			gray_record_cell(RAS_VAR);
-
+		{
+			error = gray_record_cell(RAS_VAR);
+			if (error != 0)
+				return error;
+		}
+		
 		ras.area = 0;
 		ras.cover = 0;
 		ras.ex = ex;
@@ -358,6 +384,7 @@ static void gray_set_cell(RAS_ARG_ TCoord ex, TCoord ey)
 	}
 
 	ras.invalid = ((plutovg_uint_t) ey >= (plutovg_uint_t) ras.count_ey || ex >= ras.count_ex);
+	return 0;
 }
 
 
@@ -365,7 +392,7 @@ static void gray_set_cell(RAS_ARG_ TCoord ex, TCoord ey)
   /*                                                                       */
   /* Start a new contour at a given cell.                                  */
   /*                                                                       */
-static void gray_start_cell(RAS_ARG_ TCoord ex, TCoord ey)
+static PVG_FT_Error gray_start_cell(RAS_ARG_ TCoord ex, TCoord ey)
 {
 	if (ex > ras.max_ex)
 		ex = (TCoord) (ras.max_ex);
@@ -379,7 +406,7 @@ static void gray_start_cell(RAS_ARG_ TCoord ex, TCoord ey)
 	ras.ey = ey - ras.min_ey;
 	ras.invalid = 0;
 
-	gray_set_cell(RAS_VAR_ ex, ey);
+	return gray_set_cell(RAS_VAR_ ex, ey);
 }
 
 /* The new render-line implementation is not yet used */
@@ -389,11 +416,12 @@ static void gray_start_cell(RAS_ARG_ TCoord ex, TCoord ey)
   /*                                                                       */
   /* Render a scanline as one or more cells.                               */
   /*                                                                       */
-static void gray_render_scanline(RAS_ARG_ TCoord ey, TPos x1, TCoord y1, TPos x2, TCoord y2)
+static PVG_FT_Error gray_render_scanline(RAS_ARG_ TCoord ey, TPos x1, TCoord y1, TPos x2, TCoord y2)
 {
 	TCoord ex1, ex2, fx1, fx2, first, dy, delta, mod;
 	TPos p, dx;
 	plutovg_int_t incr;
+	PVG_FT_Error error;
 
 	ex1 = TRUNC(x1);
 	ex2 = TRUNC(x2);
@@ -401,8 +429,7 @@ static void gray_render_scanline(RAS_ARG_ TCoord ey, TPos x1, TCoord y1, TPos x2
 	/* trivial case.  Happens often */
 	if (y1 == y2)
 	{
-		gray_set_cell(RAS_VAR_ ex2, ey);
-		return;
+		return gray_set_cell(RAS_VAR_ ex2, ey);
 	}
 
 	fx1 = FRACT(x1);
@@ -432,13 +459,18 @@ static void gray_render_scanline(RAS_ARG_ TCoord ey, TPos x1, TCoord y1, TPos x2
 		dx = -dx;
 	}
 
+	/* the fractional part of y-delta is mod/dx. It is essential to */
+	/* keep track of its accumulation for accurate rendering.       */
+	/* XXX: y-delta and x-delta below should be related.            */
 	PVG_FT_DIV_MOD(TCoord, p, dx, delta, mod);
 
 	ras.area += (TArea) (fx1 + first) * delta;
 	ras.cover += delta;
 	y1 += delta;
 	ex1 += incr;
-	gray_set_cell(RAS_VAR_ ex1, ey);
+	error = gray_set_cell(RAS_VAR_ ex1, ey);
+	if (error != 0)
+		return error;
 
 	if (ex1 != ex2)
 	{
@@ -461,7 +493,9 @@ static void gray_render_scanline(RAS_ARG_ TCoord ey, TPos x1, TCoord y1, TPos x2
 			ras.cover += delta;
 			y1 += delta;
 			ex1 += incr;
-			gray_set_cell(RAS_VAR_ ex1, ey);
+			error = gray_set_cell(RAS_VAR_ ex1, ey);
+			if (error != 0)
+				return error;
 		} while (ex1 != ex2);
 	}
 	fx1 = ONE_PIXEL - first;
@@ -471,18 +505,20 @@ static void gray_render_scanline(RAS_ARG_ TCoord ey, TPos x1, TCoord y1, TPos x2
 
 	ras.area += (TArea) ((fx1 + fx2) * dy);
 	ras.cover += dy;
+	return 0;
 }
 
 
-  /*************************************************************************/
-  /*                                                                       */
-  /* Render a given line as a series of scanlines.                         */
-  /*                                                                       */
-static void gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
+/*************************************************************************/
+/*                                                                       */
+/* Render a given line as a series of scanlines.                         */
+/*                                                                       */
+static PVG_FT_Error gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
 {
 	TCoord ey1, ey2, fy1, fy2, first, delta, mod;
 	TPos p, dx, dy, x, x2;
 	plutovg_int_t incr;
+	PVG_FT_Error error;
 
 	ey1 = TRUNC(ras.y);
 	ey2 = TRUNC(to_y);					/* if (ey2 >= ras.max_ey) ey2 = ras.max_ey-1; */
@@ -497,7 +533,9 @@ static void gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
 	/* everything is on a single scanline */
 	if (ey1 == ey2)
 	{
-		gray_render_scanline(RAS_VAR_ ey1, ras.x, fy1, to_x, fy2);
+		error = gray_render_scanline(RAS_VAR_ ey1, ras.x, fy1, to_x, fy2);
+		if (error != 0)
+			return error;
 		goto End;
 	}
 
@@ -533,50 +571,52 @@ static void gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
 			if (ey1 > max_ey1)
 			{
 				ey1 = (max_ey1 > ey2) ? max_ey1 : ey2;
-				gray_set_cell(&ras, ex, ey1);
+				error = gray_set_cell(&ras, ex, ey1);
 			} else
 			{
 				ey1--;
-				gray_set_cell(&ras, ex, ey1);
+				error = gray_set_cell(&ras, ex, ey1);
 			}
-			while (ey1 > ey2 && ey1 >= ras.min_ey)
+			while (error == 0 && ey1 > ey2 && ey1 >= ras.min_ey)
 			{
 				ras.area += area;
 				ras.cover += delta;
 				ey1--;
 
-				gray_set_cell(&ras, ex, ey1);
+				error = gray_set_cell(&ras, ex, ey1);
 			}
-			if (ey1 != ey2)
+			if (error == 0 && ey1 != ey2)
 			{
 				ey1 = ey2;
-				gray_set_cell(&ras, ex, ey1);
+				error = gray_set_cell(&ras, ex, ey1);
 			}
 		} else
 		{
 			if (ey1 < ras.min_ey)
 			{
 				ey1 = (ras.min_ey < ey2) ? ras.min_ey : ey2;
-				gray_set_cell(&ras, ex, ey1);
+				error = gray_set_cell(&ras, ex, ey1);
 			} else
 			{
 				ey1++;
-				gray_set_cell(&ras, ex, ey1);
+				error = gray_set_cell(&ras, ex, ey1);
 			}
-			while (ey1 < ey2 && ey1 < max_ey1)
+			while (error == 0 && ey1 < ey2 && ey1 < max_ey1)
 			{
 				ras.area += area;
 				ras.cover += delta;
 				ey1++;
 
-				gray_set_cell(&ras, ex, ey1);
+				error = gray_set_cell(&ras, ex, ey1);
 			}
-			if (ey1 != ey2)
+			if (error == 0 && ey1 != ey2)
 			{
 				ey1 = ey2;
-				gray_set_cell(&ras, ex, ey1);
+				error = gray_set_cell(&ras, ex, ey1);
 			}
 		}
+		if (error != 0)
+			return error;
 
 		delta = (TCoord) (fy2 - ONE_PIXEL + first);
 		ras.area += (TArea) two_fx *delta;
@@ -605,10 +645,14 @@ static void gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
 	PVG_FT_DIV_MOD(TCoord, p, dy, delta, mod);
 
 	x = ras.x + delta;
-	gray_render_scanline(RAS_VAR_ ey1, ras.x, fy1, x, (TCoord) first);
+	error = gray_render_scanline(RAS_VAR_ ey1, ras.x, fy1, x, (TCoord) first);
+	if (error != 0)
+		return error;
 
 	ey1 += incr;
-	gray_set_cell(RAS_VAR_ TRUNC(x), ey1);
+	error = gray_set_cell(RAS_VAR_ TRUNC(x), ey1);
+	if (error != 0)
+		return error;
 
 	if (ey1 != ey2)
 	{
@@ -628,19 +672,26 @@ static void gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
 			}
 
 			x2 = x + delta;
-			gray_render_scanline(RAS_VAR_ ey1, x, ONE_PIXEL - first, x2, first);
+			error = gray_render_scanline(RAS_VAR_ ey1, x, ONE_PIXEL - first, x2, first);
+			if (error != 0)
+				return error;
 			x = x2;
 
 			ey1 += incr;
-			gray_set_cell(RAS_VAR_ TRUNC(x), ey1);
+			error = gray_set_cell(RAS_VAR_ TRUNC(x), ey1);
+			if (error != 0)
+				return error;
 		} while (ey1 != ey2);
 	}
 
-	gray_render_scanline(RAS_VAR_ ey1, x, ONE_PIXEL - first, to_x, fy2);
+	error = gray_render_scanline(RAS_VAR_ ey1, x, ONE_PIXEL - first, to_x, fy2);
+	if (error != 0)
+		return error;
 
   End:
 	ras.x = to_x;
 	ras.y = to_y;
+	return 0;
 }
 
 
@@ -650,10 +701,11 @@ static void gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
   /*                                                                       */
   /* Render a straight line across multiple cells in any direction.        */
   /*                                                                       */
-static void gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
+static PVG_FT_Error gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
 {
 	TPos dx, dy, fx1, fy1, fx2, fy2;
 	TCoord ex1, ex2, ey1, ey2;
+	PVG_FT_Error error;
 
 	ex1 = TRUNC(ras.x);
 	ex2 = TRUNC(to_x);
@@ -671,14 +723,16 @@ static void gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
 	fy1 = FRACT(ras.y);
 
 	if (ex1 == ex2 && ey1 == ey2)		/* inside one cell */
-		;
-	else if (dy == 0)					/* ex1 != ex2 */ /* any horizontal line */
+	{
+		error = 0;
+	} else if (dy == 0)					/* ex1 != ex2 */ /* any horizontal line */
 	{
 		ex1 = ex2;
-		gray_set_cell(RAS_VAR_ ex1, ey1);
+		error = gray_set_cell(RAS_VAR_ ex1, ey1);
 	} else if (dx == 0)
 	{
 		if (dy > 0)						/* vertical line up */
+		{
 			do
 			{
 				fy2 = ONE_PIXEL;
@@ -686,9 +740,10 @@ static void gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
 				ras.area += (fy2 - fy1) * fx1 * 2;
 				fy1 = 0;
 				ey1++;
-				gray_set_cell(RAS_VAR_ ex1, ey1);
-			} while (ey1 != ey2);
-		else							/* vertical line down */
+				error = gray_set_cell(RAS_VAR_ ex1, ey1);
+			} while (error == 0 && ey1 != ey2);
+		} else							/* vertical line down */
+		{
 			do
 			{
 				fy2 = 0;
@@ -696,15 +751,15 @@ static void gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
 				ras.area += (fy2 - fy1) * fx1 * 2;
 				fy1 = ONE_PIXEL;
 				ey1--;
-				gray_set_cell(RAS_VAR_ ex1, ey1);
-			} while (ey1 != ey2);
+				error = gray_set_cell(RAS_VAR_ ex1, ey1);
+			} while (error == 0 && ey1 != ey2);
+		}
 	} else								/* any other line */
 	{
 		TArea prod = dx * fy1 - dy * fx1;
 
-		PVG_FT_UDIVPREP(dx);
-		PVG_FT_UDIVPREP(dy);
-
+		PVG_FT_UDIVPREP(ex1 != ex2, dx);
+		PVG_FT_UDIVPREP(ey1 != ey2, dy);
 
 		/* The fundamental value `prod' determines which side and the  */
 		/* exact coordinate where the line exits current cell.  It is  */
@@ -754,9 +809,11 @@ static void gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
 				ey1--;
 			}
 
-			gray_set_cell(RAS_VAR_ ex1, ey1);
-		} while (ex1 != ex2 || ey1 != ey2);
+			error = gray_set_cell(RAS_VAR_ ex1, ey1);
+		} while (error == 0 && (ex1 != ex2 || ey1 != ey2));
 	}
+	if (error != 0)
+		return error;
 
 	fx2 = FRACT(to_x);
 	fy2 = FRACT(to_y);
@@ -767,6 +824,7 @@ static void gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
   End:
 	ras.x = to_x;
 	ras.y = to_y;
+	return 0;
 }
 
 #endif
@@ -776,25 +834,28 @@ static void gray_split_conic(PVG_FT_Vector *base)
 	TPos a, b;
 
 	base[4].x = base[2].x;
-	b = base[1].x;
-	a = base[3].x = (base[2].x + b) / 2;
-	b = base[1].x = (base[0].x + b) / 2;
-	base[2].x = (a + b) / 2;
+	a = base[0].x + base[1].x;
+	b = base[1].x + base[2].x;
+	base[3].x = b >> 1;
+	base[2].x = (a + b) >> 2;
+	base[1].x = a >> 1;
 
 	base[4].y = base[2].y;
-	b = base[1].y;
-	a = base[3].y = (base[2].y + b) / 2;
-	b = base[1].y = (base[0].y + b) / 2;
-	base[2].y = (a + b) / 2;
+	a = base[0].y + base[1].y;
+	b = base[1].y + base[2].y;
+	base[3].y = b >> 1;
+	base[2].y = (a + b) >> 2;
+	base[1].y = a >> 1;
 }
 
 
-static void gray_render_conic(RAS_ARG_ const PVG_FT_Vector *control, const PVG_FT_Vector *to)
+static PVG_FT_Error gray_render_conic(RAS_ARG_ const PVG_FT_Vector *control, const PVG_FT_Vector *to)
 {
 	PVG_FT_Vector bez_stack[16 * 2 + 1];	/* enough to accommodate bisections */
 	PVG_FT_Vector *arc = bez_stack;
 	TPos dx, dy;
 	plutovg_int_t draw, split;
+	PVG_FT_Error error;
 
 	arc[0].x = UPSCALE(to->x);
 	arc[0].y = UPSCALE(to->y);
@@ -811,7 +872,7 @@ static void gray_render_conic(RAS_ARG_ const PVG_FT_Vector *control, const PVG_F
 	{
 		ras.x = arc[0].x;
 		ras.y = arc[0].y;
-		return;
+		return 0;
 	}
 
 	dx = PVG_FT_ABS(arc[2].x + arc[0].x - 2 * arc[1].x);
@@ -842,41 +903,47 @@ static void gray_render_conic(RAS_ARG_ const PVG_FT_Vector *control, const PVG_F
 			split <<= 1;
 		}
 
-		gray_render_line(RAS_VAR_ arc[0].x, arc[0].y);
+		error = gray_render_line(RAS_VAR_ arc[0].x, arc[0].y);
+		if (error != 0)
+			return error;
 		arc -= 2;
 
 	} while (--draw);
+	return 0;
 }
 
 
 static void gray_split_cubic(PVG_FT_Vector *base)
 {
-	TPos a, b, c, d;
+	TPos a, b, c;
 
 	base[6].x = base[3].x;
-	c = base[1].x;
-	d = base[2].x;
-	base[1].x = a = (base[0].x + c) / 2;
-	base[5].x = b = (base[3].x + d) / 2;
-	c = (c + d) / 2;
-	base[2].x = a = (a + c) / 2;
-	base[4].x = b = (b + c) / 2;
-	base[3].x = (a + b) / 2;
+	a = base[0].x + base[1].x;
+	b = base[1].x + base[2].x;
+	c = base[2].x + base[3].x;
+	base[5].x = c >> 1;
+	c += b;
+	base[4].x = c >> 2;
+	base[1].x = a >> 1;
+	a += b;
+	base[2].x = a >> 2;
+	base[3].x = (a + c) >> 3;
 
 	base[6].y = base[3].y;
-	c = base[1].y;
-	d = base[2].y;
-	base[1].y = a = (base[0].y + c) / 2;
-	base[5].y = b = (base[3].y + d) / 2;
-	c = (c + d) / 2;
-	base[2].y = a = (a + c) / 2;
-	base[4].y = b = (b + c) / 2;
-	base[3].y = (a + b) / 2;
+	a = base[0].y + base[1].y;
+	b = base[1].y + base[2].y;
+	c = base[2].y + base[3].y;
+	base[5].y = c >> 1;
+	c += b;
+	base[4].y = c >> 2;
+	base[1].y = a >> 1;
+	a += b;
+	base[2].y = a >> 2;
+	base[3].y = (a + c) >> 3;
 }
 
 
-static void
-gray_render_cubic(RAS_ARG_ const PVG_FT_Vector *control1, const PVG_FT_Vector *control2, const PVG_FT_Vector *to)
+static PVG_FT_Error gray_render_cubic(RAS_ARG_ const PVG_FT_Vector *control1, const PVG_FT_Vector *control2, const PVG_FT_Vector *to)
 {
 	PVG_FT_Vector bez_stack[16 * 3 + 1];	/* enough to accommodate bisections */
 	PVG_FT_Vector *arc = bez_stack;
@@ -884,6 +951,7 @@ gray_render_cubic(RAS_ARG_ const PVG_FT_Vector *control1, const PVG_FT_Vector *c
 	TPos dx, dy, dx_, dy_;
 	TPos dx1, dy1, dx2, dy2;
 	TPos L, s, s_limit;
+	PVG_FT_Error error;
 
 	arc[0].x = UPSCALE(to->x);
 	arc[0].y = UPSCALE(to->y);
@@ -904,7 +972,7 @@ gray_render_cubic(RAS_ARG_ const PVG_FT_Vector *control1, const PVG_FT_Vector *c
 	{
 		ras.x = arc[0].x;
 		ras.y = arc[0].y;
-		return;
+		return 0;
 	}
 
 	for (;;)
@@ -949,17 +1017,19 @@ gray_render_cubic(RAS_ARG_ const PVG_FT_Vector *control1, const PVG_FT_Vector *c
 		if (dx1 * (dx1 - dx) + dy1 * (dy1 - dy) > 0 || dx2 * (dx2 - dx) + dy2 * (dy2 - dy) > 0)
 			goto Split;
 
-		gray_render_line(RAS_VAR_ arc[0].x, arc[0].y);
+		error = gray_render_line(RAS_VAR_ arc[0].x, arc[0].y);
+		if (error != 0)
+			return error;
 
 		if (arc == bez_stack)
-			return;
+			return 0;
 
 		arc -= 3;
 		continue;
 
 	  Split:
 		if (arc == limit)
-			return;
+			return 0;
 		gray_split_cubic(arc);
 		arc += 3;
 	}
@@ -967,19 +1037,26 @@ gray_render_cubic(RAS_ARG_ const PVG_FT_Vector *control1, const PVG_FT_Vector *c
 
 
 
-static int gray_move_to(const PVG_FT_Vector *to, PWorker worker)
+static PVG_FT_Error gray_move_to(const PVG_FT_Vector *to, PWorker worker)
 {
 	TPos x, y;
+	PVG_FT_Error error;
 
 	/* record current cell, if any */
 	if (!ras.invalid)
-		gray_record_cell(worker);
+	{
+		error = gray_record_cell(worker);
+		if (error != 0)
+			return error;
+	}
 
 	/* start to a new position */
 	x = UPSCALE(to->x);
 	y = UPSCALE(to->y);
 
-	gray_start_cell(worker, TRUNC(x), TRUNC(y));
+	error = gray_start_cell(worker, TRUNC(x), TRUNC(y));
+	if (error != 0)
+		return error;
 
 	ras.x = x;
 	ras.y = y;
@@ -1217,7 +1294,7 @@ void PVG_FT_Outline_Get_CBox(const PVG_FT_Outline *outline, PVG_FT_BBox *acbox)
   /* <Return>                                                              */
   /*    Error code.  0 means success.                                      */
   /*                                                                       */
-static int PVG_FT_Outline_Decompose(const PVG_FT_Outline *outline, void *user)
+static PVG_FT_Error PVG_FT_Outline_Decompose(const PVG_FT_Outline *outline, void *user)
 {
 #undef SCALED
 #define SCALED( x )  (x)
@@ -1232,7 +1309,7 @@ static int PVG_FT_Outline_Decompose(const PVG_FT_Outline *outline, void *user)
 
 	plutovg_int_t n;								/* index of contour in outline     */
 	plutovg_int_t first;							/* index of first point in contour */
-	int error;
+	PVG_FT_Error error;
 	char tag;							/* current point's state           */
 
 	if (!outline)
@@ -1291,7 +1368,7 @@ static int PVG_FT_Outline_Decompose(const PVG_FT_Outline *outline, void *user)
 		}
 
 		error = gray_move_to(&v_start, user);
-		if (error)
+		if (error != 0)
 			return error;
 
 		while (point < limit)
@@ -1310,7 +1387,9 @@ static int PVG_FT_Outline_Decompose(const PVG_FT_Outline *outline, void *user)
 					vec.x = SCALED(point->x);
 					vec.y = SCALED(point->y);
 
-					gray_render_line(user, UPSCALE(vec.x), UPSCALE(vec.y));
+					error = gray_render_line(user, UPSCALE(vec.x), UPSCALE(vec.y));
+					if (error != 0)
+						return error;
 					continue;
 				}
 
@@ -1335,7 +1414,9 @@ static int PVG_FT_Outline_Decompose(const PVG_FT_Outline *outline, void *user)
 
 						if (tag == PVG_FT_CURVE_TAG_ON)
 						{
-							gray_render_conic(user, &v_control, &vec);
+							error = gray_render_conic(user, &v_control, &vec);
+							if (error != 0)
+								return error;
 							continue;
 						}
 
@@ -1345,13 +1426,17 @@ static int PVG_FT_Outline_Decompose(const PVG_FT_Outline *outline, void *user)
 						v_middle.x = (v_control.x + vec.x) / 2;
 						v_middle.y = (v_control.y + vec.y) / 2;
 
-						gray_render_conic(user, &v_control, &v_middle);
+						error = gray_render_conic(user, &v_control, &v_middle);
+						if (error != 0)
+							return error;
 
 						v_control = vec;
 						goto Do_Conic;
 					}
 
-					gray_render_conic(user, &v_control, &v_start);
+					error = gray_render_conic(user, &v_control, &v_start);
+					if (error != 0)
+						return error;
 					goto Close;
 				}
 
@@ -1379,18 +1464,24 @@ static int PVG_FT_Outline_Decompose(const PVG_FT_Outline *outline, void *user)
 						vec.x = SCALED(point->x);
 						vec.y = SCALED(point->y);
 
-						gray_render_cubic(user, &vec1, &vec2, &vec);
+						error = gray_render_cubic(user, &vec1, &vec2, &vec);
+						if (error != 0)
+							return error;
 						continue;
 					}
 
-					gray_render_cubic(user, &vec1, &vec2, &v_start);
+					error = gray_render_cubic(user, &vec1, &vec2, &v_start);
+					if (error != 0)
+						return error;
 					goto Close;
 				}
 			}
 		}
 
 		/* close the contour with a line segment */
-		gray_render_line(user, UPSCALE(v_start.x), UPSCALE(v_start.y));
+		error = gray_render_line(user, UPSCALE(v_start.x), UPSCALE(v_start.y));
+		if (error != 0)
+			return error;
 
 	  Close:
 		first = last + 1;
@@ -1405,31 +1496,25 @@ typedef struct TBand_
 	TPos max;
 } TBand;
 
-static int gray_convert_glyph_inner(RAS_ARG)
+static PVG_FT_Error gray_convert_glyph_inner(RAS_ARG)
 {
-	volatile int error = 0;
+	PVG_FT_Error error;
 
-	if (pvg_ft_setjmp(ras.jump_buffer) == 0)
-	{
-		error = PVG_FT_Outline_Decompose(&ras.outline, &ras);
-		if (!ras.invalid)
-			gray_record_cell(RAS_VAR);
-	} else
-	{
-		error = ErrRaster_Memory_Overflow;
-	}
+	error = PVG_FT_Outline_Decompose(&ras.outline, &ras);
+	if (!ras.invalid)
+		error = gray_record_cell(RAS_VAR);
 
 	return error;
 }
 
 
-static int gray_convert_glyph(RAS_ARG)
+static PVG_FT_Error gray_convert_glyph(RAS_ARG)
 {
 	TBand bands[40];
-	TBand *volatile band;
-	plutovg_int_t volatile n;
+	TBand *band;
+	plutovg_int_t n;
 	plutovg_int_t num_bands;
-	TPos volatile min, max, max_y;
+	TPos min, max, max_y;
 	PVG_FT_BBox *clip;
 	plutovg_int_t skip;
 
@@ -1482,7 +1567,7 @@ static int gray_convert_glyph(RAS_ARG)
 		while (band >= bands)
 		{
 			TPos bottom, top, middle;
-			int error;
+			PVG_FT_Error error;
 
 			{
 				PCell cells_max;
@@ -1523,7 +1608,7 @@ static int gray_convert_glyph(RAS_ARG)
 
 			error = gray_convert_glyph_inner(RAS_VAR);
 
-			if (!error)
+			if (error == 0)
 			{
 				gray_sweep(RAS_VAR);
 				band--;

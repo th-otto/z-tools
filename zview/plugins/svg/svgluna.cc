@@ -546,6 +546,8 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		free(data);
 		RETURN_ERROR(EC_Malloc);
 	}
+#if 0
+	/* no longer needed with bigendian patch */
 	/* Hide embedded images,
 	 * and update the layout after applying the style.
 	 * This is a workaround for a bug in plutovg,
@@ -553,6 +555,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	 */
 	svg_image->applyStyleSheet("image { display: none }");
 	svg_image->updateLayout();
+#endif
 
 	info->width = svg_image->width();
 	info->height = svg_image->height();

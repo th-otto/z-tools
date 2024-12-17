@@ -134,7 +134,11 @@ void plutovg_convert_argb_to_rgba(unsigned char *dst, const unsigned char *src, 
 					b = (b * 255) / a;
 				}
 
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+                dst_row[x] = (r << 24) | (g << 16) | (b << 8) | a;
+#else
 				dst_row[x] = (a << 24) | (b << 16) | (g << 8) | r;
+#endif
 			}
 		}
 	}
@@ -152,6 +156,28 @@ void plutovg_convert_rgba_to_argb(unsigned char *dst, const unsigned char *src, 
 		for (x = 0; x < width; x++)
 		{
 			uint32_t pixel = src_row[x];
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+			uint32_t a = (pixel) & 0xFF;
+
+			if (a == 0)
+			{
+				dst_row[x] = 0x00000000;
+			} else
+			{
+				uint32_t b = (pixel >> 8) & 0xFF;
+				uint32_t g = (pixel >> 16) & 0xFF;
+				uint32_t r = (pixel >> 24) & 0xFF;
+
+				if (a != 255)
+				{
+					r = (r * a) / 255;
+					g = (g * a) / 255;
+					b = (b * a) / 255;
+				}
+
+				dst_row[x] = (a << 24) | (r << 16) | (g << 8) | b;
+			}
+#else
 			uint32_t a = (pixel >> 24) & 0xFF;
 
 			if (a == 0)
@@ -172,6 +198,7 @@ void plutovg_convert_rgba_to_argb(unsigned char *dst, const unsigned char *src, 
 
 				dst_row[x] = (a << 24) | (r << 16) | (g << 8) | b;
 			}
+#endif
 		}
 	}
 }

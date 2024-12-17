@@ -4,7 +4,7 @@ CC				= $(CROSS_PREFIX)gcc
 AR 				= $(CROSS_PREFIX)ar
 
 OPTIMISATION = -O2 -fomit-frame-pointer
-CPPFLAGS = -I. -I/usr/include/freetype2
+CPPFLAGS = -I.
 CFLAGS   = $(DEBUG) $(CPU_CFLAGS) $(CPPFLAGS) $(OPTIMISATION) -Wall -Wshadow -Wno-pointer-sign -Wstrict-prototypes -Wmissing-prototypes -Wdeclaration-after-statement -Werror
 #CFLAGS += -Waggregate-return
 LIBS = -lz -lm
