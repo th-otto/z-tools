@@ -6,11 +6,21 @@
  * For conditions of distribution and use, see copyright file.
  */
 
+#define	VERSION	    0x103
+#define NAME        "HighResMode"
+#define EXTENSIONS  "HRM\0"
+#define DATE        __DATE__ " " __TIME__
+#define AUTHOR      "Lonny Pursell, Thorsten Otto"
+#define MISC_INFO   "Some code by Hans Wessels"
+
 #ifndef LIBFUNC
-# error "LIBFUNC must be defined before including this file"
+#define LIBFUNC(_fn, name, _nargs)
 #endif
 #ifndef LIBFUNC2
 #define LIBFUNC2(_fn, name, _nargs) LIBFUNC(_fn, name, _nargs)
+#endif
+#ifndef NOFUNC
+#define NOFUNC
 #endif
 
 /*   0 */ LIBFUNC(0, slb_control, 2)
@@ -27,3 +37,5 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
+
+#define SHAREDLIB "zvhrm.slb"

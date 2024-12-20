@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvfluff.slb\"
-
 all:: fluff64.ldg zvfluff.slb
 
 include $(top_srcdir)/rules

@@ -1,14 +1,10 @@
-#define	VERSION	     0x0202
-#define NAME        "Autodesk Animator FLIC"
-#define AUTHOR      "Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
-
 /*
 See https://www.compuphase.com/flic.htm
 */
 
 #include "plugin.h"
 #include "zvplugin.h"
+#include "exports.h"
 #define NF_DEBUG 0
 #include "nfdebug.h"
 
@@ -21,7 +17,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("FLC\0" "FLH\0" "FLI\0");
+		return (long) (EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -31,6 +27,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
+	case INFO_MISC:
+		return (long)MISC_INFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}

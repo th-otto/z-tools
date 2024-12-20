@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvimglab.slb\"
-
 all:: imagelab.ldg zvimglab.slb
 
 include $(top_srcdir)/rules

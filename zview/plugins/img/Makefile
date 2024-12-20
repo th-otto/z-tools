@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvimg.slb\"
-
 all:: img.ldg zvimg.slb
 
 include $(top_srcdir)/rules

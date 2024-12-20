@@ -6,7 +6,7 @@
  * For conditions of distribution and use, see copyright file.
  */
 
-#define VERSION		0x0201
+#define VERSION		0x201
 #define NAME        "AIM (Atari Image Manager)"
 #define EXTENSIONS  "COL\0" "IM\0"
 #define DATE        __DATE__ " " __TIME__

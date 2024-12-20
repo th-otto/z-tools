@@ -5,8 +5,6 @@ include ../pluginvars
 GIFLIB = -lgif
 LIB       = $(GIFLIB)
 
-SFLAGS += -DSHAREDLIB=\"zvgif.slb\"
-
 all:: gif.ldg zvgif.slb
 
 include $(top_srcdir)/rules

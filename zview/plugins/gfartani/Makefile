@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvgrani.slb\"
-
 all:: gfartani.ldg zvgrani.slb
 
 include $(top_srcdir)/rules

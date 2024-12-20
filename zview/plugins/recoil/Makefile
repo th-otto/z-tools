@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvrecoil.slb\"
-
 all:: recoil.ldg zvrecoil.slb
 
 include $(top_srcdir)/rules

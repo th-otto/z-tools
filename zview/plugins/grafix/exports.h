@@ -7,16 +7,20 @@
  */
 
 #define VERSION		0x203
-#define AUTHOR      "Thorsten Otto"
 #define NAME        "Grafix"
 #define DATE        __DATE__ " " __TIME__
 #define EXTENSIONS  "GRX\0"
+#define AUTHOR      "Lonny Pursell"
+#define MISC_INFO   "zView module by Thorsten Otto"
 
 #ifndef LIBFUNC
-# error "LIBFUNC must be defined before including this file"
+#define LIBFUNC(_fn, name, _nargs)
 #endif
 #ifndef LIBFUNC2
 #define LIBFUNC2(_fn, name, _nargs) LIBFUNC(_fn, name, _nargs)
+#endif
+#ifndef NOFUNC
+#define NOFUNC
 #endif
 
 /*   0 */ LIBFUNC(0, slb_control, 2)

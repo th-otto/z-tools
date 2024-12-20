@@ -198,7 +198,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	
 	if (custom_size)
 	{
-		/* strcat(info->info, " (custom size)"); */
+		/* strcat(info->info, " (custom size)"); FIXME: info->info too small for this */
 	}
 	strcpy(info->compression, "None");
 	

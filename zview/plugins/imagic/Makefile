@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvimagic.slb\"
-
 all:: imagic.ldg zvimagic.slb
 
 include $(top_srcdir)/rules

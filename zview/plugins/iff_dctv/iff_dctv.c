@@ -1,11 +1,6 @@
-#define	VERSION	    0x201
-#define NAME        "DCTV - Interchange File Format"
-#define AUTHOR      "Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
-#define MISC_INFO   "Some code by cholok"
-
 #include "plugin.h"
 #include "zvplugin.h"
+#include "exports.h"
 #define NF_DEBUG 0
 #include "nfdebug.h"
 #include "cvtdctv.c"
@@ -132,7 +127,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("DCT\0" "DCTV\0");
+		return (long) (EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;

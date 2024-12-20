@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvindy.slb\"
-
 all:: indypnt.ldg zvindy.slb
 
 include $(top_srcdir)/rules

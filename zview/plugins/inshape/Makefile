@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zviim.slb\"
-
 all:: inshape.ldg zviim.slb
 
 include $(top_srcdir)/rules

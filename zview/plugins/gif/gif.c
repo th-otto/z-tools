@@ -15,17 +15,11 @@
   2.11 Code cleanup
 */
 
-#define VERSION		0x0211
-#define NAME        "Graphics Interchange Format"
-#define AUTHOR      "Lonny Pursell, Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
-#define MISCINFO    "GIFLIB: " __STRINGIFY(GIFLIB_MAJOR) "." __STRINGIFY(GIFLIB_MINOR) "." __STRINGIFY(GIFLIB_RELEASE)
-
 #include <stdlib.h>
 #include <gif_lib.h>
 #include "plugin.h"
-#include "imginfo.h"
 #include "zvplugin.h"
+#include "exports.h"
 
 #ifdef PLUGIN_SLB
 
@@ -36,7 +30,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("GIF\0");
+		return (long) (EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -46,8 +40,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
 	case INFO_MISC:
-		return (long)MISCINFO;
+		return (long)MISC_INFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}

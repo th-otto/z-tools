@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvezap.slb\"
-
 all:: ezartpro.ldg zvezap.slb
 
 include $(top_srcdir)/rules

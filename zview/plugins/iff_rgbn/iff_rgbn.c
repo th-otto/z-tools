@@ -1,10 +1,6 @@
-#define	VERSION	    0x200
-#define NAME        "RGB8/RGBN - Interchange File Format"
-#define AUTHOR      "Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
-
 #include "plugin.h"
 #include "zvplugin.h"
+#include "exports.h"
 #define NF_DEBUG 0
 #include "nfdebug.h"
 
@@ -130,7 +126,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("TSI\0");
+		return (long) (EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -140,6 +136,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
+	case INFO_MISC:
+		return (long)MISC_INFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}
@@ -534,7 +534,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
  *==================================================================================*/
 void __CDECL reader_quit(IMGINFO info)
 {
-	bail("reader_quit(cleanup)\n");
+	nf_debugprintf(("reader_quit(cleanup)\n"));
 	free(info->_priv_ptr);
 	info->_priv_ptr = 0;
 }
