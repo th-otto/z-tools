@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvdune.slb\"
-
 all:: dungraph.ldg zvdune.slb
 
 include $(top_srcdir)/rules

@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvcart.slb\"
-
 all:: crackart.ldg zvcart.slb
 
 include $(top_srcdir)/rules
@@ -21,7 +19,7 @@ header.lo: ../common/header.S exports.h
 ca_unpac.o: ca_unpac.s Makefile
 	$(CC) $(ASFLAGS) -c $< -o $@
 
-slb.lo crackart.lo: ../common/plugin.h ../common/zview.h exports.h
+ldg.o crackart.o slb.lo crackart.lo: ../common/plugin.h ../common/zview.h exports.h
 crackart.lo crackart.o: crackart.c ca_unpac.c
 
 clean:

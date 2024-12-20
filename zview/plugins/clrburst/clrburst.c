@@ -1,10 +1,6 @@
-#define	VERSION	     0x0103
-#define NAME        "ColorBurst II"
-#define AUTHOR      "Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
-
 #include "plugin.h"
 #include "zvplugin.h"
+#include "exports.h"
 
 /*
 ColorBurst II    *.BST
@@ -30,7 +26,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("BST\0");
+		return (long) (EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;

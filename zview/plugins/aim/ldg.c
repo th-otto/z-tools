@@ -14,10 +14,14 @@
  * return:	 																		*
  *      --																			*
  *==================================================================================*/
-static void __CDECL init( void)
+static void __CDECL init(void)
 {
 }
 
+
+#ifndef MISC_INFO
+#define MISC_INFO ""
+#endif
 
 static PROC Func[] = 
 {
@@ -25,11 +29,7 @@ static PROC Func[] =
 	{ "reader_init", "Author: " AUTHOR, reader_init },
 	{ "reader_read", "Date: " __DATE__, reader_read },
 	{ "reader_quit", "Time: " __TIME__, reader_quit },
-#ifdef MISC_INFO
 	{ "reader_get_txt", MISC_INFO, reader_get_txt }
-#else
-	{ "reader_get_txt", "", reader_get_txt }
-#endif
 };
 
 

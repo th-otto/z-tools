@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvcanvas.slb\"
-
 all:: canvas.ldg zvcanvas.slb
 
 include $(top_srcdir)/rules

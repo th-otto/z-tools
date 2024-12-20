@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvduo.slb\"
-
 all:: duo.ldg zvduo.slb
 
 include $(top_srcdir)/rules

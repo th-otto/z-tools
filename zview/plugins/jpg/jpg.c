@@ -41,12 +41,8 @@ zv_boolean progressive = FALSE;
 
 #undef VERSION
 #undef NAME
+#include "exports.h"
 
-#define VERSION  0x201
-#define NAME     "Joint Photographic Experts Group"
-#define AUTHOR   "Zorro"
-#define DATE     __DATE__ " " __TIME__
-#define MISCINFO "Using " JPEG_SHAREDLIB_NAME
 
 
 #ifdef PLUGIN_SLB
@@ -57,7 +53,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE | CAN_ENCODE;
 	case OPTION_EXTENSIONS:
-		return (long)("JPG\0" "JPE\0" "JPEG\0" "JIF\0" "JFIF\0" "JFI\0");
+		return (long)(EXTENSIONS);
 
 	case OPTION_QUALITY:
 		return quality;

@@ -1,10 +1,6 @@
-#define	VERSION	     0x0103
-#define NAME        "Cybermate (Animation)"
-#define AUTHOR      "Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
-
 #include "plugin.h"
 #include "zvplugin.h"
+#include "exports.h"
 
 /*
                                Stereo CAD-3D 2.0
@@ -69,7 +65,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("DLT\0");
+		return (long) (EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -79,6 +75,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
+	case INFO_MISC:
+		return (long)MISC_INFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}
@@ -91,9 +91,6 @@ long __CDECL get_option(zv_int_t which)
 /* FIXME */
 static uint32_t frame_positions[ZVIEW_MAX_IMAGES];
 static int cur_y;
-
-/* to be fixed: */
-#define bail(msg)
 
 #include "../degas/packbits.c"
 #include "../degas/tanglbts.c"
@@ -163,8 +160,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	handle = (int16_t)Fopen(name, FO_READ);
 	if (handle < 0)
 	{
-		bail("Invalid path");
-		return FALSE;
+		RETURN_ERROR(EC_Fopen);
 	}
 	file_size = Fseek(0, handle, SEEK_END);
 	Fseek(0, handle, SEEK_SET);
@@ -172,16 +168,14 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	degas_res = find_degas(name, degas_name);
 	if (degas_res < 0)
 	{
-		bail("Invalid path");
 		Fclose(handle);
-		return FALSE;
+		RETURN_ERROR(EC_Fopen);
 	}
 	bmap = malloc(SCREEN_SIZE);
 	if (bmap == NULL)
 	{
-		bail("Malloc(bitmap) failed");
 		Fclose(handle);
-		return FALSE;
+		RETURN_ERROR(EC_Malloc);
 	}
 
 	num_frames = 1;
@@ -189,10 +183,9 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	{
 		if ((size_t) Fread(handle, sizeof(num_deltas), &num_deltas) != sizeof(num_deltas))
 		{
-			bail("Fread failed");
 			free(bmap);
 			Fclose(handle);
-			return FALSE;
+			RETURN_ERROR(EC_Fread);
 		}
 		if (num_deltas == 0)
 			break;
@@ -209,10 +202,9 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	fh = (int)Fopen(degas_name, FO_READ);
 	if (fh < 0)
 	{
-		bail("Invalid path");
 		free(bmap);
 		Fclose(handle);
-		return FALSE;
+		RETURN_ERROR(EC_Fopen);
 	}
 	
 	file_size = Fseek(0, fh, SEEK_END);
@@ -221,11 +213,10 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		Fread(fh, sizeof(palette), palette) != sizeof(palette) ||
 		(res & 3) > 2)
 	{
-		bail("Fread failed");
 		Fclose(fh);
 		free(bmap);
 		Fclose(handle);
-		return FALSE;
+		RETURN_ERROR(EC_Fread);
 	}
 	
 	info->planes = 4 >> (res & 3);
@@ -255,20 +246,18 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		file_size -= sizeof(res) + sizeof(palette);
 		if ((size_t)Fread(fh, file_size, bmap) != file_size)
 		{
-			bail("Fread failed");
 			Fclose(fh);
 			free(bmap);
 			Fclose(handle);
-			return FALSE;
+			RETURN_ERROR(EC_Fread);
 		}
 		temp = malloc(SCREEN_SIZE);
 		if (temp == NULL)
 		{
-			bail("Malloc(bitmap) failed");
 			Fclose(fh);
 			free(bmap);
 			Fclose(handle);
-			return FALSE;
+			RETURN_ERROR(EC_Malloc);
 		}
 		decode_packbits(temp, bmap, SCREEN_SIZE);
 		tangle_bitplanes(bmap, temp, info->width, info->height, info->planes);
@@ -277,11 +266,10 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	{
 		if (Fread(fh, SCREEN_SIZE, bmap) != SCREEN_SIZE)
 		{
-			bail("Fread failed");
 			Fclose(fh);
 			free(bmap);
 			Fclose(handle);
-			return FALSE;
+			RETURN_ERROR(EC_Fread);
 		}
 	}
 	Fclose(fh);
@@ -295,7 +283,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		{
 			info->palette[i].red = (((palette[i] >> 7) & 0x0e) + ((palette[i] >> 11) & 0x01)) * 17;
 			info->palette[i].green = (((palette[i] >> 3) & 0x0e) + ((palette[i] >> 7) & 0x01)) * 17;
-			info->palette[i].blue = (((palette[i] << 1) & 0x0e) + ((palette[i] >> 3) & 0x01)) * 0x11;
+			info->palette[i].blue = (((palette[i] << 1) & 0x0e) + ((palette[i] >> 3) & 0x01)) * 17;
 		}
 	}
 
@@ -315,7 +303,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	strcpy(info->info, "Cybermate (Animation)");
 	strcpy(info->compression, "DLTa");
 
-	return TRUE;
+	RETURN_SUCCESS();
 }
 
 
@@ -422,7 +410,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 
 	info->_priv_var = pos;
 	
-	return TRUE;
+	RETURN_SUCCESS();
 }
 
 

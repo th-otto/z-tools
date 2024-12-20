@@ -1,11 +1,6 @@
-#define	VERSION	     0x0201
-#define NAME        "Canvas"
-#define AUTHOR      "Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
-#define MISC_INFO   "Some code by Hans Wessels"
-
 #include "plugin.h"
 #include "zvplugin.h"
+#include "exports.h"
 
 /*
 Canvas            *.CNV, *.CPT, *.HBL, *.FUL
@@ -96,7 +91,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("CNV\0" "CPT\0" "FUL\0");
+		return (long) (EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;

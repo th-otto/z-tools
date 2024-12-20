@@ -10,9 +10,6 @@
 #endif
 #include "plugin.h"
 #include "zvplugin.h"
-/* only need the meta-information here */
-#define LIBFUNC(a,b,c)
-#define NOFUNC
 #include "exports.h"
 #define NF_DEBUG 0
 #include "nfdebug.h"

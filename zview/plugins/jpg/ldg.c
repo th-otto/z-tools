@@ -23,6 +23,9 @@
 #endif
 #include "zvjpg.h"
 #include "ldglib/ldg.h"
+#undef VERSION
+#undef NAME
+#include "exports.h"
 
 /*==================================================================================*
  * boolean set_jpg_option:															*
@@ -33,7 +36,7 @@
  * return:	 																		*
  *      --																			*
  *==================================================================================*/
-static void __CDECL set_jpg_option( int32_t set_quality, int32_t set_color_space, int32_t set_progressive)
+static void __CDECL set_jpg_option(int32_t set_quality, int32_t set_color_space, int32_t set_progressive)
 {
 	quality = (int) set_quality;
 	color_space = (J_COLOR_SPACE)set_color_space;
@@ -58,13 +61,17 @@ static void __CDECL init( void)
 }
 
 
+#ifndef MISC_INFO
+#define MISC_INFO ""
+#endif
+
 static PROC LibFunc[] = 
 { 
-	{ "plugin_init",    "", init },
-	{ "reader_init",    "", reader_init },
-	{ "reader_get_txt", "", reader_get_txt },
-	{ "reader_read",    "", reader_read },
-	{ "reader_quit",    "", reader_quit },
+	{ "plugin_init", "Codec: " NAME, init },
+	{ "reader_init", "Author: " AUTHOR, reader_init },
+	{ "reader_read", "Date: " __DATE__, reader_read },
+	{ "reader_quit", "Time: " __TIME__, reader_quit },
+	{ "reader_get_txt", MISC_INFO, reader_get_txt },
 	{ "encoder_init", 	"", encoder_init },
 	{ "encoder_write",	"", encoder_write },
 	{ "encoder_quit", 	"", encoder_quit },
@@ -74,17 +81,13 @@ static PROC LibFunc[] =
 
 static LDGLIB plugin =
 {
-	0x200, 			/* Plugin version */
+	VERSION, 			/* Plugin version */
 	sizeof(LibFunc) / sizeof(LibFunc[0]),					/* Number of plugin's functions */
 	LibFunc,			/* List of functions */
-#if 0
-	"JPG\0JPE\0JPEG\0",		/* File's type Handled */
-#else
-	"JPGJPE\0",		/* File's type Handled */
-#endif
+	EXTENSIONS,		/* File's type Handled */
 	LDG_NOT_SHARED, 	/* The flags NOT_SHARED is used here.. */
 	0,
-	2					/* Howmany file type are supported by this plugin */
+	0					/* Howmany file type are supported by this plugin (0 = double-zero terminated) */
 };
 
 /*==================================================================================*

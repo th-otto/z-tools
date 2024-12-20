@@ -5,7 +5,7 @@ include ../pluginvars
 LIB			= -ljpeg -lexif -lm
 
 CPPFLAGS += -DNO_GETENV -DJPEG_LIB_VERSION=80
-SFLAGS += -DJPEG_SLB -DEXIF_SLB -DSHAREDLIB=\"zvjpg.slb\"
+SFLAGS += -DJPEG_SLB -DEXIF_SLB
 
 libexif_OBJS =
 

@@ -348,7 +348,9 @@ void infobox( void)
 				const char *codecname;
 				const char *author;
 				const char *date;
-				
+				const char *misc_info;
+				int i;
+
 				ldg = img->codec->c.ldg.ldg;
 				codecname = ldg->list[0].info;
 				if (codecname)
@@ -372,34 +374,36 @@ void infobox( void)
 				 * - text of function pointer 4 (reader_get_txt) may contain misc info
 				 */
 				author = NULL;
-				if (ldg->num >= 2)
+				date = NULL;
+				misc_info = NULL;
+				for (i = 0; i < (int)ldg->num; i++)
 				{
-					author = ldg->list[1].info;
-					if (author)
+					if (strcmp(ldg->list[i].name, "reader_init") == 0)
 					{
-						if (strncmp(author, "Author: ", 8) == 0)
-							author += 8;
+						author = ldg->list[i].info;
+					} else if (strcmp(ldg->list[i].name, "reader_read") == 0)
+					{
+						date = ldg->list[i].info;
+					} else if (strcmp(ldg->list[i].name, "reader_quit") == 0)
+					{
+						if (ldg->list[i].info != NULL && ldg->list[i].info[0] != 'T')
+							date = ldg->list[i].info;
+					} else if (strcmp(ldg->list[i].name, "reader_get_txt") == 0)
+					{
+						misc_info = ldg->list[i].info;
 					}
 				}
+				if (author && strncmp(author, "Author: ", 8) == 0)
+					author += 8;
+				if (date && strncmp(date, "Date: ", 6) == 0)
+					date += 6;
 				if (author == NULL)
 					author = "";
 				ObjcStrnCpy(infotext, FILE_CODEC_AUTHOR, author);
-				date = NULL;
-				if (ldg->num >= 3)
-				{
-					date = ldg->list[2].info;
-					if (date)
-					{
-						if (strncmp(date, "Date: ", 6) == 0)
-							date += 6;
-						else if (ldg->num >= 4 && ldg->list[3].info != NULL && ldg->list[3].info[0] != 'T')
-							date = ldg->list[3].info;
-					}
-				}
 				if (date == NULL)
 					date = "";
 				ObjcStrnCpy(infotext, FILE_CODEC_DATE, date);
-				objc_multiline(infotext, ldg->num >= 5 ? (long)ldg->list[4].info : 0, FILE_CODEC_INFO_FIRST, FILE_CODEC_INFO_LAST);
+				objc_multiline(infotext, (long)misc_info, FILE_CODEC_INFO_FIRST, FILE_CODEC_INFO_LAST);
 				ObjcStrnCpy(infotext, FILE_CODEC_COMPILER, ldg->flags & LDG_STDCALL ? "Pure-C" : "GNU-C");
 			}
 			break;

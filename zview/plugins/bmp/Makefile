@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvbmp.slb\"
-
 all:: bmp.ldg zvbmp.slb
 
 include $(top_srcdir)/rules

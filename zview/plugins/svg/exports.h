@@ -15,10 +15,13 @@
 #define MISC_INFO   misc_info
 
 #ifndef LIBFUNC
-# error "LIBFUNC must be defined before including this file"
+#define LIBFUNC(a,b,c)
 #endif
 #ifndef LIBFUNC2
 #define LIBFUNC2(_fn, name, _nargs) LIBFUNC(_fn, name, _nargs)
+#endif
+#ifndef NOFUNC
+#define NOFUNC
 #endif
 
 /*   0 */ LIBFUNC(0, slb_control, 2)

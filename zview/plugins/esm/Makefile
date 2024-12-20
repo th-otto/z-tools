@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvesm.slb\"
-
 all:: esm.ldg zvesm.slb
 
 include $(top_srcdir)/rules

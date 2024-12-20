@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvdlt.slb\"
-
 all:: cybrmate.ldg zvdlt.slb
 
 include $(top_srcdir)/rules

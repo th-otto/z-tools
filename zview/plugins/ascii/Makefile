@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvascii.slb\"
-
 all:: ascii.ldg zvascii.slb
 
 include $(top_srcdir)/rules

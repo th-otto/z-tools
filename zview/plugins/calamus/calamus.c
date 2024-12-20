@@ -1,10 +1,6 @@
-#define	VERSION	     0x0201
-#define NAME        "Calamus (Raster Graphic)"
-#define AUTHOR      "Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
-
 #include "plugin.h"
 #include "zvplugin.h"
+#include "exports.h"
 
 /*
 Calamus Raster Graphic    *.CRG
@@ -68,7 +64,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("CRG\0");
+		return (long) (EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -78,6 +74,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
+	case INFO_MISC:
+		return (long)MISC_INFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}
@@ -148,7 +148,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	handle = (int16_t) Fopen(name, FO_READ);
 	if (handle < 0)
 	{
-		return FALSE;
+		RETURN_ERROR(EC_Fopen);
 	}
 	file_size = Fseek(0, handle, SEEK_END);
 	Fseek(0, handle, SEEK_SET);
@@ -157,13 +157,13 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	if (filedata == NULL)
 	{
 		Fclose(handle);
-		return FALSE;
+		RETURN_ERROR(EC_Malloc);
 	}
 	if ((size_t)Fread(handle, file_size, filedata) != file_size)
 	{
 		free(filedata);
 		Fclose(handle);
-		return FALSE;
+		RETURN_ERROR(EC_Fread);
 	}
 	Fclose(handle);
 
@@ -171,12 +171,12 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	if (memcmp(header->magic, "CALAMUSCRG", 10) != 0)
 	{
 		free(filedata);
-		return FALSE;
+		RETURN_ERROR(EC_FileId);
 	}
 	if (header->length + 24 != file_size)
 	{
 		free(filedata);
-		return FALSE;
+		RETURN_ERROR(EC_FileLength);
 	}
 	linesize = (header->width + 7) >> 3;
 	datasize = linesize * header->height;
@@ -184,7 +184,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	if (bmap == NULL)
 	{
 		free(filedata);
-		return FALSE;
+		RETURN_ERROR(EC_Malloc);
 	}
 	decode_packbits(filedata + sizeof(*header), bmap, datasize);
 	free(filedata);
@@ -207,7 +207,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	info->_priv_ptr = bmap;
 	info->_priv_var = 0;				/* y offset */
 
-	return TRUE;
+	RETURN_SUCCESS();
 }
 
 
@@ -247,7 +247,7 @@ boolean __CDECL reader_read(IMGINFO info, uint8_t *buffer)
 
 	info->_priv_var = pos;
 	
-	return TRUE;
+	RETURN_SUCCESS();
 }
 
 

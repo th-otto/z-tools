@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvdali.slb\"
-
 all:: dali.ldg zvdali.slb
 
 include $(top_srcdir)/rules

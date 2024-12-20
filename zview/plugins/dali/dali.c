@@ -1,10 +1,6 @@
-#define	VERSION	     0x0103
-#define NAME        "Cybermate (Animation)"
-#define AUTHOR      "Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
-
 #include "plugin.h"
 #include "zvplugin.h"
+#include "exports.h"
 
 /*
 Dali           *.SD0 (ST low resolution)
@@ -48,7 +44,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("SD0\0" "SD1\0" "SD2\0" "LPK\0" "MPK\0" "HPK\0");
+		return (long) (EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -58,6 +54,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
+	case INFO_MISC:
+		return (long)MISC_INFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}

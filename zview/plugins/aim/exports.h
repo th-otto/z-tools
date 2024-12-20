@@ -8,13 +8,13 @@
 
 #define VERSION		0x0201
 #define NAME        "AIM (Atari Image Manager)"
+#define EXTENSIONS  "COL\0" "IM\0"
 #define DATE        __DATE__ " " __TIME__
 #define AUTHOR      "Lonny Pursell"
-#define EXTENSIONS  "COL\0" "IM\0"
 #define MISC_INFO   "zView module by Thorsten Otto"
 
 #ifndef LIBFUNC
-#define LIBFUNC(a,b,c)
+#define LIBFUNC(_fn, name, _nargs)
 #endif
 #ifndef LIBFUNC2
 #define LIBFUNC2(_fn, name, _nargs) LIBFUNC(_fn, name, _nargs)

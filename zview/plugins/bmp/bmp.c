@@ -10,13 +10,9 @@
   1.07 Fix a bug in rle4 decoder
 */
 
-#define VERSION		0x0107
-#define NAME        "Windows Bitmap, OS/2 Bitmap"
-#define AUTHOR      "Lonny Pursell, Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
-
 #include "plugin.h"
 #include "zvplugin.h"
+#include "exports.h"
 #define NF_DEBUG 0
 #include "nfdebug.h"
 
@@ -29,7 +25,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE | CAN_ENCODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("BMP\0");
+		return (long) (EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -37,6 +33,10 @@ long __CDECL get_option(zv_int_t which)
 		return VERSION;
 	case INFO_DATETIME:
 		return (long)DATE;
+#ifdef MISC_INFO
+	case INFO_MISC:
+		return (long)MISC_INFO;
+#endif
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
 	case INFO_COMPILER:

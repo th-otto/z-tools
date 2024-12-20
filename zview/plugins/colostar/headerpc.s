@@ -77,6 +77,6 @@ _slh_names:
   move.l d0,4(a7)
   bra get_option
          
-_slbname: .ascii "zvcolorst.slb"
+_slbname: .ascii "zvcolrst.slb"
  .dc.b 0
  .even

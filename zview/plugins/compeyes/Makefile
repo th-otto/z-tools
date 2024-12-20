@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvceyes.slb\"
-
 all:: compeyes.ldg zvceyes.slb
 
 include $(top_srcdir)/rules

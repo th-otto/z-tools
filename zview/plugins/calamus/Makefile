@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvcrg.slb\"
-
 all:: calamus.ldg zvcrg.slb
 
 include $(top_srcdir)/rules

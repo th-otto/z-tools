@@ -59,32 +59,14 @@ static uint32_t filesize(int16_t fhand)
 }
 
 
-char *strrchr(const char *s, int c)
-{
-	const char *cp = s + strlen(s);
-
-	do
-	{
-		if (*cp == (char) c)
-			return (char*)cp;
-	} while (--cp >= s);
-
-	return NULL;
-}
-
-
 static int header_open(const char *filename, IMGINFO info)
 {
 	char tmpname[256];
-	char *p;
 	int16_t tmp_handle;
 	struct file_header header;
 
 	strcpy(tmpname, filename);
-	p = strrchr(tmpname, '.');
-	if (p == NULL)
-		return FALSE;
-	strcpy(p + 1, "hd");
+	strcpy(tmpname + strlen(tmpname) - 3, "hd");
 	if ((tmp_handle = (int16_t) Fopen(tmpname, FO_READ)) < 0)
 		return FALSE;
 	if (Fread(tmp_handle, sizeof(header), &header) != sizeof(header))
