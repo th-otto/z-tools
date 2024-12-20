@@ -424,6 +424,37 @@ static uint32_t swap32(uint32_t l)
 	return ((l >> 24) & 0xffL) | ((l << 8) & 0xff0000L) | ((l >> 8) & 0xff00L) | ((l << 24) & 0xff000000UL);
 }
 
+/*
+ * LunaSVG uses C++ and may need a rather large stack
+ */
+#define PLUGIN_STACKSIZE 524288
+
+#ifdef PLUGIN_STACKSIZE
+static char plugin_stack[PLUGIN_STACKSIZE];
+
+static boolean __CDECL reader_init_on_stack(const char *name, IMGINFO info);
+
+boolean __CDECL reader_init(const char *name, IMGINFO info)
+{
+	register boolean ret asm("d0");
+	__asm__ __volatile__(
+		" move.l %%a5,-(%%sp)\n"   /* save a5 */
+		" move.l %%sp,%%a5\n"      /* save original stack pointer */
+		" move.l %4,%%sp\n"        /* set new stack */
+		" move.l %2,-(%%sp)\n"     /* push arguments */
+		" move.l %1,-(%%sp)\n"
+		" jbsr %3\n"               /* call actual function */
+		" move.l %%a5,%%sp\n"      /* restore stack pointer */
+		" move.l (%%sp)+,%%a5\n"   /* restore a5 */
+	: "=d"(ret)
+	: "r"(name), "r"(info), "m"(reader_init_on_stack), "i"(plugin_stack + PLUGIN_STACKSIZE - 32)
+	: "a5", "cc" AND_MEMORY
+	);
+	return ret;
+#define reader_init reader_init_on_stack
+}
+
+#endif
 
 /*==================================================================================*
  * boolean __CDECL reader_init:														*
