@@ -117,6 +117,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	int16_t fd;
 	uint8_t magic[2];
 	uint32_t file_size;
+	long width, height;
 	
 #ifdef ZLIB_SLB
 	if (init_zlib_slb() < 0)
@@ -215,13 +216,20 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	}
 	free(data);
 
-	info->width = svg_image->width;
-	info->height = svg_image->height;
-	if (info->width == 0 || info->height == 0)
+	width = svg_image->width;
+	height = svg_image->height;
+	if (width <= 0 || height <= 0)
 	{
 		nsvgDelete(svg_image);
 		RETURN_ERROR(EC_FileType);
 	}
+	if (width > 4096 || height > 4096)
+	{
+		nsvgDelete(svg_image);
+		RETURN_ERROR(EC_FileType);
+	}
+	info->width = width;
+	info->height = height;
 	image_size = (size_t)info->width * info->height * 4;
 	bmap = (void *)malloc(image_size);
 	if (bmap == NULL)

@@ -476,7 +476,8 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	uint32_t file_size;
 	int fd;
 	uint8_t magic[2];
-	
+	long width, height;
+
 	/* main() won't call __main() for global constructors, so do it here. */
 	__main();
 
@@ -585,13 +586,20 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	svg_image->updateLayout();
 #endif
 
-	info->width = svg_image->width();
-	info->height = svg_image->height();
-	if (info->width <= 0 || info->height <= 0)
+	width = svg_image->width();
+	height = svg_image->height();
+	if (width <= 0 || height <= 0)
 	{
 		free(data);
-		RETURN_ERROR(EC_FileType);
+		RETURN_ERROR(EC_WidthNegative);
 	}
+	if (width > 4096 || height > 4096)
+	{
+		free(data);
+		RETURN_ERROR(EC_WidthOver4K);
+	}
+	info->width = width;
+	info->height = height;
 	image_size = (size_t)info->width * info->height * 4;
 	bmap = (uint8_t *)malloc(image_size);
 	if (bmap == NULL)

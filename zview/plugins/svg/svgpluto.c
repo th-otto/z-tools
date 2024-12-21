@@ -230,6 +230,7 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 	plutovg_surface_t *surface;
 	plutovg_color_t bg;
 	plutovg_canvas_t *canvas;
+	long width, height;
 
 #ifdef ZLIB_SLB
 	if (init_zlib_slb() < 0)
@@ -326,14 +327,22 @@ boolean __CDECL reader_init(const char *name, IMGINFO info)
 		RETURN_ERROR(EC_Malloc);
 	}
 
-	info->width = plutosvg_document_get_width(document);
-	info->height = plutosvg_document_get_height(document);
-	if (info->width <= 0 || info->height <= 0)
+	width = plutosvg_document_get_width(document);
+	height = plutosvg_document_get_height(document);
+	if (width <= 0 || height <= 0)
 	{
 		plutosvg_document_destroy(document);
 		free(data);
-		RETURN_ERROR(EC_FileType);
+		RETURN_ERROR(EC_WidthNegative);
 	}
+	if (width > 4096 || height > 4096)
+	{
+		plutosvg_document_destroy(document);
+		free(data);
+		RETURN_ERROR(EC_WidthOver4K);
+	}
+	info->width = width;
+	info->height = height;
 	image_size = (size_t)info->width * info->height * 4;
 	bmap = (uint8_t *)malloc(image_size);
 	if (bmap == NULL)

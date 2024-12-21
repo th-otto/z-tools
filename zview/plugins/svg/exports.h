@@ -7,7 +7,7 @@
  */
 
 
-#define VERSION		0x200
+#define VERSION		0x201
 #define AUTHOR      "Thorsten Otto"
 #define NAME        "Scalable Vector Graphics"
 #define DATE        __DATE__ " " __TIME__
