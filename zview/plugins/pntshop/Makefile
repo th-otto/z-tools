@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvpsc.slb\"
-
 all:: pntshop.ldg zvpsc.slb
 
 include $(top_srcdir)/rules

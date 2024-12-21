@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvmpp.slb\"
-
 all:: mpp.ldg zvmpp.slb
 
 include $(top_srcdir)/rules

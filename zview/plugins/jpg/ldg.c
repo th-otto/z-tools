@@ -100,8 +100,8 @@ static LDGLIB plugin =
  * return:	 																		*
  *      0																			*
  *==================================================================================*/
-int main( void)
+int main(void)
 {
-	ldg_init( &plugin);
-	return( 0);
+	ldg_init(&plugin);
+	return 0;
 }

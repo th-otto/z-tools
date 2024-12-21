@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvneoimg.slb\"
-
 all:: neoimg.ldg zvneoimg.slb
 
 include $(top_srcdir)/rules

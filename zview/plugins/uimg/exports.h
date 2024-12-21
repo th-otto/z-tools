@@ -1,23 +1,27 @@
 /*
  * exports.h - internal header with definitions of all exported functions
  *
- * Copyright (C) 2019 Thorsten Otto
+ * Copyright (C) 2024 Thorsten Otto
  *
  * For conditions of distribution and use, see copyright file.
  */
 
-
 #define VERSION		0x201
-#define AUTHOR      "Thorsten Otto"
 #define NAME        "uConvert bitmap format"
-#define DATE        __DATE__ " " __TIME__
 #define EXTENSIONS  "UIM\0" "UIMG\0" "C01\0" "C02\0" "C04\0" "C08\0" "C16\0" "C24\0" "C32\0" "BP1\0" "BP2\0" "BP4\0" "BP6\0" "BP8\0"
+#define DATE        __DATE__ " " __TIME__
+#define AUTHOR      "Thorsten Otto"
+
+#define SHAREDLIB "zvuimg.slb"
 
 #ifndef LIBFUNC
-# error "LIBFUNC must be defined before including this file"
+#define LIBFUNC(_fn, name, _nargs)
 #endif
 #ifndef LIBFUNC2
 #define LIBFUNC2(_fn, name, _nargs) LIBFUNC(_fn, name, _nargs)
+#endif
+#ifndef NOFUNC
+#define NOFUNC
 #endif
 
 /*   0 */ LIBFUNC(0, slb_control, 2)
@@ -34,5 +38,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvuimg.slb"

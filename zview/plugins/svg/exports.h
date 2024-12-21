@@ -1,11 +1,10 @@
 /*
  * exports.h - internal header with definitions of all exported functions
  *
- * Copyright (C) 2019 Thorsten Otto
+ * Copyright (C) 2024 Thorsten Otto
  *
  * For conditions of distribution and use, see copyright file.
  */
-
 
 #define VERSION		0x201
 #define AUTHOR      "Thorsten Otto"
@@ -13,6 +12,8 @@
 #define DATE        __DATE__ " " __TIME__
 #define EXTENSIONS  "SVG\0" "SVGZ\0"
 #define MISC_INFO   misc_info
+
+#define SHAREDLIB "zvsvg.slb"
 
 #ifndef LIBFUNC
 #define LIBFUNC(a,b,c)
@@ -38,5 +39,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvsvg.slb"

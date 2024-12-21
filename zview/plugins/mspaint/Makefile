@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvmspnt.slb\"
-
 all:: mspaint.ldg zvmspnt.slb
 
 include $(top_srcdir)/rules

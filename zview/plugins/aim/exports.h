@@ -13,6 +13,8 @@
 #define AUTHOR      "Lonny Pursell"
 #define MISC_INFO   "zView module by Thorsten Otto"
 
+#define SHAREDLIB "zvaim.slb"
+
 #ifndef LIBFUNC
 #define LIBFUNC(_fn, name, _nargs)
 #endif
@@ -37,5 +39,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvaim.slb"

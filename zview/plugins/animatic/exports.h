@@ -6,11 +6,14 @@
  * For conditions of distribution and use, see copyright file.
  */
 
-#define VERSION		0x0200
-#define AUTHOR      "Thorsten Otto"
+#define VERSION		0x200
 #define NAME        "Animatic (Film)"
-#define DATE        __DATE__ " " __TIME__
 #define EXTENSIONS  "FLM\0"
+#define DATE        __DATE__ " " __TIME__
+#define AUTHOR      "Thorsten Otto"
+#define MISC_INFO   "zView module by Thorsten Otto"
+
+#define SHAREDLIB "zvflm.slb"
 
 #ifndef LIBFUNC
 #define LIBFUNC(a,b,c)
@@ -36,5 +39,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvflm.slb"

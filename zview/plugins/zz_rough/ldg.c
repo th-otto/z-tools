@@ -1,9 +1,6 @@
 #include "plugin.h"
 #include "zvplugin.h"
 #include "ldglib/ldg.h"
-/* only need the meta-information here */
-#define LIBFUNC(a,b,c)
-#define NOFUNC
 #include "exports.h"
 
 
@@ -12,7 +9,12 @@ static void __CDECL init(void)
 }
 
 
-static PROC DATAFunc[] = {
+#ifndef MISC_INFO
+#define MISC_INFO ""
+#endif
+
+static PROC Func[] =
+{
 	{ "plugin_init", "Codec: " NAME, init },
 	{ "reader_init", "Author: " AUTHOR, reader_init },
 	{ "reader_read", "Date: " __DATE__, reader_read },
@@ -20,10 +22,11 @@ static PROC DATAFunc[] = {
 	{ "reader_get_txt", "", reader_get_txt }
 };
 
-static LDGLIB data_plugin = {
+static LDGLIB plugin =
+{
 	VERSION,							/* plugin version */
-	5,									/* number of plugin functions */
-	DATAFunc,							/* list of functions */
+	sizeof(Func) / sizeof(Func[0]),		/* Number of plugin's functions */
+	Func,								/* list of functions */
 	EXTENSIONS,							/* file types handled */
 	LDG_NOT_SHARED,						/* use this flag, don't know if ldg.prg is installed */
 	0,									/* function called when the plugin is unloaded */
@@ -34,6 +37,6 @@ static LDGLIB data_plugin = {
 
 int main(void)
 {
-	ldg_init(&data_plugin);
+	ldg_init(&plugin);
 	return 0;
 }

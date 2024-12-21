@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvneoani.slb\"
-
 all:: neoani.ldg zvneoani.slb
 
 include $(top_srcdir)/rules

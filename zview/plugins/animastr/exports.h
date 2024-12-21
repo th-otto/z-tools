@@ -6,12 +6,14 @@
  * For conditions of distribution and use, see copyright file.
  */
 
-#define VERSION		0x0200
+#define VERSION		0x200
 #define AUTHOR      "Lonny Pursell"
 #define NAME        "Animaster (Sprite Bank)"
 #define DATE        __DATE__ " " __TIME__
 #define EXTENSIONS  "ASB\0" "MSK\0"
 #define MISC_INFO   "zView module by Thorsten Otto"
+
+#define SHAREDLIB "zvasb.slb"
 
 #ifndef LIBFUNC
 #define LIBFUNC(a,b,c)
@@ -37,5 +39,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvasb.slb"

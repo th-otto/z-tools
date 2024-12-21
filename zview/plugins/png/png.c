@@ -2,13 +2,9 @@
 #include "zvplugin.h"
 #include <png.h>
 #include <wchar.h>
+#include "exports.h"
 #define NF_DEBUG 0
 #include "nfdebug.h"
-
-#define VERSION 0x202
-#define NAME    "Portable Network Graphics"
-#define AUTHOR  "Zorro, Thorsten Otto"
-#define DATE     __DATE__ " " __TIME__
 
 #ifdef PLUGIN_SLB
 long __CDECL get_option(zv_int_t which)
@@ -18,7 +14,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("PNG\0");
+		return (long) (EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -28,6 +24,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
+	case INFO_MISC:
+		return (long)MISC_INFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}

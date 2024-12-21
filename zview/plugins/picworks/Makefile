@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvcp3.slb\"
-
 all:: picworks.ldg zvcp3.slb
 
 include $(top_srcdir)/rules

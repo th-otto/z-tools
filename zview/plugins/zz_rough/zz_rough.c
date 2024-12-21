@@ -1,8 +1,5 @@
 #include "plugin.h"
 #include "zvplugin.h"
-/* only need the meta-information here */
-#define LIBFUNC(a,b,c)
-#define NOFUNC
 #include "exports.h"
 
 /*
@@ -39,6 +36,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
+	case INFO_MISC:
+		return (long)MISC_INFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}

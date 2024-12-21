@@ -13,12 +13,7 @@
 #include <webp/demux.h>
 #include <webp/mux_types.h>
 #include "zvwebp.h"
-
-#define VERSION 0x100
-#define NAME    "Image format for the Web"
-#define AUTHOR  "Thorsten Otto"
-#define DATE     __DATE__ " " __TIME__
-#define MISCINFO "Using libwebp version " WEBP_VERSION_STR
+#include "exports.h"
 
 #define NF_DEBUG 0
 
@@ -181,7 +176,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE | CAN_ENCODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("WEB\0" "WEBP\0");
+		return (long) (EXTENSIONS);
 
 	case OPTION_QUALITY:
 		return quality;
@@ -198,8 +193,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
 	case INFO_MISC:
 		return (long)MISCINFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}

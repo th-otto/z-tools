@@ -1,17 +1,19 @@
 /*
- * ascii/exports.h - internal header with definitions of all exported functions
+ * exports.h - internal header with definitions of all exported functions
  *
- * Copyright (C) 2019 Thorsten Otto
+ * Copyright (C) 2024 Thorsten Otto
  *
  * For conditions of distribution and use, see copyright file.
  */
 
-#define	VERSION	     0x0201
+#define	VERSION	    0x201
 #define NAME        "ASCII art (grayscale)"
 #define AUTHOR      "Lonny Pursell"
 #define DATE        __DATE__ " " __TIME__
 #define EXTENSIONS  "TXT\0"
 #define MISC_INFO   "zView module by Thorsten Otto"
+
+#define SHAREDLIB "zvascii.slb"
 
 #ifndef LIBFUNC
 #define LIBFUNC(a,b,c)
@@ -37,5 +39,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvascii.slb"

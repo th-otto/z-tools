@@ -1,7 +1,7 @@
 /*
  * exports.h - internal header with definitions of all exported functions
  *
- * Copyright (C) 2019 Thorsten Otto
+ * Copyright (C) 2024 Thorsten Otto
  *
  * For conditions of distribution and use, see copyright file.
  */
@@ -12,6 +12,8 @@
 #define EXTENSIONS  "GRX\0"
 #define AUTHOR      "Lonny Pursell"
 #define MISC_INFO   "zView module by Thorsten Otto"
+
+#define SHAREDLIB "zvgrafix.slb"
 
 #ifndef LIBFUNC
 #define LIBFUNC(_fn, name, _nargs)
@@ -37,5 +39,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvgrafix.slb"

@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvtim.slb\"
-
 all:: psx.ldg zvtim.slb
 
 include $(top_srcdir)/rules

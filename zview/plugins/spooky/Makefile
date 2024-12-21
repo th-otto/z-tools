@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvtre.slb\"
-
 all:: spooky.ldg zvtre.slb
 
 include $(top_srcdir)/rules

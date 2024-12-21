@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvrgb.slb\"
-
 all:: rgb.ldg zvrgb.slb
 
 include $(top_srcdir)/rules

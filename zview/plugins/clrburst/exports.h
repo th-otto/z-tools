@@ -1,16 +1,19 @@
 /*
  * exports.h - internal header with definitions of all exported functions
  *
- * Copyright (C) 2019 Thorsten Otto
+ * Copyright (C) 2024 Thorsten Otto
  *
  * For conditions of distribution and use, see copyright file.
  */
 
-#define	VERSION	     0x0103
+#define	VERSION	    0x103
 #define NAME        "ColorBurst II"
-#define AUTHOR      "Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
 #define EXTENSIONS  "BST\0"
+#define DATE        __DATE__ " " __TIME__
+#define AUTHOR      "Lonny Pursell"
+#define MISC_INFO   "zView module by Thorsten Otto"
+
+#define SHAREDLIB "zvbst.slb"
 
 #ifndef LIBFUNC
 #define LIBFUNC(_fn, name, _nargs)
@@ -36,5 +39,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvbst.slb"

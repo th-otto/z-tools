@@ -1,16 +1,28 @@
 /*
  * exports.h - internal header with definitions of all exported functions
  *
- * Copyright (C) 2019 Thorsten Otto
+ * Copyright (C) 2024 Thorsten Otto
  *
  * For conditions of distribution and use, see copyright file.
  */
 
+#define	VERSION	    0x202
+#define NAME        "Public Painter"
+#define EXTENSIONS  "PCS\0"
+#define DATE        __DATE__ " " __TIME__
+#define AUTHOR      "Lonny Pursell, Thorsten Otto"
+#define MISC_INFO   "Some code by Hans Wessels"
+
+#define SHAREDLIB "zvpcs.slb"
+
 #ifndef LIBFUNC
-# error "LIBFUNC must be defined before including this file"
+#define LIBFUNC(_fn, name, _nargs)
 #endif
 #ifndef LIBFUNC2
 #define LIBFUNC2(_fn, name, _nargs) LIBFUNC(_fn, name, _nargs)
+#endif
+#ifndef NOFUNC
+#define NOFUNC
 #endif
 
 /*   0 */ LIBFUNC(0, slb_control, 2)

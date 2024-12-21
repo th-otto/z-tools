@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvtcp.slb\"
-
 all:: rembrndt.ldg zvtcp.slb
 
 include $(top_srcdir)/rules

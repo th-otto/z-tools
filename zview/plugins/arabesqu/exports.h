@@ -6,12 +6,14 @@
  * For conditions of distribution and use, see copyright file.
  */
 
-#define VERSION		0x0201
+#define VERSION		0x201
 #define NAME        "Arabesque Bitmap"
+#define EXTENSIONS  "ABM\0" "PUF\0"
 #define DATE        __DATE__ " " __TIME__
 #define AUTHOR      "Thorsten Otto"
-#define EXTENSIONS  "ABM\0" "PUF\0"
 #define MISC_INFO   "zView module by Thorsten Otto"
+
+#define SHAREDLIB "zvabm.slb"
 
 #ifndef LIBFUNC
 #define LIBFUNC(a,b,c)
@@ -37,5 +39,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvabm.slb"

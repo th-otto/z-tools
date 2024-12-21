@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvpixart.slb\"
-
 all:: pixart.ldg zvpixart.slb
 
 include $(top_srcdir)/rules

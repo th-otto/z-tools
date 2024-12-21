@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvppp.slb\"
-
 all:: pablopnt.ldg zvppp.slb
 
 include $(top_srcdir)/rules

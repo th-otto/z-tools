@@ -1,12 +1,6 @@
 #include "plugin.h"
 #include "zvplugin.h"
-#include "symbols.h"
-
-#define VERSION		0x201
-#define AUTHOR      "Thorsten Otto"
-#define NAME        "Spectrum 512 Extended"
-#define DATE        __DATE__ " " __TIME__
-#define MISC_INFO   "Some code by Hans Wessels"
+#include "exports.h"
 
 /*
 Spectrum 512 Extended    *.SPX
@@ -70,7 +64,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long)("SPX\0");
+		return (long)(EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -80,8 +74,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
 	case INFO_MISC:
 		return (long)MISC_INFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}

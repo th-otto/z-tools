@@ -6,12 +6,14 @@
  * For conditions of distribution and use, see copyright file.
  */
 
-#define VERSION		0x0204
+#define VERSION		0x204
 #define NAME        "RECOIL - Retro Computer Image Library"
 #define EXTENSIONS  "*\0"
 #define DATE        __DATE__ " " __TIME__
 #define AUTHOR      "Thorsten Otto"
 #define MISC_INFO   "RECOIL v" RECOIL_VERSION " Retro Computer Image Library\n" "(C) " RECOIL_YEARS " Piotr Fusik"
+
+#define SHAREDLIB "zvrecoil.slb"
 
 #ifndef LIBFUNC
 #define LIBFUNC(_fn, name, _nargs)
@@ -37,5 +39,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvrecoil.slb"

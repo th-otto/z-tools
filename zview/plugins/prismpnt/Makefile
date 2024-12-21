@@ -2,8 +2,6 @@ top_srcdir=../../..
 include $(top_srcdir)/configvars
 include ../pluginvars
 
-SFLAGS += -DSHAREDLIB=\"zvprism.slb\"
-
 all:: prismpnt.ldg zvprism.slb
 
 include $(top_srcdir)/rules

@@ -1,13 +1,8 @@
-#define	VERSION	     0x0201
-#define NAME        "Picture Packer"
-#define AUTHOR      "Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
-#define MISC_INFO   "Some code by Hans Wessels"
-
 #include "plugin.h"
 #include "zvplugin.h"
 #define NF_DEBUG 0
 #include "nfdebug.h"
+#include "exports.h"
 
 /*
 Picture Packer    *.PP1 (ST low resolution)
@@ -69,7 +64,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("PP1\0" "PP2\0" "PP3\0");
+		return (long) (EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -79,8 +74,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
 	case INFO_MISC:
 		return (long)MISC_INFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}

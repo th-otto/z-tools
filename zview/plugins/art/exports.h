@@ -1,17 +1,19 @@
 /*
  * exports.h - internal header with definitions of all exported functions
  *
- * Copyright (C) 2019 Thorsten Otto
+ * Copyright (C) 2024 Thorsten Otto
  *
  * For conditions of distribution and use, see copyright file.
  */
 
-#define VERSION		0x0201
+#define VERSION		0x201
 #define NAME        "Art Director, Palette Master, GFA Artist, The ArtiST"
 #define DATE        __DATE__ " " __TIME__
 #define EXTENSIONS  "ART\0"
 #define AUTHOR      "Lonny Pursell"
 #define MISC_INFO   "zView module by Thorsten Otto"
+
+#define SHAREDLIB "zvart.slb"
 
 #ifndef LIBFUNC
 #define LIBFUNC(a,b,c)
@@ -37,5 +39,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvart.slb"

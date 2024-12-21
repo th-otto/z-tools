@@ -4,7 +4,7 @@ include ../pluginvars
 
 LIB       = -lpng -lz -lm
 
-SFLAGS += -DPNGLIB_SLB -DZLIB_SLB -DSHAREDLIB=\"zvpng.slb\"
+SFLAGS += -DPNGLIB_SLB -DZLIB_SLB
 
 LIBPNG_OBJS = libpng/png.o libpng/pngerror.o \
 	libpng/pngget.o libpng/pngmem.o libpng/pngpread.o libpng/pngread.o libpng/pngrio.o libpng/pngrtran.o libpng/pngrutil.o \

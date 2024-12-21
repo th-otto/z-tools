@@ -1,11 +1,6 @@
-#define	VERSION	     0x0206
-#define NAME        "Quantum Paintbox"
-#define AUTHOR      "Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
-#define MISC_INFO   "Some code by Hans Wessels"
-
 #include "plugin.h"
 #include "zvplugin.h"
+#include "exports.h"
 
 /*
 QuantumPaint    *.PBX (ST low and ST medium resolution)
@@ -74,7 +69,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_DECODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("PBX\0");
+		return (long) (EXTENSIONS);
 
 	case INFO_NAME:
 		return (long)NAME;
@@ -84,8 +79,10 @@ long __CDECL get_option(zv_int_t which)
 		return (long)DATE;
 	case INFO_AUTHOR:
 		return (long)AUTHOR;
+#ifdef MISC_INFO
 	case INFO_MISC:
 		return (long)MISC_INFO;
+#endif
 	case INFO_COMPILER:
 		return (long)(COMPILER_VERSION_STRING);
 	}

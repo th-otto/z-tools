@@ -1,16 +1,18 @@
 /*
- * bmp/exports.h - internal header with definitions of all exported functions
+ * exports.h - internal header with definitions of all exported functions
  *
- * Copyright (C) 2019 Thorsten Otto
+ * Copyright (C) 2024 Thorsten Otto
  *
  * For conditions of distribution and use, see copyright file.
  */
 
-#define VERSION		0x0107
+#define VERSION		0x107
 #define NAME        "Windows Bitmap, OS/2 Bitmap"
 #define AUTHOR      "Lonny Pursell, Thorsten Otto"
 #define DATE        __DATE__ " " __TIME__
 #define EXTENSIONS  "BMP\0"
+
+#define SHAREDLIB "zvbmp.slb"
 
 #ifndef LIBFUNC
 #define LIBFUNC(a,b,c)
@@ -36,5 +38,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvbmp.slb"

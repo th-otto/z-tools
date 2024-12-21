@@ -1,10 +1,6 @@
-#define	VERSION	     0x0201
-#define NAME        "Printer Control Language"
-#define AUTHOR      "Thorsten Otto"
-#define DATE        __DATE__ " " __TIME__
-
 #include "plugin.h"
 #include "zvplugin.h"
+#include "exports.h"
 
 static int landscape;
 
@@ -20,7 +16,7 @@ long __CDECL get_option(zv_int_t which)
 	case OPTION_CAPABILITIES:
 		return CAN_ENCODE;
 	case OPTION_EXTENSIONS:
-		return (long) ("PCL\0");
+		return (long) (EXTENSIONS);
 
 	case OPTION_QUALITY:
 		return landscape;
@@ -41,7 +37,7 @@ long __CDECL get_option(zv_int_t which)
 
 long __CDECL set_option(zv_int_t which, zv_int_t value)
 {
-	switch (which)
+	switch ((int)which)
 	{
 	case OPTION_CAPABILITIES:
 	case OPTION_EXTENSIONS:

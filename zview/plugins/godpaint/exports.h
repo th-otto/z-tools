@@ -1,7 +1,7 @@
 /*
- * god/exports.h - internal header with definitions of all exported functions
+ * exports.h - internal header with definitions of all exported functions
  *
- * Copyright (C) 2019 Thorsten Otto
+ * Copyright (C) 2019-2024 Thorsten Otto
  *
  * For conditions of distribution and use, see copyright file.
  */
@@ -11,6 +11,8 @@
 #define EXTENSIONS  "GOD\0"
 #define DATE    	 __DATE__ " " __TIME__
 #define AUTHOR  	"Zorro"
+
+#define SHAREDLIB "zvgod.slb"
 
 #ifndef LIBFUNC
 #define LIBFUNC(_fn, name, _nargs)
@@ -36,5 +38,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvgod.slb"

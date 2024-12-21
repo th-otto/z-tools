@@ -1,17 +1,19 @@
 /*
  * exports.h - internal header with definitions of all exported functions
  *
- * Copyright (C) 2019 Thorsten Otto
+ * Copyright (C) 2024 Thorsten Otto
  *
  * For conditions of distribution and use, see copyright file.
  */
 
-#define	VERSION	    0x0102
+#define	VERSION	    0x102
 #define NAME        "D-GRAPH"
 #define EXTENSIONS  "P3C\0" "P32\0"
 #define DATE        __DATE__ " " __TIME__
 #define AUTHOR      "Lonny Pursell"
 #define MISC_INFO   "zView module by Thorsten Otto"
+
+#define SHAREDLIB "zvdgraph.slb"
 
 #ifndef LIBFUNC
 #define LIBFUNC(_fn, name, _nargs)
@@ -37,5 +39,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvdgraph.slb"

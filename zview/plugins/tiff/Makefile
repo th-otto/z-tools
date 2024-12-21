@@ -4,7 +4,7 @@ include ../pluginvars
 
 LIB       = -ltiff -ljpeg -llzma -lzstd -lz
 
-SFLAGS += -DTIFF_SLB -DJPEG_SLB -DLZMA_SLB -DZLIB_SLB -DSHAREDLIB=\"zvtiff.slb\"
+SFLAGS += -DTIFF_SLB -DJPEG_SLB -DLZMA_SLB -DZLIB_SLB
 
 all:: tiff.ldg zvtiff.slb
 

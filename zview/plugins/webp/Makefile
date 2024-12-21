@@ -4,8 +4,6 @@ include ../pluginvars
 
 LIB       = -lwebpdemux -lwebp -lz -lm
 
-SFLAGS += -DSHAREDLIB=\"zvwebp.slb\"
-
 # libwebp headers don't have any version info, extract it from pkg-config
 export PKG_CONFIG_PATH := $(shell CROSS_PREFIX=$(CROSS_PREFIX); CROSS_PREFIX=$${CROSS_PREFIX%-}; echo /usr/$${CROSS_PREFIX}/lib/pkgconfig)
 WEBP_VERSION_STR := $(shell pkg-config --modversion libwebp)

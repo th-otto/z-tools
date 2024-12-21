@@ -1,7 +1,7 @@
 /*
  * exports.h - internal header with definitions of all exported functions
  *
- * Copyright (C) 2019 Thorsten Otto
+ * Copyright (C) 2019-2024 Thorsten Otto
  *
  * For conditions of distribution and use, see copyright file.
  */
@@ -13,6 +13,8 @@
 #define AUTHOR      "Lonny Pursell, Thorsten Otto"
 #define MISC_INFO   "Parts of code taken from St2BMP,\n" \
                     "written by Hans Wessels"
+
+#define SHAREDLIB "zvdoodle.slb"
 
 #ifndef LIBFUNC
 #define LIBFUNC(_fn, name, _nargs)
@@ -38,5 +40,3 @@
 #undef LIBFUNC
 #undef LIBFUNC2
 #undef NOFUNC
-
-#define SHAREDLIB "zvdoodle.slb"
